@@ -1,0 +1,14 @@
+{
+  "name": "HelloWorldApp",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "detonator start"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "dependencies": {
+    "detonator": "",
+    "untrue": "5.7.2"
+  }
+}
