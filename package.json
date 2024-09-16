@@ -1,6 +1,6 @@
 {
   "name": "detonator",
-  "version": "1.4.1",
+  "version": "1.4.2",
   "description": "Build native mobile apps with Untrue.",
   "homepage": "https://detonator.dev",
   "repository": {
@@ -21,13 +21,13 @@
   ],
   "license": "MIT",
   "devDependencies": {
-    "fs-extra": "^11.2.0",
     "typescript": "^5.6.2"
   },
   "dependencies": {
     "@paletto/color": "^1.1.4",
     "ts-loader": "^9.5.1",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "fs-extra": "^11.2.0"
   },
   "peerDependencies": {
     "untrue": "^5.7.2"
