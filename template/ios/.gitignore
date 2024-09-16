@@ -1,0 +1,44 @@
+# Xcode specific files and directories
+HelloWorldApp.xcworkspace/
+HelloWorldApp.xcuserdata/
+HelloWorldApp.xcodeproj/project.xcworkspace/
+HelloWorldApp.xcodeproj/xcuserdata/
+
+# User-specific settings
+HelloWorldApp.xcodeproj/xcuserdata/
+HelloWorldApp.xcuserdata/
+HelloWorldApp.xcdebugger/
+
+# DerivedData directory (build artifacts)
+DerivedData/
+
+# Build folder
+build/
+
+# Temporary files
+*.swp
+*.lock
+*.xcuserstate
+*.xcscmblueprint
+
+# Logs and temp files
+*.log
+*.tmp
+*.DS_Store
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Archive files
+*.xcarchive
+*.ipa
+*.dSYM.zip
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# Editor specific
+.vscode/
+.idea/
