@@ -5,10 +5,8 @@
   "scripts": {
     "start": "detonator start"
   },
-  "keywords": [],
-  "license": "ISC",
   "dependencies": {
-    "detonator": "",
+    "detonator": "{{ version }}",
     "untrue": "5.7.2"
   }
 }
