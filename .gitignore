@@ -6,3 +6,5 @@ package-lock.json
 /dist
 
 /android/Detonator/build/
+
+/template/dist
