@@ -84,6 +84,10 @@ module.exports = async () => {
 
     const replaceObject = { HelloWorldApp: name };
 
+    const packagePath = path.resolve(currentDir, "package.json");
+
+    await replacePath(packagePath, replaceObject);
+
     const androidReplaceObject = {
       ...replaceObject,
       "com.example.helloworldapp": `com.example.${name.toLowerCase()}`,
@@ -103,19 +107,6 @@ module.exports = async () => {
 
     await renamePath(androidPath, androidRenameObject);
     await renamePath(iosPath, iosRenameObject);
-
-    const libraryPackagePath = path.resolve(__dirname, "../package.json");
-
-    const package = require(libraryPackagePath);
-
-    const packagePath = path.resolve(currentDir, "package.json");
-
-    const packageReplaceObject = {
-      ...replaceObject,
-      "{{ version }}": package.version,
-    };
-
-    await replacePath(packagePath, packageReplaceObject);
   }
 
   {
