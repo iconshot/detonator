@@ -79,14 +79,14 @@ module.exports = async () => {
 
     await fse.copy(templateDir, currentDir);
 
-    const androidPath = path.resolve(currentDir, "android");
-    const iosPath = path.resolve(currentDir, "ios");
-
     const replaceObject = { HelloWorldApp: name };
 
     const packagePath = path.resolve(currentDir, "package.json");
 
     await replacePath(packagePath, replaceObject);
+
+    const androidPath = path.resolve(currentDir, "android");
+    const iosPath = path.resolve(currentDir, "ios");
 
     const androidReplaceObject = {
       ...replaceObject,
