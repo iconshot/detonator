@@ -8,3 +8,5 @@ package-lock.json
 /android/Detonator/build/
 
 /template/dist
+/template/android/app/src/main/assets
+/template/ios/HelloWorldApp/Resources
