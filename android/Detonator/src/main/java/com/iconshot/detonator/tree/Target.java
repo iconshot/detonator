@@ -1,15 +1,14 @@
 package com.iconshot.detonator.tree;
 
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.ViewParent;
 
-import com.iconshot.detonator.layout.ViewLayout;
-
 public class Target {
-    private final ViewLayout view;
+    private final ViewGroup view;
     private int index;
 
-    public Target(ViewLayout view, int index) {
+    public Target(ViewGroup view, int index) {
         this.view = view;
         this.index = index;
     }

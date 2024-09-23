@@ -1,11 +1,13 @@
-import $, { Props } from "untrue";
+import $ from "untrue";
+
+import { ViewProps } from "./View";
 
 type SafeAreaEdge = "left" | "top" | "right" | "bottom";
 
-interface SafeAreaViewProps extends Props {
+interface SafeAreaViewProps extends ViewProps {
   edges: SafeAreaEdge[];
 }
 
 export function SafeAreaView({ children, ...attributes }: SafeAreaViewProps) {
-  return $("com.iconshot.detonator.safeareaview", attributes);
+  return $("com.iconshot.detonator.safeareaview", attributes, children);
 }

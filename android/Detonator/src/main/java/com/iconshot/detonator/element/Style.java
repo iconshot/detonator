@@ -25,6 +25,8 @@ public class Style {
     // padding
 
     Float padding;
+    Float paddingHorizontal;
+    Float paddingVertical;
     Float paddingTop;
     Float paddingLeft;
     Float paddingBottom;
@@ -33,6 +35,8 @@ public class Style {
     // margin
 
     Float margin;
+    Float marginHorizontal;
+    Float marginVertical;
     Float marginTop;
     Float marginLeft;
     Float marginBottom;

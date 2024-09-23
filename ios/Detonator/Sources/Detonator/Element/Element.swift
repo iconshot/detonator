@@ -87,11 +87,15 @@ class Element: NSObject {
         let maxWidth = styler.getMaxWidth()
         let maxHeight = styler.getMaxHeight()
         let padding = styler.getPadding()
+        let paddingHorizontal = styler.getPaddingHorizontal()
+        let paddingVertical = styler.getPaddingVertical()
         let paddingTop = styler.getPaddingTop()
         let paddingLeft = styler.getPaddingLeft()
         let paddingBottom = styler.getPaddingBottom()
         let paddingRight = styler.getPaddingRight()
         let margin = styler.getMargin()
+        let marginHorizontal = styler.getMarginHorizontal()
+        let marginVertical = styler.getMarginVertical()
         let marginTop = styler.getMarginTop()
         let marginLeft = styler.getMarginLeft()
         let marginBottom = styler.getMarginBottom()
@@ -147,11 +151,15 @@ class Element: NSObject {
         let currentMaxWidth = currentStyler.getMaxWidth()
         let currentMaxHeight = currentStyler.getMaxHeight()
         let currentPadding = currentStyler.getPadding()
+        let currentPaddingHorizontal = currentStyler.getPaddingHorizontal()
+        let currentPaddingVertical = currentStyler.getPaddingVertical()
         let currentPaddingTop = currentStyler.getPaddingTop()
         let currentPaddingLeft = currentStyler.getPaddingLeft()
         let currentPaddingBottom = currentStyler.getPaddingBottom()
         let currentPaddingRight = currentStyler.getPaddingRight()
         let currentMargin = currentStyler.getMargin()
+        let currentMarginHorizontal = currentStyler.getMarginHorizontal()
+        let currentMarginVertical = currentStyler.getMarginVertical()
         let currentMarginTop = currentStyler.getMarginTop()
         let currentMarginLeft = currentStyler.getMarginLeft()
         let currentMarginBottom = currentStyler.getMarginBottom()
@@ -207,11 +215,15 @@ class Element: NSObject {
         let patchMaxWidthBool = forcePatch || !CompareHelper.compareStyleSizes(maxWidth, currentMaxWidth)
         let patchMaxHeightBool = forcePatch || !CompareHelper.compareStyleSizes(maxHeight, currentMaxHeight)
         let patchPaddingBool = forcePatch || padding != currentPadding
+        let patchPaddingHorizontalBool = forcePatch || paddingHorizontal != currentPaddingHorizontal
+        let patchPaddingVerticalBool = forcePatch || paddingVertical != currentPaddingVertical
         let patchPaddingTopBool = forcePatch || paddingTop != currentPaddingTop
         let patchPaddingLeftBool = forcePatch || paddingLeft != currentPaddingLeft
         let patchPaddingBottomBool = forcePatch || paddingBottom != currentPaddingBottom
         let patchPaddingRightBool = forcePatch || paddingRight != currentPaddingRight
         let patchMarginBool = forcePatch || margin != currentMargin
+        let patchMarginHorizontalBool = forcePatch || marginHorizontal != currentMarginHorizontal
+        let patchMarginVerticalBool = forcePatch || marginVertical != currentMarginVertical
         let patchMarginTopBool = forcePatch || marginTop != currentMarginTop
         let patchMarginLeftBool = forcePatch || marginLeft != currentMarginLeft
         let patchMarginBottomBool = forcePatch || marginBottom != currentMarginBottom
@@ -302,9 +314,17 @@ class Element: NSObject {
             patchMaxHeight(maxHeight: maxHeight)
         }
         
-        if patchPaddingBool || patchPaddingTopBool || patchPaddingLeftBool || patchPaddingBottomBool || patchPaddingRightBool {
+        if patchPaddingBool
+            || patchPaddingHorizontalBool
+            || patchPaddingVerticalBool
+            || patchPaddingTopBool
+            || patchPaddingLeftBool
+            || patchPaddingBottomBool
+            || patchPaddingRightBool {
             patchPadding(
                 padding: padding,
+                paddingHorizontal: paddingHorizontal,
+                paddingVertical: paddingVertical,
                 paddingTop: paddingTop,
                 paddingLeft: paddingLeft,
                 paddingBottom: paddingBottom,
@@ -312,9 +332,17 @@ class Element: NSObject {
             )
         }
 
-        if patchMarginBool || patchMarginTopBool || patchMarginLeftBool || patchMarginBottomBool || patchMarginRightBool {
+        if patchMarginBool
+            || patchMarginHorizontalBool
+            || patchMarginVerticalBool
+            || patchMarginTopBool
+            || patchMarginLeftBool
+            || patchMarginBottomBool
+            || patchMarginRightBool {
             patchMargin(
                 margin: margin,
+                marginHorizontal: marginHorizontal,
+                marginVertical: marginVertical,
                 marginTop: marginTop,
                 marginLeft: marginLeft,
                 marginBottom: marginBottom,
@@ -671,6 +699,8 @@ class Element: NSObject {
 
     public func patchPadding(
         padding: Float?,
+        paddingHorizontal: Float?,
+        paddingVertical: Float?,
         paddingTop: Float?,
         paddingLeft: Float?,
         paddingBottom: Float?,
@@ -679,28 +709,92 @@ class Element: NSObject {
         let layoutParams = view.layoutParams
         
         let tmpPadding = padding ?? 0
-                    
-        layoutParams.padding.top = paddingTop ?? tmpPadding
-        layoutParams.padding.left = paddingLeft ?? tmpPadding
-        layoutParams.padding.bottom = paddingBottom ?? tmpPadding
-        layoutParams.padding.right = paddingRight ?? tmpPadding
+        
+        var tmpPaddingTop = tmpPadding
+        var tmpPaddingLeft = tmpPadding
+        var tmpPaddingBottom = tmpPadding
+        var tmpPaddingRight = tmpPadding
+        
+        if paddingHorizontal != nil {
+            tmpPaddingLeft = paddingHorizontal!
+            tmpPaddingRight = paddingHorizontal!
+        }
+        
+        if paddingVertical != nil {
+            tmpPaddingTop = paddingVertical!
+            tmpPaddingBottom = paddingVertical!
+        }
+        
+        if paddingTop != nil {
+            tmpPaddingTop = paddingTop!
+        }
+        
+        if paddingLeft != nil {
+            tmpPaddingLeft = paddingLeft!
+        }
+        
+        if paddingBottom != nil {
+            tmpPaddingBottom = paddingBottom!
+        }
+        
+        if paddingRight != nil {
+            tmpPaddingRight = paddingRight!
+        }
+        
+        layoutParams.padding.top = tmpPaddingTop
+        layoutParams.padding.left = tmpPaddingLeft
+        layoutParams.padding.bottom = tmpPaddingBottom
+        layoutParams.padding.right = tmpPaddingRight
     }
 
     public func patchMargin(
         margin: Float?,
+        marginHorizontal: Float?,
+        marginVertical: Float?,
         marginTop: Float?,
         marginLeft: Float?,
         marginBottom: Float?,
         marginRight: Float?
     ) {
         let layoutParams = view.layoutParams
-        
+
         let tmpMargin = margin ?? 0
-                    
-        layoutParams.margin.top = marginTop ?? tmpMargin
-        layoutParams.margin.left = marginLeft ?? tmpMargin
-        layoutParams.margin.bottom = marginBottom ?? tmpMargin
-        layoutParams.margin.right = marginRight ?? tmpMargin
+
+        var tmpMarginTop = tmpMargin
+        var tmpMarginLeft = tmpMargin
+        var tmpMarginBottom = tmpMargin
+        var tmpMarginRight = tmpMargin
+
+        if marginHorizontal != nil {
+            tmpMarginLeft = marginHorizontal!
+            tmpMarginRight = marginHorizontal!
+        }
+
+        if marginVertical != nil {
+            tmpMarginTop = marginVertical!
+            tmpMarginBottom = marginVertical!
+        }
+        
+        if marginTop != nil {
+            tmpMarginTop = marginTop!
+        }
+        
+        if marginLeft != nil {
+            tmpMarginLeft = marginLeft!
+        }
+        
+        if marginBottom != nil {
+            tmpMarginBottom = marginBottom!
+        }
+        
+        if marginRight != nil {
+            tmpMarginRight = marginRight!
+        }
+
+        layoutParams.margin.top = tmpMarginTop
+        layoutParams.margin.left = tmpMarginLeft
+        layoutParams.margin.bottom = tmpMarginBottom
+        layoutParams.margin.right = tmpMarginRight
     }
 
     public func patchFontSize(fontSize: Float?) {
@@ -980,11 +1074,15 @@ class Element: NSObject {
         let maxWidth = styler.getMaxWidth()
         let maxHeight = styler.getMaxHeight()
         let padding = styler.getPadding()
+        let paddingHorizontal = styler.getPaddingHorizontal()
+        let paddingVertical = styler.getPaddingVertical()
         let paddingTop = styler.getPaddingTop()
         let paddingLeft = styler.getPaddingLeft()
         let paddingBottom = styler.getPaddingBottom()
         let paddingRight = styler.getPaddingRight()
         let margin = styler.getMargin()
+        let marginHorizontal = styler.getMarginHorizontal()
+        let marginVertical = styler.getMarginVertical()
         let marginTop = styler.getMarginTop()
         let marginLeft = styler.getMarginLeft()
         let marginBottom = styler.getMarginBottom()
@@ -1040,11 +1138,15 @@ class Element: NSObject {
         let patchMaxWidthBool = keys.contains("maxWidth")
         let patchMaxHeightBool = keys.contains("maxHeight")
         let patchPaddingBool = keys.contains("padding")
+        let patchPaddingHorizontalBool = keys.contains("paddingHorizontal")
+        let patchPaddingVerticalBool = keys.contains("paddingVertical")
         let patchPaddingTopBool = keys.contains("paddingTop")
         let patchPaddingLeftBool = keys.contains("paddingLeft")
         let patchPaddingBottomBool = keys.contains("paddingBottom")
         let patchPaddingRightBool = keys.contains("paddingRight")
         let patchMarginBool = keys.contains("margin")
+        let patchMarginHorizontalBool = keys.contains("marginHorizontal")
+        let patchMarginVerticalBool = keys.contains("marginVertical")
         let patchMarginTopBool = keys.contains("marginTop")
         let patchMarginLeftBool = keys.contains("marginLeft")
         let patchMarginBottomBool = keys.contains("marginBottom")
@@ -1135,9 +1237,17 @@ class Element: NSObject {
             patchMaxHeight(maxHeight: maxHeight)
         }
         
-        if patchPaddingBool || patchPaddingTopBool || patchPaddingLeftBool || patchPaddingBottomBool || patchPaddingRightBool {
+        if patchPaddingBool
+            || patchPaddingHorizontalBool
+            || patchPaddingVerticalBool
+            || patchPaddingTopBool
+            || patchPaddingLeftBool
+            || patchPaddingBottomBool
+            || patchPaddingRightBool {
             patchPadding(
                 padding: patchPaddingBool ? padding : self.styler.getPadding(),
+                paddingHorizontal: patchPaddingHorizontalBool ? paddingHorizontal : self.styler.getPaddingHorizontal(),
+                paddingVertical: patchPaddingVerticalBool ? paddingVertical : self.styler.getPaddingVertical(),
                 paddingTop: patchPaddingTopBool ? paddingTop : self.styler.getPaddingTop(),
                 paddingLeft: patchPaddingLeftBool ? paddingLeft : self.styler.getPaddingLeft(),
                 paddingBottom: patchPaddingBottomBool ? paddingBottom : self.styler.getPaddingBottom(),
@@ -1145,9 +1255,17 @@ class Element: NSObject {
             )
         }
 
-        if patchMarginBool || patchMarginTopBool || patchMarginLeftBool || patchMarginBottomBool || patchMarginRightBool {
+        if patchMarginBool
+            || patchMarginHorizontalBool
+            || patchMarginVerticalBool
+            || patchMarginTopBool
+            || patchMarginLeftBool
+            || patchMarginBottomBool
+            || patchMarginRightBool {
             patchMargin(
                 margin: patchMarginBool ? margin : self.styler.getMargin(),
+                marginHorizontal: patchMarginHorizontalBool ? marginHorizontal : self.styler.getMarginHorizontal(),
+                marginVertical: patchMarginVerticalBool ? marginVertical : self.styler.getMarginVertical(),
                 marginTop: patchMarginTopBool ? marginTop : self.styler.getMarginTop(),
                 marginLeft: patchMarginLeftBool ? marginLeft : self.styler.getMarginLeft(),
                 marginBottom: patchMarginBottomBool ? marginBottom : self.styler.getMarginBottom(),

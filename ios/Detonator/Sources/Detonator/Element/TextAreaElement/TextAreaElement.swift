@@ -52,6 +52,8 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
     
     override func patchPadding(
         padding: Float?,
+        paddingHorizontal: Float?,
+        paddingVertical: Float?,
         paddingTop: Float?,
         paddingLeft: Float?,
         paddingBottom: Float?,
@@ -61,10 +63,36 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         
         let tmpPadding = padding ?? 0
         
-        let tmpPaddingTop = paddingTop ?? tmpPadding
-        let tmpPaddingLeft = paddingLeft ?? tmpPadding
-        let tmpPaddingBottom = paddingBottom ?? tmpPadding
-        let tmpPaddingRight = paddingRight ?? tmpPadding
+        var tmpPaddingTop = tmpPadding
+        var tmpPaddingLeft = tmpPadding
+        var tmpPaddingBottom = tmpPadding
+        var tmpPaddingRight = tmpPadding
+        
+        if paddingHorizontal != nil {
+            tmpPaddingLeft = paddingHorizontal!
+            tmpPaddingRight = paddingHorizontal!
+        }
+        
+        if paddingVertical != nil {
+            tmpPaddingTop = paddingVertical!
+            tmpPaddingBottom = paddingVertical!
+        }
+        
+        if paddingTop != nil {
+            tmpPaddingTop = paddingTop!
+        }
+        
+        if paddingLeft != nil {
+            tmpPaddingLeft = paddingLeft!
+        }
+        
+        if paddingBottom != nil {
+            tmpPaddingBottom = paddingBottom!
+        }
+        
+        if paddingRight != nil {
+            tmpPaddingRight = paddingRight!
+        }
         
         view.textContainerInset = UIEdgeInsets(
             top: CGFloat(tmpPaddingTop),

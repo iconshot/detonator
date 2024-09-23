@@ -57,6 +57,14 @@ class Styler {
         return style?.padding
     }
     
+    public func getPaddingHorizontal() -> Float? {
+        return style?.paddingHorizontal
+    }
+    
+    public func getPaddingVertical() -> Float? {
+        return style?.paddingVertical
+    }
+    
     public func getPaddingTop() -> Float? {
         return style?.paddingTop
     }
@@ -75,6 +83,14 @@ class Styler {
     
     public func getMargin() -> Float? {
         return style?.margin
+    }
+    
+    public func getMarginHorizontal() -> Float? {
+        return style?.marginHorizontal
+    }
+    
+    public func getMarginVertical() -> Float? {
+        return style?.marginVertical
     }
     
     public func getMarginTop() -> Float? {

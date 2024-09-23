@@ -1,12 +1,14 @@
 package com.iconshot.detonator;
 
 import com.iconshot.detonator.element.Element;
+import com.iconshot.detonator.element.SafeAreaViewElement;
+import com.iconshot.detonator.element.scrollviewelement.ScrollViewElement;
 import com.iconshot.detonator.element.imageelement.ImageElement;
 import com.iconshot.detonator.element.InputElement;
 import com.iconshot.detonator.element.TextAreaElement;
 import com.iconshot.detonator.element.TextElement;
 import com.iconshot.detonator.element.videoelement.VideoElement;
-import com.iconshot.detonator.element.ViewElement;
+import com.iconshot.detonator.element.viewelement.ViewElement;
 import com.iconshot.detonator.element.Style;
 
 import com.iconshot.detonator.emitter.EventEmitter;
@@ -39,6 +41,7 @@ import com.iconshot.detonator.tree.Target;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
@@ -101,6 +104,8 @@ public class Detonator {
         addElementClass("com.iconshot.detonator.textarea", TextAreaElement.class);
         addElementClass("com.iconshot.detonator.image", ImageElement.class);
         addElementClass("com.iconshot.detonator.video", VideoElement.class);
+        addElementClass("com.iconshot.detonator.scrollview", ScrollViewElement.class);
+        addElementClass("com.iconshot.detonator.safeareaview", SafeAreaViewElement.class);
 
         addRequestClass("com.iconshot.detonator.input/focus", InputFocusRequest.class);
         addRequestClass("com.iconshot.detonator.input/blur", InputBlurRequest.class);
@@ -412,8 +417,8 @@ public class Detonator {
         if (element != null) {
             element.patch();
 
-            if (element.view instanceof ViewLayout) {
-                tmpTarget = new Target((ViewLayout) element.view, 0);
+            if (element.view instanceof ViewGroup) {
+                tmpTarget = new Target((ViewGroup) element.view, 0);
             }
         }
 

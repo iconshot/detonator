@@ -59,6 +59,14 @@ public class Styler {
         return style != null ? style.padding : null;
     }
 
+    public Float getPaddingHorizontal() {
+        return style != null ? style.paddingHorizontal : null;
+    }
+
+    public Float getPaddingVertical() {
+        return style != null ? style.paddingVertical : null;
+    }
+
     public Float getPaddingTop() {
         return style != null ? style.paddingTop : null;
     }
@@ -77,6 +85,14 @@ public class Styler {
 
     public Float getMargin() {
         return style != null ? style.margin : null;
+    }
+
+    public Float getMarginHorizontal() {
+        return style != null ? style.marginHorizontal : null;
+    }
+
+    public Float getMarginVertical() {
+        return style != null ? style.marginVertical : null;
     }
 
     public Float getMarginTop() {

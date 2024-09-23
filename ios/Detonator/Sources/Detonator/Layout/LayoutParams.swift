@@ -21,6 +21,8 @@ class LayoutParams {
         case flexStart, flexEnd, start, end, center
     }
     
+    var remeasured: Bool = false
+    
     var position: Position = .relative
     
     var display: Display = .flex

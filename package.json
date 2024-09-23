@@ -1,6 +1,6 @@
 {
   "name": "detonator",
-  "version": "1.4.12",
+  "version": "1.4.13",
   "description": "Build native mobile apps with Untrue.",
   "homepage": "https://detonator.dev",
   "repository": {
@@ -14,7 +14,8 @@
     "remove-dist": "rm -rf dist",
     "bundle-dist": "npm run remove-dist && tsc",
     "build": "npm run prepare-template && npm run bundle-dist",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "publish-alpha": "npm publish --tag alpha"
   },
   "keywords": [
     "mobile",

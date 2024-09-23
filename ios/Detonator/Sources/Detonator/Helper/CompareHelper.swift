@@ -68,4 +68,32 @@ class CompareHelper {
             return false
         }
     }
+    
+    public static func compareArrays<T: Equatable>(_ a: [T]?, _ b: [T]?) -> Bool {
+        if a == nil {
+            return b == nil
+        }
+        
+        guard let a = a else {
+            return false
+        }
+        
+        guard let b = b else {
+            return false
+        }
+        
+        if a.count != b.count {
+            return false
+        }
+        
+        for (i, aValue) in a.enumerated() {
+            let bValue = b[i]
+            
+            if aValue != bValue {
+                return false
+            }
+        }
+        
+        return true
+    }
 }

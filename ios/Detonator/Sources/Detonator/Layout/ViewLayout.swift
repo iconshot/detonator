@@ -10,6 +10,8 @@ class ViewLayout: UIView {
     public var justifyContent: LayoutParams.JustifyContent = .flexStart
     public var alignItems: LayoutParams.AlignItems = .flexStart
     
+    public var onSafeAreaInsetsChange: (() -> Void)?
+    
     override init(frame: CGRect) {
         id = ViewLayout.staticId
         
@@ -31,7 +33,15 @@ class ViewLayout: UIView {
     }
 
     private func initView() {
+        isViewGroup = true
+        
         clipsToBounds = false
+    }
+    
+    override func safeAreaInsetsDidChange() {
+        super.safeAreaInsetsDidChange()
+                
+        onSafeAreaInsetsChange?()
     }
     
     private func isHorizontal() -> Bool {
@@ -42,33 +52,39 @@ class ViewLayout: UIView {
         return flexDirection == .rowReverse || flexDirection == .columnReverse
     }
     
-    public func performLayout() {
+    public func performLayout() {        
         let width = frame.size.width
         let height = frame.size.height
         
-        measureRelativeChildren(
-            exactWidth: Float(width),
-            exactHeight: Float(height),
-            mostWidth: nil,
-            mostHeight: nil
+        measure(
+            specWidth: width,
+            specHeight: height,
+            specWidthMode: MeasureSpec.EXACTLY,
+            specHeightMode: MeasureSpec.EXACTLY
         )
         
-        measureAbsoluteChildren()
-        
-        layoutChildren()
+        layout(x: 0, y: 0)
         
         setNeedsLayout()
     }
     
-    // exact is equivalent to android's EXACTLY
-    // most is equivalent to android's AT_MOST
-    
-    private func measureRelativeChildren(
-        exactWidth: Float?,
-        exactHeight: Float?,
-        mostWidth: Float?,
-        mostHeight: Float?
-    ) -> LayoutSize {
+    override func measure(
+        specWidth: CGFloat,
+        specHeight: CGFloat,
+        specWidthMode: Int,
+        specHeightMode: Int
+    ) {
+        let isParentViewLayout = superview is ViewLayout
+        
+        if layoutParams.remeasured {
+            frame.size.width = specWidth
+            frame.size.height = specHeight
+            
+            measureAbsoluteChildren()
+            
+            return
+        }
+        
         let paddingTop = layoutParams.padding.top
         let paddingLeft = layoutParams.padding.left
         let paddingBottom = layoutParams.padding.bottom
@@ -77,8 +93,8 @@ class ViewLayout: UIView {
         let paddingX = paddingLeft + paddingRight
         let paddingY = paddingTop + paddingBottom
         
-        let innerWidth = (exactWidth ?? 0) - paddingX
-        let innerHeight = (exactHeight ?? 0) - paddingY
+        let innerWidth = Float(specWidth) - paddingX
+        let innerHeight = Float(specHeight) - paddingY
         
         var contentWidth: Float = 0
         var contentHeight: Float = 0
@@ -87,7 +103,8 @@ class ViewLayout: UIView {
         var totalFlex: Int = 0
         var usedSize: Float = 0
         
-        let canUseFlex = isHorizontal() ? exactWidth != nil : exactHeight != nil
+        let canUseFlex = (isHorizontal() && specWidthMode == MeasureSpec.EXACTLY)
+            || (!isHorizontal() && specHeightMode == MeasureSpec.EXACTLY)
         
         // non-flex
         
@@ -127,10 +144,10 @@ class ViewLayout: UIView {
                 continue
             }
             
-            var childExactWidth: Float?
-            var childExactHeight: Float?
-            var childMostWidth: Float?
-            var childMostHeight: Float?
+            var childSpecWidth: Float = 0
+            var childSpecHeight: Float = 0
+            var childSpecWidthMode: Int = MeasureSpec.UNSPECIFIED
+            var childSpecHeightMode: Int = MeasureSpec.UNSPECIFIED
             
             let hasWidth = layoutParams.width != nil || layoutParams.widthPercent != nil
             let hasHeight = layoutParams.height != nil || layoutParams.heightPercent != nil
@@ -141,14 +158,14 @@ class ViewLayout: UIView {
             let hasMaxWidth = layoutParams.maxWidth != nil || layoutParams.maxWidthPercent != nil
             let hasMaxHeight = layoutParams.maxHeight != nil || layoutParams.maxHeightPercent != nil
             
-            let useWidth = hasWidth && (layoutParams.widthPercent == nil || exactWidth != nil)
-            let useHeight = hasHeight && (layoutParams.heightPercent == nil || exactHeight != nil)
+            let useWidth = hasWidth && (layoutParams.widthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
+            let useHeight = hasHeight && (layoutParams.heightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
             
-            let useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == nil || exactWidth != nil)
-            let useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == nil || exactHeight != nil)
+            let useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
+            let useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
             
-            let useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == nil || exactWidth != nil)
-            let useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == nil || exactHeight != nil)
+            let useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
+            let useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
             
             if useWidth {
                 var width = layoutParams.width ?? innerWidth * layoutParams.widthPercent!
@@ -165,12 +182,14 @@ class ViewLayout: UIView {
                     width = max(width, minWidth)
                 }
                 
-                childExactWidth = width
+                childSpecWidth = width
+                childSpecWidthMode = MeasureSpec.EXACTLY
             } else {
                 if useMaxWidth {
                     let maxWidth = layoutParams.maxWidth ?? innerWidth * layoutParams.maxWidthPercent!
                     
-                    childMostWidth = maxWidth
+                    childSpecWidth = maxWidth
+                    childSpecWidthMode = MeasureSpec.AT_MOST
                 }
             }
             
@@ -189,36 +208,43 @@ class ViewLayout: UIView {
                     height = max(height, minHeight)
                 }
                 
-                childExactHeight = height
+                childSpecHeight = height
+                childSpecHeightMode = MeasureSpec.EXACTLY
             } else {
                 if useMaxHeight {
                     let maxHeight = layoutParams.maxHeight ?? innerHeight * layoutParams.maxHeightPercent!
                     
-                    childMostHeight = maxHeight
+                    childSpecHeight = maxHeight
+                    childSpecHeightMode = MeasureSpec.AT_MOST
                 }
             }
             
             if layoutParams.aspectRatio != nil {
                 if useWidth {
-                    childExactHeight = childExactWidth! * layoutParams.aspectRatio!
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
+                    childSpecHeightMode = MeasureSpec.EXACTLY
                 } else if useHeight {
-                    childExactWidth = childExactHeight! * layoutParams.aspectRatio!
+                    childSpecWidth = childSpecHeight * layoutParams.aspectRatio!
+                    childSpecWidthMode = MeasureSpec.EXACTLY
                 }
             }
             
-            let childSize = measureChild(
+            measureChild(
                 view: child,
-                exactWidth: childExactWidth,
-                exactHeight: childExactHeight,
-                mostWidth: childMostWidth,
-                mostHeight: childMostHeight
+                specWidth: childSpecWidth,
+                specHeight: childSpecHeight,
+                specWidthMode: childSpecWidthMode,
+                specHeightMode: childSpecHeightMode
             )
             
-            var childWidth = childSize.width
-            var childHeight = childSize.height
+            childSpecWidth = Float(child.frame.size.width)
+            childSpecHeight = Float(child.frame.size.height)
+            
+            childSpecWidthMode = MeasureSpec.EXACTLY
+            childSpecHeightMode = MeasureSpec.EXACTLY
             
             if !useWidth {
-                var width = childWidth
+                var width = childSpecWidth
                 
                 if useMinWidth {
                     let minWidth = layoutParams.minWidth ?? innerWidth * layoutParams.minWidthPercent!
@@ -226,11 +252,11 @@ class ViewLayout: UIView {
                     width = max(width, minWidth)
                 }
                 
-                childWidth = width
+                childSpecWidth = width
             }
             
             if !useHeight {
-                var height = childHeight
+                var height = childSpecHeight
                 
                 if useMinHeight {
                     let minHeight = layoutParams.minHeight ?? innerHeight * layoutParams.minHeightPercent!
@@ -238,7 +264,7 @@ class ViewLayout: UIView {
                     height = max(height, minHeight)
                 }
                 
-                childHeight = height
+                childSpecHeight = height
             }
             
             if layoutParams.aspectRatio != nil && !useWidth && !useHeight {
@@ -246,15 +272,24 @@ class ViewLayout: UIView {
                 let hasAnyHeight = hasHeight || hasMinHeight || hasMaxHeight
                 
                 if hasAnyWidth {
-                    childHeight = childWidth * layoutParams.aspectRatio!
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
                 } else if hasAnyHeight {
-                    childWidth = childHeight * layoutParams.aspectRatio!
+                    childSpecWidth = childSpecHeight * layoutParams.aspectRatio!
                 } else {
-                    childHeight = childWidth * layoutParams.aspectRatio!
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
                 }
             }
             
-            setChildSize(view: child, width: childWidth, height: childHeight)
+            remeasureChild(
+                view: child,
+                specWidth: childSpecWidth,
+                specHeight: childSpecHeight,
+                specWidthMode: childSpecWidthMode,
+                specHeightMode: childSpecHeightMode
+            )
+            
+            let childWidth = Float(child.frame.size.width)
+            let childHeight = Float(child.frame.size.height)
             
             let outerWidth = childWidth + marginX
             let outerHeight = childHeight + marginY
@@ -303,10 +338,10 @@ class ViewLayout: UIView {
             
             let flexSize = flexBaseSize * Float(layoutParams.flex!) + flexDistribution
             
-            var childExactWidth: Float?
-            var childExactHeight: Float?
-            var childMostWidth: Float?
-            var childMostHeight: Float?
+            var childSpecWidth: Float = 0
+            var childSpecHeight: Float = 0
+            var childSpecWidthMode: Int = MeasureSpec.UNSPECIFIED
+            var childSpecHeightMode: Int = MeasureSpec.UNSPECIFIED
             
             let hasWidth = layoutParams.width != nil || layoutParams.widthPercent != nil
             let hasHeight = layoutParams.height != nil || layoutParams.heightPercent != nil
@@ -317,17 +352,18 @@ class ViewLayout: UIView {
             let hasMaxWidth = layoutParams.maxWidth != nil || layoutParams.maxWidthPercent != nil
             let hasMaxHeight = layoutParams.maxHeight != nil || layoutParams.maxHeightPercent != nil
             
-            let useWidth = hasWidth && (layoutParams.widthPercent == nil || exactWidth != nil)
-            let useHeight = hasHeight && (layoutParams.heightPercent == nil || exactHeight != nil)
+            let useWidth = hasWidth && (layoutParams.widthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
+            let useHeight = hasHeight && (layoutParams.heightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
             
-            let useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == nil || exactWidth != nil)
-            let useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == nil || exactHeight != nil)
+            let useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
+            let useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
             
-            let useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == nil || exactWidth != nil)
-            let useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == nil || exactHeight != nil)
+            let useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
+            let useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
             
             if isHorizontal() {
-                childExactWidth = flexSize
+                childSpecWidth = flexSize
+                childSpecWidthMode = MeasureSpec.EXACTLY
                 
                 if useHeight {
                     var height = layoutParams.height ?? innerHeight * layoutParams.heightPercent!
@@ -344,21 +380,25 @@ class ViewLayout: UIView {
                         height = max(height, minHeight)
                     }
                     
-                    childExactHeight = height
+                    childSpecHeight = height
+                    childSpecHeightMode = MeasureSpec.EXACTLY
                 } else {
                     if useMaxHeight {
                         let maxHeight = layoutParams.maxHeight ?? innerHeight * layoutParams.maxHeightPercent!
                         
-                        childMostHeight = maxHeight
+                        childSpecHeight = maxHeight
+                        childSpecHeightMode = MeasureSpec.AT_MOST
                     }
                 }
                 
                 if layoutParams.aspectRatio != nil {
-                    childExactHeight = childExactWidth! * layoutParams.aspectRatio!
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
+                    childSpecHeightMode = MeasureSpec.EXACTLY
                     
                 }
             } else {
-                childExactHeight = flexSize
+                childSpecHeight = flexSize
+                childSpecHeightMode = MeasureSpec.EXACTLY
                 
                 if useWidth {
                     var width = layoutParams.width ?? innerWidth * layoutParams.widthPercent!
@@ -375,35 +415,41 @@ class ViewLayout: UIView {
                         width = max(width, minWidth)
                     }
                     
-                    childExactWidth = width
+                    childSpecWidth = width
+                    childSpecWidthMode = MeasureSpec.EXACTLY
                 } else {
                     if useMaxWidth {
                         let maxWidth = layoutParams.maxWidth ?? innerWidth * layoutParams.maxWidthPercent!
                         
-                        childMostWidth = maxWidth
+                        childSpecWidth = maxWidth
+                        childSpecWidthMode = MeasureSpec.AT_MOST
                     }
                 }
                 
                 if layoutParams.aspectRatio != nil {
-                    childExactWidth = childExactHeight! * layoutParams.aspectRatio!
+                    childSpecWidth = childSpecHeight * layoutParams.aspectRatio!
+                    childSpecWidthMode = MeasureSpec.EXACTLY
                 }
             }
             
-            let childSize = measureChild(
+            measureChild(
                 view: child,
-                exactWidth: childExactWidth,
-                exactHeight: childExactHeight,
-                mostWidth: childMostWidth,
-                mostHeight: childMostHeight
+                specWidth: childSpecWidth,
+                specHeight: childSpecHeight,
+                specWidthMode: childSpecWidthMode,
+                specHeightMode: childSpecHeightMode
             )
             
-            var childWidth = childSize.width
-            var childHeight = childSize.height
+            childSpecWidth = Float(child.frame.size.width)
+            childSpecHeight = Float(child.frame.size.height)
+            
+            childSpecWidthMode = MeasureSpec.EXACTLY
+            childSpecHeightMode = MeasureSpec.EXACTLY
             
             if layoutParams.aspectRatio == nil {
                 if isHorizontal() {
                     if !useHeight {
-                        var height = childHeight
+                        var height = childSpecHeight
                         
                         if useMinHeight {
                             let minHeight = layoutParams.minHeight ?? innerHeight * layoutParams.minHeightPercent!
@@ -411,11 +457,11 @@ class ViewLayout: UIView {
                             height = max(height, minHeight)
                         }
                         
-                        childHeight = height
+                        childSpecHeight = height
                     }
                 } else {
                     if !useWidth {
-                        var width = childWidth
+                        var width = childSpecWidth
                         
                         if useMinWidth {
                             let minWidth = layoutParams.minWidth ?? innerWidth * layoutParams.minWidthPercent!
@@ -423,12 +469,18 @@ class ViewLayout: UIView {
                             width = max(width, minWidth)
                         }
                         
-                        childWidth = width
+                        childSpecWidth = width
                     }
                 }
             }
-                        
-            setChildSize(view: child, width: childWidth, height: childHeight)
+            
+            remeasureChild(
+                view: child,
+                specWidth: childSpecWidth,
+                specHeight: childSpecHeight,
+                specWidthMode: childSpecWidthMode,
+                specHeightMode: childSpecHeightMode
+            )
         }
         
         // content size
@@ -475,26 +527,15 @@ class ViewLayout: UIView {
         contentWidth += paddingX
         contentHeight += paddingY
         
-        var resolvedWidth: Float = 0
-        var resolvedHeight: Float = 0
+        let resolvedWidth = resolveSize(size: CGFloat(contentWidth), specSize: specWidth, specSizeMode: specWidthMode)
+        let resolvedHeight = resolveSize(size: CGFloat(contentHeight), specSize: specHeight, specSizeMode: specHeightMode)
         
-        if exactWidth != nil {
-            resolvedWidth = exactWidth!
-        } else if mostWidth != nil {
-            resolvedWidth = min(contentWidth, mostWidth!)
-        } else {
-            resolvedWidth = contentWidth
+        frame.size.width = resolvedWidth
+        frame.size.height = resolvedHeight
+        
+        if !isParentViewLayout {
+            measureAbsoluteChildren()
         }
-        
-        if exactHeight != nil {
-            resolvedHeight = exactHeight!
-        } else if mostHeight != nil {
-            resolvedHeight = min(contentHeight, mostHeight!)
-        } else {
-            resolvedHeight = contentHeight
-        }
-        
-        return LayoutSize(width: resolvedWidth, height: resolvedHeight)
     }
     
     private func measureAbsoluteChildren() {
@@ -515,10 +556,10 @@ class ViewLayout: UIView {
                 continue
             }
             
-            var childExactWidth: Float?
-            var childExactHeight: Float?
-            var childMostWidth: Float?
-            var childMostHeight: Float?
+            var childSpecWidth: Float = 0
+            var childSpecHeight: Float = 0
+            var childSpecWidthMode: Int = MeasureSpec.UNSPECIFIED
+            var childSpecHeightMode: Int = MeasureSpec.UNSPECIFIED
             
             let hasWidth = layoutParams.width != nil || layoutParams.widthPercent != nil
             let hasHeight = layoutParams.height != nil || layoutParams.heightPercent != nil
@@ -559,7 +600,8 @@ class ViewLayout: UIView {
                     width = max(width, minWidth)
                 }
                 
-                childExactWidth = width
+                childSpecWidth = width
+                childSpecWidthMode = MeasureSpec.EXACTLY
             } else if usePositionWidth {
                 var width = measuredWidth - layoutParams.positionLeft! - layoutParams.positionRight!
                 
@@ -575,12 +617,14 @@ class ViewLayout: UIView {
                     width = max(width, minWidth)
                 }
                 
-                childExactWidth = width
+                childSpecWidth = width
+                childSpecWidthMode = MeasureSpec.EXACTLY
             } else {
                 if useMaxWidth {
                     let maxWidth = layoutParams.maxWidth ?? measuredWidth * layoutParams.maxWidthPercent!
                     
-                    childMostWidth = maxWidth
+                    childSpecWidth = maxWidth
+                    childSpecWidthMode = MeasureSpec.AT_MOST
                 }
             }
             
@@ -599,7 +643,8 @@ class ViewLayout: UIView {
                     height = max(height, minHeight)
                 }
                 
-                childExactHeight = height
+                childSpecHeight = height
+                childSpecHeightMode = MeasureSpec.EXACTLY
             } else if usePositionHeight {
                 var height = measuredHeight - layoutParams.positionTop! - layoutParams.positionBottom!
                 
@@ -615,36 +660,43 @@ class ViewLayout: UIView {
                     height = max(height, minHeight)
                 }
                 
-                childExactHeight = height
+                childSpecHeight = height
+                childSpecHeightMode = MeasureSpec.EXACTLY
             } else {
                 if useMaxHeight {
                     let maxHeight = layoutParams.maxHeight ?? measuredHeight * layoutParams.maxHeightPercent!
                     
-                    childMostHeight = maxHeight
+                    childSpecHeight = maxHeight
+                    childSpecHeightMode = MeasureSpec.AT_MOST
                 }
             }
             
             if layoutParams.aspectRatio != nil {
                 if useWidth || usePositionWidth {
-                    childExactHeight = childExactWidth! * layoutParams.aspectRatio!
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
+                    childSpecHeightMode = MeasureSpec.EXACTLY
                 } else if useHeight || usePositionHeight {
-                    childExactWidth = childExactHeight! * layoutParams.aspectRatio!
+                    childSpecWidth = childSpecHeight * layoutParams.aspectRatio!
+                    childSpecWidthMode = MeasureSpec.EXACTLY
                 }
             }
             
-            let childSize = measureChild(
+            measureChild(
                 view: child,
-                exactWidth: childExactWidth,
-                exactHeight: childExactHeight,
-                mostWidth: childMostWidth,
-                mostHeight: childMostHeight
+                specWidth: childSpecWidth,
+                specHeight: childSpecHeight,
+                specWidthMode: childSpecWidthMode,
+                specHeightMode: childSpecHeightMode
             )
             
-            var childWidth = childSize.width
-            var childHeight = childSize.height
+            childSpecWidth = Float(child.frame.size.width)
+            childSpecHeight = Float(child.frame.size.height)
+            
+            childSpecWidthMode = MeasureSpec.EXACTLY
+            childSpecHeightMode = MeasureSpec.EXACTLY
             
             if !(useWidth || usePositionWidth) {
-                var width = childWidth
+                var width = childSpecWidth
                 
                 if useMinWidth {
                     let minWidth = layoutParams.minWidth ?? measuredWidth * layoutParams.minWidthPercent!
@@ -652,11 +704,11 @@ class ViewLayout: UIView {
                     width = max(width, minWidth)
                 }
                 
-                childWidth = width
+                childSpecWidth = width
             }
             
             if !(useHeight || usePositionHeight) {
-                var height = childHeight
+                var height = childSpecHeight
                 
                 if useMinHeight {
                     let minHeight = layoutParams.minHeight ?? measuredHeight * layoutParams.minHeightPercent!
@@ -664,7 +716,7 @@ class ViewLayout: UIView {
                     height = max(height, minHeight)
                 }
                 
-                childHeight = height
+                childSpecHeight = height
             }
             
             if layoutParams.aspectRatio != nil
@@ -674,60 +726,31 @@ class ViewLayout: UIView {
                 let hasMinOrMaxHeight = hasMinHeight || hasMaxHeight
                 
                 if hasMinOrMaxWidth {
-                    childHeight = childWidth * layoutParams.aspectRatio!
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
                 } else if hasMinOrMaxHeight {
-                    childWidth = childHeight * layoutParams.aspectRatio!
+                    childSpecWidth = childSpecHeight * layoutParams.aspectRatio!
                 } else {
-                    childHeight = childWidth * layoutParams.aspectRatio!
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
                 }
             }
-                        
-            setChildSize(view: child, width: childWidth, height: childHeight)
-        }
-    }
-    
-    private func measureChild(
-        view: UIView,
-        exactWidth: Float?,
-        exactHeight: Float?,
-        mostWidth: Float?,
-        mostHeight: Float?
-    ) -> LayoutSize {
-        if view is ViewLayout {
-            return (view as! ViewLayout).measureRelativeChildren(
-                exactWidth: exactWidth,
-                exactHeight: exactHeight,
-                mostWidth: mostWidth,
-                mostHeight: mostHeight
+            
+            remeasureChild(
+                view: child,
+                specWidth: childSpecWidth,
+                specHeight: childSpecHeight,
+                specWidthMode: childSpecWidthMode,
+                specHeightMode: childSpecHeightMode
             )
         }
-        
-        var constraintWidth = CGFloat.greatestFiniteMagnitude
-        var constraintHeight = CGFloat.greatestFiniteMagnitude
-        
-        if exactWidth != nil {
-            constraintWidth = CGFloat(exactWidth!)
-        } else if mostWidth != nil {
-            constraintWidth = CGFloat(mostWidth!)
-        }
-        
-        if exactHeight != nil {
-            constraintHeight = CGFloat(exactHeight!)
-        } else if mostHeight != nil {
-            constraintHeight = CGFloat(mostHeight!)
-        }
-        
-        let constraintSize = CGSize(width: constraintWidth, height: constraintHeight)
-        
-        let fittingSize = view.sizeThatFits(constraintSize)
-        
-        let resolvedWidth = exactWidth ?? Float(fittingSize.width)
-        let resolvedHeight = exactHeight ?? Float(fittingSize.height)
-        
-        return LayoutSize(width: resolvedWidth, height: resolvedHeight)
     }
     
-    private func layoutChildren() {
+    override func layout(x: CGFloat, y: CGFloat) {
+        super.layout(x: x, y: y)
+        
+        if subviews.isEmpty {
+            return
+        }
+        
         let measuredWidth = Float(frame.size.width)
         let measuredHeight = Float(frame.size.height)
         
@@ -1026,8 +1049,8 @@ class ViewLayout: UIView {
             } else if positionBottom != nil {
                 y -= positionBottom!
             }
-                        
-            setChildOrigin(view: child, x: x, y: y)
+            
+            layoutChild(view: child, x: x, y: y)
             
             if isHorizontal() {
                 left += outerWidth + spaceDistribution
@@ -1185,25 +1208,60 @@ class ViewLayout: UIView {
             } else if positionBottom != nil {
                 y = measuredHeight - positionBottom! - marginBottom - childHeight
             }
-                        
-            setChildOrigin(view: child, x: x, y: y)
+            
+            layoutChild(view: child, x: x, y: y)
         }
     }
     
-    private func setChildSize(view: UIView, width: Float, height: Float) {
-        view.frame.size = CGSize(width: CGFloat(width), height: CGFloat(height))
-        
-        if view is ViewLayout {
-            (view as! ViewLayout).measureAbsoluteChildren()
-        }
+    private func measureChild(
+        view: UIView,
+        specWidth: Float,
+        specHeight: Float,
+        specWidthMode: Int,
+        specHeightMode: Int
+    ) {
+        view.measure(
+            specWidth: CGFloat(specWidth),
+            specHeight: CGFloat(specHeight),
+            specWidthMode: specWidthMode,
+            specHeightMode: specHeightMode
+        )
     }
     
-    private func setChildOrigin(view: UIView, x: Float, y: Float) {
-        view.frame.origin = CGPoint(x: CGFloat(x), y: CGFloat(y))
+    private func remeasureChild(
+        view: UIView,
+        specWidth: Float,
+        specHeight: Float,
+        specWidthMode: Int,
+        specHeightMode: Int
+    ) {
+        let layoutParams = view.layoutParams
         
-        if view is ViewLayout {
-            (view as! ViewLayout).layoutChildren()
+        let isViewLayout = view is ViewLayout
+        
+        let hasSpecChanged = specWidth != Float(view.frame.size.width)
+            || specHeight != Float(view.frame.size.height)
+        
+        let remeasure = isViewLayout || hasSpecChanged
+        
+        if !remeasure {
+            return
         }
+        
+        layoutParams.remeasured = true
+        
+        view.measure(
+            specWidth: CGFloat(specWidth),
+            specHeight: CGFloat(specHeight),
+            specWidthMode: specWidthMode,
+            specHeightMode: specHeightMode
+        )
+        
+        layoutParams.remeasured = false
+    }
+    
+    private func layoutChild(view: UIView, x: Float, y: Float) {
+        view.layout(x: CGFloat(x), y: CGFloat(y))
         
         let layoutParams = view.layoutParams
         

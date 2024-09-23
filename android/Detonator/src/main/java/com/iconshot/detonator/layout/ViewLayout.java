@@ -19,8 +19,6 @@ public class ViewLayout extends ViewGroup {
     public static int OVERFLOW_VISIBLE = 0;
     public static int OVERFLOW_HIDDEN = 1;
 
-    protected boolean remeasured = false;
-
     private int overflow = OVERFLOW_VISIBLE;
 
     private int flexDirection = LayoutParams.FLEX_DIRECTION_COLUMN;
@@ -139,7 +137,7 @@ public class ViewLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
-         // System.out.println("onMeasure " + id);
+        // System.out.println("onMeasure " + id);
 
         int specWidth = MeasureSpec.getSize(widthSpec);
         int specHeight = MeasureSpec.getSize(heightSpec);
@@ -147,12 +145,18 @@ public class ViewLayout extends ViewGroup {
         int specWidthMode = MeasureSpec.getMode(widthSpec);
         int specHeightMode = MeasureSpec.getMode(heightSpec);
 
-        if (remeasured) {
-            setMeasuredDimension(specWidth, specHeight);
+        boolean isParentViewLayout = getParent() instanceof ViewLayout;
 
-            onMeasureAbsoluteChildren();
+        if (isParentViewLayout) {
+            LayoutParams layoutParams = (LayoutParams) getLayoutParams();
 
-            return;
+            if (layoutParams.remeasured) {
+                setMeasuredDimension(specWidth, specHeight);
+
+                onMeasureAbsoluteChildren();
+
+                return;
+            }
         }
 
         int paddingTop = getPaddingTop();
@@ -626,14 +630,12 @@ public class ViewLayout extends ViewGroup {
 
         setMeasuredDimension(resolvedWidth, resolvedHeight);
 
-        boolean isParentViewLayout = getLayoutParams() instanceof LayoutParams;
-
         if (!isParentViewLayout) {
             onMeasureAbsoluteChildren();
         }
     }
 
-    public void onMeasureAbsoluteChildren() {
+    protected void onMeasureAbsoluteChildren() {
         int measuredWidth = getMeasuredWidth();
         int measuredHeight = getMeasuredHeight();
 
@@ -1457,29 +1459,29 @@ public class ViewLayout extends ViewGroup {
         view.measure(widthSpec, heightSpec);
     }
 
+    // in remeasure, specs are always EXACTLY
+
     private void remeasureChild(View view, int widthSpec, int heightSpec) {
         int currentWidthSpec = MeasureSpec.makeMeasureSpec(view.getMeasuredWidth(), MeasureSpec.EXACTLY);
         int currentHeightSpec = MeasureSpec.makeMeasureSpec(view.getMeasuredHeight(), MeasureSpec.EXACTLY);
 
         boolean isViewLayout = view instanceof ViewLayout;
 
-        boolean remeasure = widthSpec != currentWidthSpec || heightSpec != currentHeightSpec;
+        boolean hasSpecChanged = widthSpec != currentWidthSpec || heightSpec != currentHeightSpec;
 
-        ViewLayout viewLayout = isViewLayout ? (ViewLayout) view : null;
+        boolean remeasure = isViewLayout || hasSpecChanged;
 
-        if (!remeasure && !isViewLayout) {
+        if (!remeasure) {
             return;
         }
 
-        if (isViewLayout) {
-            viewLayout.remeasured = true;
-        }
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+
+        layoutParams.remeasured = true;
 
         view.measure(widthSpec, heightSpec);
 
-        if (isViewLayout) {
-            viewLayout.remeasured = false;
-        }
+        layoutParams.remeasured = false;
     }
 
     private void layoutChild(View view, int l, int t, int r, int b) {
@@ -1491,6 +1493,8 @@ public class ViewLayout extends ViewGroup {
     }
 
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
+        public boolean remeasured = false;
+
         public int position = LayoutParams.POSITION_RELATIVE;
 
         public int display = LayoutParams.DISPLAY_FLEX;

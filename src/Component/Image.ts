@@ -11,7 +11,7 @@ interface ImageLoadEvent extends Event {}
 interface ImageErrorEvent extends Event {}
 
 interface ImageProps extends ViewProps {
-  url: string | null;
+  url?: string | null;
   onLoad?: ((event: ImageLoadEvent) => void) | null;
   onError?: ((event: ImageErrorEvent) => void) | null;
 }

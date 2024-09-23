@@ -1,14 +1,11 @@
 package com.iconshot.detonator.element;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import android.graphics.Color;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
 import android.view.View;
-import android.view.ViewTreeObserver;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ColorHelper;
@@ -34,7 +31,6 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
     protected boolean forcePatch = true;
 
-
     public Element(Detonator detonator) {
         this.detonator = detonator;
     }
@@ -56,6 +52,8 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         );
 
         view.setLayoutParams(layoutParams);
+
+        view.setBackgroundColor(Color.TRANSPARENT);
 
         view.setOnClickListener((View v) -> {
             detonator.handlerEmitter.emit("onTap", edge.id);
@@ -87,11 +85,15 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         Object maxWidth = styler.getMaxWidth();
         Object maxHeight = styler.getMaxHeight();
         Float padding = styler.getPadding();
+        Float paddingHorizontal = styler.getPaddingHorizontal();
+        Float paddingVertical = styler.getPaddingVertical();
         Float paddingTop = styler.getPaddingTop();
         Float paddingLeft = styler.getPaddingLeft();
         Float paddingBottom = styler.getPaddingBottom();
         Float paddingRight = styler.getPaddingRight();
         Float margin = styler.getMargin();
+        Float marginHorizontal = styler.getMarginHorizontal();
+        Float marginVertical = styler.getMarginVertical();
         Float marginTop = styler.getMarginTop();
         Float marginLeft = styler.getMarginLeft();
         Float marginBottom = styler.getMarginBottom();
@@ -147,11 +149,15 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         Object currentMaxWidth = currentStyler.getMaxWidth();
         Object currentMaxHeight = currentStyler.getMaxHeight();
         Float currentPadding = currentStyler.getPadding();
+        Float currentPaddingHorizontal = currentStyler.getPaddingHorizontal();
+        Float currentPaddingVertical = currentStyler.getPaddingVertical();
         Float currentPaddingTop = currentStyler.getPaddingTop();
         Float currentPaddingLeft = currentStyler.getPaddingLeft();
         Float currentPaddingBottom = currentStyler.getPaddingBottom();
         Float currentPaddingRight = currentStyler.getPaddingRight();
         Float currentMargin = currentStyler.getMargin();
+        Float currentMarginHorizontal = currentStyler.getMarginHorizontal();
+        Float currentMarginVertical = currentStyler.getMarginVertical();
         Float currentMarginTop = currentStyler.getMarginTop();
         Float currentMarginLeft = currentStyler.getMarginLeft();
         Float currentMarginBottom = currentStyler.getMarginBottom();
@@ -212,11 +218,15 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         boolean patchMaxWidth = forcePatch || !CompareHelper.compareObjects(maxWidth, currentMaxWidth);
         boolean patchMaxHeight = forcePatch || !CompareHelper.compareObjects(maxHeight, currentMaxHeight);
         boolean patchPadding = forcePatch || !CompareHelper.compareObjects(padding, currentPadding);
+        boolean patchPaddingHorizontal = forcePatch || !CompareHelper.compareObjects(paddingHorizontal, currentPaddingHorizontal);
+        boolean patchPaddingVertical = forcePatch || !CompareHelper.compareObjects(paddingVertical, currentPaddingVertical);
         boolean patchPaddingTop = forcePatch || !CompareHelper.compareObjects(paddingTop, currentPaddingTop);
         boolean patchPaddingLeft = forcePatch || !CompareHelper.compareObjects(paddingLeft, currentPaddingLeft);
         boolean patchPaddingBottom = forcePatch || !CompareHelper.compareObjects(paddingBottom, currentPaddingBottom);
         boolean patchPaddingRight = forcePatch || !CompareHelper.compareObjects(paddingRight, currentPaddingRight);
         boolean patchMargin = forcePatch || !CompareHelper.compareObjects(margin, currentMargin);
+        boolean patchMarginHorizontal = forcePatch || !CompareHelper.compareObjects(marginHorizontal, currentMarginHorizontal);
+        boolean patchMarginVertical = forcePatch || !CompareHelper.compareObjects(marginVertical, currentMarginVertical);
         boolean patchMarginTop = forcePatch || !CompareHelper.compareObjects(marginTop, currentMarginTop);
         boolean patchMarginLeft = forcePatch || !CompareHelper.compareObjects(marginLeft, currentMarginLeft);
         boolean patchMarginBottom = forcePatch || !CompareHelper.compareObjects(marginBottom, currentMarginBottom);
@@ -306,12 +316,44 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
             patchMaxHeight(maxHeight);
         }
 
-        if (patchPadding || patchPaddingTop || patchPaddingLeft || patchPaddingBottom || patchPaddingRight) {
-            patchPadding(padding, paddingTop, paddingLeft, paddingBottom, paddingRight);
+        if (
+                patchPadding
+                        || patchPaddingHorizontal
+                        || patchPaddingVertical
+                        || patchPaddingTop
+                        || patchPaddingLeft
+                        || patchPaddingBottom
+                        || patchPaddingRight
+        ) {
+            patchPadding(
+                    padding,
+                    paddingHorizontal,
+                    paddingVertical,
+                    paddingTop,
+                    paddingLeft,
+                    paddingBottom,
+                    paddingRight
+            );
         }
 
-        if (patchMargin || patchMarginTop || patchMarginLeft || patchMarginBottom || patchMarginRight) {
-            patchMargin(margin, marginTop, marginLeft, marginBottom, marginRight);
+        if (
+                patchMargin
+                        || patchMarginHorizontal
+                        || patchMarginVertical
+                        || patchMarginTop
+                        || patchMarginLeft
+                        || patchMarginBottom
+                        || patchMarginRight
+        ) {
+            patchMargin(
+                    margin,
+                    marginHorizontal,
+                    marginVertical,
+                    marginTop,
+                    marginLeft,
+                    marginBottom,
+                    marginRight
+            );
         }
 
         if (patchFontSize) {
@@ -673,6 +715,8 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
     protected void patchPadding(
             Float padding,
+            Float paddingHorizontal,
+            Float paddingVertical,
             Float paddingTop,
             Float paddingLeft,
             Float paddingBottom,
@@ -680,16 +724,48 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     ) {
         int tmpPadding = padding != null ? PixelHelper.dpToPx(padding) : 0;
 
-        int tmpPaddingTop = paddingTop != null ? PixelHelper.dpToPx(paddingTop) : tmpPadding;
-        int tmpPaddingLeft = paddingLeft != null ? PixelHelper.dpToPx(paddingLeft) : tmpPadding;
-        int tmpPaddingBottom = paddingBottom != null ? PixelHelper.dpToPx(paddingBottom) : tmpPadding;
-        int tmpPaddingRight = paddingRight != null ? PixelHelper.dpToPx(paddingRight) : tmpPadding;
+        int tmpPaddingTop = tmpPadding;
+        int tmpPaddingLeft = tmpPadding;
+        int tmpPaddingBottom = tmpPadding;
+        int tmpPaddingRight = tmpPadding;
+
+        if (paddingHorizontal != null) {
+            int tmpPaddingHorizontal = PixelHelper.dpToPx(paddingHorizontal);
+
+            tmpPaddingLeft = tmpPaddingHorizontal;
+            tmpPaddingRight = tmpPaddingHorizontal;
+        }
+
+        if (paddingVertical != null) {
+            int tmpPaddingVertical = PixelHelper.dpToPx(paddingVertical);
+
+            tmpPaddingTop = tmpPaddingVertical;
+            tmpPaddingBottom = tmpPaddingVertical;
+        }
+
+        if (paddingTop != null) {
+            tmpPaddingTop = PixelHelper.dpToPx(paddingTop);
+        }
+
+        if (paddingLeft != null) {
+            tmpPaddingLeft = PixelHelper.dpToPx(paddingLeft);
+        }
+
+        if (paddingBottom != null) {
+            tmpPaddingBottom = PixelHelper.dpToPx(paddingBottom);
+        }
+
+        if (paddingRight != null) {
+            tmpPaddingRight = PixelHelper.dpToPx(paddingRight);
+        }
 
         view.setPadding(tmpPaddingLeft, tmpPaddingTop, tmpPaddingRight, tmpPaddingBottom);
     }
 
     protected void patchMargin(
             Float margin,
+            Float marginHorizontal,
+            Float marginVertical,
             Float marginTop,
             Float marginLeft,
             Float marginBottom,
@@ -699,10 +775,40 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         int tmpMargin = margin != null ? PixelHelper.dpToPx(margin) : 0;
 
-        int tmpMarginTop = marginTop != null ? PixelHelper.dpToPx(marginTop) : tmpMargin;
-        int tmpMarginLeft = marginLeft != null ? PixelHelper.dpToPx(marginLeft) : tmpMargin;
-        int tmpMarginBottom = marginBottom != null ? PixelHelper.dpToPx(marginBottom) : tmpMargin;
-        int tmpMarginRight = marginRight != null ? PixelHelper.dpToPx(marginRight) : tmpMargin;
+        int tmpMarginTop = tmpMargin;
+        int tmpMarginLeft = tmpMargin;
+        int tmpMarginBottom = tmpMargin;
+        int tmpMarginRight = tmpMargin;
+
+        if (marginHorizontal != null) {
+            int tmpMarginHorizontal = PixelHelper.dpToPx(marginHorizontal);
+
+            tmpMarginLeft = tmpMarginHorizontal;
+            tmpMarginRight = tmpMarginHorizontal;
+        }
+
+        if (marginVertical != null) {
+            int tmpMarginVertical = PixelHelper.dpToPx(marginVertical);
+
+            tmpMarginTop = tmpMarginVertical;
+            tmpMarginBottom = tmpMarginVertical;
+        }
+
+        if (marginTop != null) {
+            tmpMarginTop = PixelHelper.dpToPx(marginTop);
+        }
+
+        if (marginLeft != null) {
+            tmpMarginLeft = PixelHelper.dpToPx(marginLeft);
+        }
+
+        if (marginBottom != null) {
+            tmpMarginBottom = PixelHelper.dpToPx(marginBottom);
+        }
+
+        if (marginRight != null) {
+            tmpMarginRight = PixelHelper.dpToPx(marginRight);
+        }
 
         layoutParams.setMargins(tmpMarginLeft, tmpMarginTop, tmpMarginRight, tmpMarginBottom);
     }
@@ -865,11 +971,15 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         Object maxWidth = styler.getMaxWidth();
         Object maxHeight = styler.getMaxHeight();
         Float padding = styler.getPadding();
+        Float paddingHorizontal = styler.getPaddingHorizontal();
+        Float paddingVertical = styler.getPaddingVertical();
         Float paddingTop = styler.getPaddingTop();
         Float paddingLeft = styler.getPaddingLeft();
         Float paddingBottom = styler.getPaddingBottom();
         Float paddingRight = styler.getPaddingRight();
         Float margin = styler.getMargin();
+        Float marginHorizontal = styler.getMarginHorizontal();
+        Float marginVertical = styler.getMarginVertical();
         Float marginTop = styler.getMarginTop();
         Float marginLeft = styler.getMarginLeft();
         Float marginBottom = styler.getMarginBottom();
@@ -930,11 +1040,15 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         boolean patchMaxWidth = keys.contains("maxWidth");
         boolean patchMaxHeight = keys.contains("maxHeight");
         boolean patchPadding = keys.contains("padding");
+        boolean patchPaddingHorizontal = keys.contains("paddingHorizontal");
+        boolean patchPaddingVertical = keys.contains("paddingVertical");
         boolean patchPaddingTop = keys.contains("paddingTop");
         boolean patchPaddingLeft = keys.contains("paddingLeft");
         boolean patchPaddingBottom = keys.contains("paddingBottom");
         boolean patchPaddingRight = keys.contains("paddingRight");
         boolean patchMargin = keys.contains("margin");
+        boolean patchMarginHorizontal = keys.contains("marginHorizontal");
+        boolean patchMarginVertical = keys.contains("marginVertical");
         boolean patchMarginTop = keys.contains("marginTop");
         boolean patchMarginLeft = keys.contains("marginLeft");
         boolean patchMarginBottom = keys.contains("marginBottom");
@@ -1034,9 +1148,19 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
             patchMaxHeight(maxHeight);
         }
 
-        if (patchPadding || patchPaddingTop || patchPaddingLeft || patchPaddingBottom || patchPaddingRight) {
+        if (
+                patchPadding
+                        || patchPaddingHorizontal
+                        || patchPaddingVertical
+                        || patchPaddingTop
+                        || patchPaddingLeft
+                        || patchPaddingBottom
+                        || patchPaddingRight
+        ) {
             patchPadding(
                     patchPadding ? padding : this.styler.getPadding(),
+                    patchPaddingHorizontal ? paddingHorizontal : this.styler.getPaddingHorizontal(),
+                    patchPaddingVertical ? paddingVertical : this.styler.getPaddingVertical(),
                     patchPaddingTop ? paddingTop : this.styler.getPaddingTop(),
                     patchPaddingLeft ? paddingLeft : this.styler.getPaddingLeft(),
                     patchPaddingBottom ? paddingBottom : this.styler.getPaddingBottom(),
@@ -1044,9 +1168,19 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
             );
         }
 
-        if (patchMargin || patchMarginTop || patchMarginLeft || patchMarginBottom || patchMarginRight) {
+        if (
+                patchMargin
+                        || patchMarginHorizontal
+                        || patchMarginVertical
+                        || patchMarginTop
+                        || patchMarginLeft
+                        || patchMarginBottom
+                        || patchMarginRight
+        ) {
             patchMargin(
                     patchMargin ? margin: this.styler.getMargin(),
+                    patchMarginHorizontal ? marginHorizontal : this.styler.getMarginHorizontal(),
+                    patchMarginVertical ? marginVertical : this.styler.getMarginVertical(),
                     patchMarginTop ? marginTop : this.styler.getMarginTop(),
                     patchMarginLeft ? marginLeft : this.styler.getMarginLeft(),
                     patchMarginBottom ? marginBottom : this.styler.getMarginBottom(),
@@ -1186,9 +1320,9 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     protected abstract K createView();
     protected abstract void patchView();
 
-    protected static class Attributes {
-        Style style;
-        Boolean onTap;
-        Boolean onDoubleTap;
+    public static class Attributes {
+        public Style style;
+        public Boolean onTap;
+        public Boolean onDoubleTap;
     }
 }

@@ -46,6 +46,8 @@ class Detonator: NSObject, WKScriptMessageHandler {
         addElementClass(key: "com.iconshot.detonator.textarea", elementClass: TextAreaElement.self)
         addElementClass(key: "com.iconshot.detonator.image", elementClass: ImageElement.self)
         addElementClass(key: "com.iconshot.detonator.video", elementClass: VideoElement.self)
+        addElementClass(key: "com.iconshot.detonator.scrollview", elementClass: ScrollViewElement.self)
+        addElementClass(key: "com.iconshot.detonator.safeareaview", elementClass: SafeAreaViewElement.self)
         
         addRequestClass(key: "com.iconshot.detonator.input/focus", requestClass: InputFocusRequest.self)
         addRequestClass(key: "com.iconshot.detonator.input/blur", requestClass: InputBlurRequest.self)
@@ -80,6 +82,41 @@ class Detonator: NSObject, WKScriptMessageHandler {
         rootView.addSubview(webView)
         
         evaluate(code: "window.__detonator_platform = \"ios\"")
+        
+//        let scrollView = UIScrollView()
+//        
+//        scrollView.backgroundColor = .orange
+//        
+//        scrollView.contentSize.width = 300
+//        scrollView.contentSize.height = 600
+//        
+//        scrollView.frame.size.width = 300
+//        scrollView.frame.size.height = 300
+//        
+//        scrollView.showsVerticalScrollIndicator = true
+//        
+//        scrollView.contentInsetAdjustmentBehavior = .never
+//        
+//        let view = UIView()
+//        
+//        view.frame.size.width = 200
+//        view.frame.size.height = 300
+//        
+//        view.backgroundColor = .blue
+//        
+//        let nextView = UIView()
+//        
+//        nextView.frame.size.width = 300
+//        nextView.frame.size.height = 300
+//        
+//        nextView.frame.origin.y = 300
+//        
+//        nextView.backgroundColor = .red
+//        
+//        scrollView.addSubview(view)
+//        scrollView.addSubview(nextView)
+//        
+//        rootView.addSubview(scrollView)
         
         let code = readIndex()
         
@@ -270,7 +307,7 @@ class Detonator: NSObject, WKScriptMessageHandler {
                 tree.edge = data.edge
                 
                 renderEdge(edge: &tree.edge!, currentEdge: nil, target: target)
-                
+                                
                 performLayout()
             } catch {}
         }
@@ -370,7 +407,7 @@ class Detonator: NSObject, WKScriptMessageHandler {
         print(dataString)
     }
     
-    public func performLayout() {
+    public func performLayout() {        
         workItem?.cancel()
         
         workItem = DispatchWorkItem { [weak self] in
@@ -401,8 +438,8 @@ class Detonator: NSObject, WKScriptMessageHandler {
         if element != nil {
             element!.patch()
             
-            if element!.view! is ViewLayout {
-                tmpTarget = Target(view: element!.view! as! ViewLayout, index: 0)
+            if element!.view!.isViewGroup {
+                tmpTarget = Target(view: element!.view!, index: 0)
             }
         }
         

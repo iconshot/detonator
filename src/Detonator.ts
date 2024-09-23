@@ -11,7 +11,7 @@ import { WindowEmitter } from "./Emitter";
 
 interface StyleItem {
   elementId: number;
-  style: Partial<Style>;
+  style: Style;
   keys: string[];
 }
 
@@ -24,19 +24,19 @@ export class Detonator {
 
   private static styleTimeout: number | undefined;
 
-  static mount(slot: Slot): void {
+  public static mount(slot: Slot): void {
     this.tree.mount(slot);
   }
 
-  static unmount(): void {
+  public static unmount(): void {
     this.tree.unmount();
   }
 
-  static createTree(view: View): Tree {
+  public static createTree(view: View): Tree {
     return TreeHub.createTree(view);
   }
 
-  static style(view: BaseView, style: Partial<Style>): void {
+  public static style(view: BaseView, style: Style): void {
     const componentId = TreeHub.getComponentId(view);
 
     if (componentId === null) {
@@ -89,7 +89,7 @@ export class Detonator {
     });
   }
 
-  static async request(
+  public static async request(
     {
       name,
       data = null,
@@ -143,7 +143,7 @@ export class Detonator {
     });
   }
 
-  static log(data: any): void {
+  public static log(data: any): void {
     Messenger.log(data);
   }
 }

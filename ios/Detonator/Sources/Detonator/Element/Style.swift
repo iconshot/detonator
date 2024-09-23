@@ -57,6 +57,8 @@ struct Style: Decodable {
     // padding
     
     var padding: Float?
+    var paddingHorizontal: Float?
+    var paddingVertical: Float?
     var paddingTop: Float?
     var paddingLeft: Float?
     var paddingBottom: Float?
@@ -65,6 +67,8 @@ struct Style: Decodable {
     // margin
     
     var margin: Float?
+    var marginHorizontal: Float?
+    var marginVertical: Float?
     var marginTop: Float?
     var marginLeft: Float?
     var marginBottom: Float?
@@ -141,11 +145,15 @@ struct Style: Decodable {
         maxWidth = try container.decodeIfPresent(StyleSize.self, forKey: .maxWidth)
         maxHeight = try container.decodeIfPresent(StyleSize.self, forKey: .maxHeight)
         padding = try container.decodeIfPresent(Float.self, forKey: .padding)
+        paddingHorizontal = try container.decodeIfPresent(Float.self, forKey: .paddingHorizontal)
+        paddingVertical = try container.decodeIfPresent(Float.self, forKey: .paddingVertical)
         paddingTop = try container.decodeIfPresent(Float.self, forKey: .paddingTop)
         paddingLeft = try container.decodeIfPresent(Float.self, forKey: .paddingLeft)
         paddingBottom = try container.decodeIfPresent(Float.self, forKey: .paddingBottom)
         paddingRight = try container.decodeIfPresent(Float.self, forKey: .paddingRight)
         margin = try container.decodeIfPresent(Float.self, forKey: .margin)
+        marginHorizontal = try container.decodeIfPresent(Float.self, forKey: .marginHorizontal)
+        marginVertical = try container.decodeIfPresent(Float.self, forKey: .marginVertical)
         marginTop = try container.decodeIfPresent(Float.self, forKey: .marginTop)
         marginLeft = try container.decodeIfPresent(Float.self, forKey: .marginLeft)
         marginBottom = try container.decodeIfPresent(Float.self, forKey: .marginBottom)
@@ -202,11 +210,15 @@ struct Style: Decodable {
         case minWidth
         case minHeight
         case padding
+        case paddingHorizontal
+        case paddingVertical
         case paddingTop
         case paddingLeft
         case paddingBottom
         case paddingRight
         case margin
+        case marginHorizontal
+        case marginVertical
         case marginTop
         case marginLeft
         case marginBottom

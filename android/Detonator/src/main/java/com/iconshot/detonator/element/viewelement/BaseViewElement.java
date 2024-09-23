@@ -1,19 +1,14 @@
-package com.iconshot.detonator.element;
+package com.iconshot.detonator.element.viewelement;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.helpers.CompareHelper;
+import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
 
-public class ViewElement extends Element<ViewLayout, ViewElement.Attributes> {
-    public ViewElement(Detonator detonator) {
+public abstract class BaseViewElement<T extends BaseViewElement.Attributes> extends Element<ViewLayout, T> {
+    public BaseViewElement(Detonator detonator) {
         super(detonator);
-    }
-
-    @Override
-    public Class<Attributes> getAttributesClass() {
-        return Attributes.class;
     }
 
     @Override
@@ -187,6 +182,6 @@ public class ViewElement extends Element<ViewLayout, ViewElement.Attributes> {
         view.setAlignItems(tmpAlignItems);
     }
 
-    protected static class Attributes extends Element.Attributes {
+    public static class Attributes extends Element.Attributes {
     }
 }
