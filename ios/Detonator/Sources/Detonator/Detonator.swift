@@ -83,41 +83,6 @@ class Detonator: NSObject, WKScriptMessageHandler {
         
         evaluate(code: "window.__detonator_platform = \"ios\"")
         
-//        let scrollView = UIScrollView()
-//        
-//        scrollView.backgroundColor = .orange
-//        
-//        scrollView.contentSize.width = 300
-//        scrollView.contentSize.height = 600
-//        
-//        scrollView.frame.size.width = 300
-//        scrollView.frame.size.height = 300
-//        
-//        scrollView.showsVerticalScrollIndicator = true
-//        
-//        scrollView.contentInsetAdjustmentBehavior = .never
-//        
-//        let view = UIView()
-//        
-//        view.frame.size.width = 200
-//        view.frame.size.height = 300
-//        
-//        view.backgroundColor = .blue
-//        
-//        let nextView = UIView()
-//        
-//        nextView.frame.size.width = 300
-//        nextView.frame.size.height = 300
-//        
-//        nextView.frame.origin.y = 300
-//        
-//        nextView.backgroundColor = .red
-//        
-//        scrollView.addSubview(view)
-//        scrollView.addSubview(nextView)
-//        
-//        rootView.addSubview(scrollView)
-        
         let code = readIndex()
         
         evaluate(code: code)

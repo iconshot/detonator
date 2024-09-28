@@ -2,15 +2,20 @@ package com.iconshot.detonator.element;
 
 import java.util.List;
 
+import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RoundRectShape;
 import android.view.View;
+import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ColorHelper;
 import com.iconshot.detonator.helpers.CompareHelper;
 import com.iconshot.detonator.helpers.AttributeHelper;
+import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.PixelHelper;
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
 import com.iconshot.detonator.tree.Edge;
@@ -52,8 +57,6 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         );
 
         view.setLayoutParams(layoutParams);
-
-        view.setBackgroundColor(Color.TRANSPARENT);
 
         view.setOnClickListener((View v) -> {
             detonator.handlerEmitter.emit("onTap", edge.id);
@@ -892,19 +895,27 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     protected void patchDisplay(String display) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        int tmpDisplay = LayoutParams.DISPLAY_FLEX;
+        String tmpDisplay = display != null ? display : "flex";
 
-        if (display != null) {
-            switch (display) {
-                case "none": {
-                    tmpDisplay = LayoutParams.DISPLAY_NONE;
+        switch (tmpDisplay) {
+            case "flex": {
+                layoutParams.display = LayoutParams.DISPLAY_FLEX;
 
-                    break;
-                }
+                view.setVisibility(View.VISIBLE);
+
+                break;
+            }
+
+            case "none": {
+                layoutParams.display = LayoutParams.DISPLAY_NONE;
+
+                clearFocus(view);
+
+                view.setVisibility(View.GONE);
+
+                break;
             }
         }
-
-        layoutParams.display = tmpDisplay;
     }
 
     protected void patchPointerEvents(String pointerEvents) {
@@ -1319,6 +1330,30 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
     protected abstract K createView();
     protected abstract void patchView();
+
+    private void clearFocus(View view) {
+        if (view instanceof ViewGroup) {
+            ViewGroup viewGroup = (ViewGroup) view;
+
+            for (int i = 0; i < viewGroup.getChildCount(); i++) {
+                View child = viewGroup.getChildAt(i);
+
+                clearFocus(child);
+            }
+        }
+
+        if (view.hasFocus()) {
+            view.clearFocus();
+
+            if (view instanceof EditText) {
+                view.post(() -> {
+                    InputMethodManager imm = (InputMethodManager) ContextHelper.context.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+                });
+            }
+        }
+    }
 
     public static class Attributes {
         public Style style;

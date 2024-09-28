@@ -40,7 +40,7 @@ class ViewLayout: UIView {
     
     override func safeAreaInsetsDidChange() {
         super.safeAreaInsetsDidChange()
-                
+        
         onSafeAreaInsetsChange?()
     }
     
@@ -52,7 +52,7 @@ class ViewLayout: UIView {
         return flexDirection == .rowReverse || flexDirection == .columnReverse
     }
     
-    public func performLayout() {        
+    public func performLayout() {
         let width = frame.size.width
         let height = frame.size.height
         

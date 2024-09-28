@@ -10,10 +10,14 @@ interface InputChangeEvent extends Event {
   value: string;
 }
 
+interface InputNextEvent extends Event {}
+
 interface InputProps extends ViewProps {
   placeholder?: string | number | null;
   value?: string | null;
+  inputType?: "text" | "password" | "email" | null;
   onChange?: ((event: InputChangeEvent) => void) | null;
+  onDone?: ((event: InputNextEvent) => void) | null;
 }
 
 export class Input extends BaseView<InputProps> {

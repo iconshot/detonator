@@ -878,10 +878,16 @@ class Element: NSObject {
         case "none":
             layoutParams.display = .none
             
+            resignFirstResponder(view)
+            
+            view.isHidden = true
+            
             break
             
         default:
             layoutParams.display = .flex
+            
+            view.isHidden = false
             
             break
         }
@@ -1422,6 +1428,16 @@ class Element: NSObject {
     
     func patchView() {
         preconditionFailure("This method must be overridden.")
+    }
+    
+    func resignFirstResponder(_ view: UIView) {
+        if view.isFirstResponder {
+            view.resignFirstResponder()
+        }
+        
+        for subview in view.subviews {
+            resignFirstResponder(subview)
+        }
     }
     
     @objc func onTapListener(_ sender: UITapGestureRecognizer) {

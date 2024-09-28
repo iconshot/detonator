@@ -1,9 +1,12 @@
 package com.iconshot.detonator.element;
 
+import android.content.Context;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.TypedValue;
+import android.view.KeyEvent;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.iconshot.detonator.Detonator;
@@ -29,7 +32,6 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         EditText view = new EditText(ContextHelper.context);
 
         view.setMaxLines(1);
-        view.setInputType(InputType.TYPE_CLASS_TEXT);
 
         defaultColor = view.getCurrentTextColor();
 
@@ -51,6 +53,24 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         };
 
         view.addTextChangedListener(textWatcher);
+
+        view.setOnKeyListener((v, keyCode, event) -> {
+            if (keyCode == KeyEvent.KEYCODE_ENTER && event.getAction() == KeyEvent.ACTION_UP) {
+                view.clearFocus();
+
+                view.post(() -> {
+                    InputMethodManager imm = (InputMethodManager) ContextHelper.context.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                    imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+                    detonator.handlerEmitter.emit("onDone", edge.id);
+                });
+
+                return true;
+            }
+
+            return false;
+        });
 
         return view;
     }
@@ -74,6 +94,36 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         if (patchValue) {
             view.setText(value != null ? value : "");
         }
+
+        String inputType = attributes.inputType;
+
+        String currentInputType = currentAttributes != null ? currentAttributes.inputType : null;
+
+        boolean patchInputType = forcePatch || !CompareHelper.compareObjects(inputType, currentInputType);
+
+        if (patchInputType) {
+            String tmpInputType = inputType != null ? inputType : "text";
+
+            switch (tmpInputType) {
+                case "text": {
+                    view.setInputType(InputType.TYPE_CLASS_TEXT);
+
+                    break;
+                }
+
+                case "password": {
+                    view.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+
+                    break;
+                }
+
+                case "email": {
+                    view.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+
+                    break;
+                }
+            }
+        }
     }
 
     protected void patchFontSize(Float fontSize) {
@@ -91,7 +141,9 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
     protected static class Attributes extends Element.Attributes {
         String placeholder;
         String value;
+        String inputType;
         Boolean onChange;
+        Boolean onDone;
     }
 
     private static class OnChangeData {

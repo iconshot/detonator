@@ -36,15 +36,23 @@ function App() {
       style: {
         width: "100%",
         height: "100%",
+        backgroundColor: "black",
         justifyContent: "center",
         alignItems: "center",
       },
     },
     [
-      $(Text, { style: { fontSize: 30, marginBottom: 30 } }, "Hello, world."),
       $(
         Text,
-        { ref: textRef, style: { fontSize: 24, marginBottom: 30 } },
+        { style: { color: "white", fontSize: 30, marginBottom: 30 } },
+        "Hello, world."
+      ),
+      $(
+        Text,
+        {
+          ref: textRef,
+          style: { color: "white", fontSize: 24, marginBottom: 30 },
+        },
         counter
       ),
       $(
