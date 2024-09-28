@@ -28,8 +28,25 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         
         let patchPlaceholder = forcePatch || placeholder != currentPlaceholder
         
-        if patchPlaceholder {
-             view.placeholder = placeholder
+        let placeholderColor = attributes.placeholderColor
+        let currentPlaceholderColor = currentAttributes?.placeholderColor
+        
+        let patchPlaceholderColor = forcePatch || !CompareHelper.compareStyleColors(placeholderColor, currentPlaceholderColor)
+        
+        if patchPlaceholder || patchPlaceholderColor {
+            if placeholder != nil {
+                var attributes: [NSAttributedString.Key: Any] = [:]
+                
+                attributes[.foregroundColor] = placeholderColor != nil ? ColorHelper.parseColor(color: placeholderColor!) : UIColor.placeholderText
+                
+                view.placeholder = nil
+                
+                view.attributedPlaceholder = NSAttributedString(string: placeholder!, attributes: attributes)
+            } else {
+                view.placeholder = nil
+                
+                view.attributedPlaceholder = nil
+            }
         }
         
         let value = attributes.value
@@ -112,6 +129,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
     
     class InputAttributes: Attributes {
         var placeholder: String?
+        var placeholderColor: StyleColor?
         var value: String?
         var inputType: String?
         var onChange: Bool?
@@ -121,6 +139,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             
             placeholder = try container.decodeIfPresent(String.self, forKey: .placeholder)
+            placeholderColor = try container.decodeIfPresent(StyleColor.self, forKey: .placeholderColor)
             value = try container.decodeIfPresent(String.self, forKey: .value)
             inputType = try container.decodeIfPresent(String.self, forKey: .inputType)
             onChange = try container.decodeIfPresent(Bool.self, forKey: .onChange)
@@ -131,6 +150,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         
         private enum CodingKeys: String, CodingKey {
             case placeholder
+            case placeholderColor
             case value
             case inputType
             case onChange

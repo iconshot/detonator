@@ -4,7 +4,7 @@ import { Detonator } from "../Detonator";
 
 import { BaseView } from "./BaseView";
 
-import { ViewProps } from "./View";
+import { StyleColor, ViewProps } from "./View";
 
 interface TextAreaChangeEvent extends Event {
   value: string;
@@ -12,6 +12,7 @@ interface TextAreaChangeEvent extends Event {
 
 interface TextAreaProps extends ViewProps {
   placeholder?: string | number | null;
+  placeholderColor?: StyleColor | null;
   value?: string | null;
   onChange?: ((event: TextAreaChangeEvent) => void) | null;
 }

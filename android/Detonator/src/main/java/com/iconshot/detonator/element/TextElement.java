@@ -57,7 +57,7 @@ public class TextElement extends Element<TextView, TextElement.Attributes> {
     }
 
     protected void patchColor(Object color) {
-        Integer tmpColor = color != null ? ColorHelper.parseColor(color) : null;
+        Integer tmpColor = ColorHelper.parseColor(color);
 
         view.setTextColor(tmpColor != null ? tmpColor : defaultColor);
     }

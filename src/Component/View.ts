@@ -2,12 +2,12 @@ import $, { Props } from "untrue";
 
 import { BaseView } from "./BaseView";
 
-type StyleColor =
+export type StyleColor =
   | string
   | [number, number, number]
   | [number, number, number, number];
 
-type StyleSize = string | number;
+export type StyleSize = string | number;
 
 export interface Style {
   flex?: number | null;

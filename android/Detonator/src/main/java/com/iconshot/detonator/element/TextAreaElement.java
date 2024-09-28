@@ -14,6 +14,7 @@ import com.iconshot.detonator.helpers.PixelHelper;
 
 public class TextAreaElement extends Element<EditText, TextAreaElement.Attributes> {
     private int defaultColor;
+    private int defaultPlaceholderColor;
 
     public TextAreaElement(Detonator detonator) {
         super(detonator);
@@ -66,6 +67,18 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
             view.setHint(placeholder != null ? placeholder : "");
         }
 
+        Object placeholderColor = attributes.placeholderColor;
+
+        Object currentPlaceholderColor = currentAttributes != null ? currentAttributes.placeholderColor : null;
+
+        boolean patchPlaceholderColor = forcePatch || !CompareHelper.compareColors(placeholderColor, currentPlaceholderColor);
+
+        if (patchPlaceholderColor) {
+            Integer tmpColor = ColorHelper.parseColor(placeholderColor);
+
+            view.setHintTextColor(tmpColor != null ? tmpColor : defaultPlaceholderColor);
+        }
+
         String value = attributes.value;
 
         boolean patchValue = forcePatch;
@@ -82,13 +95,14 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
     }
 
     protected void patchColor(Object color) {
-        Integer tmpColor = color != null ? ColorHelper.parseColor(color) : null;
+        Integer tmpColor = ColorHelper.parseColor(color);
 
         view.setTextColor(tmpColor != null ? tmpColor : defaultColor);
     }
 
     protected static class Attributes extends Element.Attributes {
         String placeholder;
+        Object placeholderColor;
         String value;
         Boolean onChange;
     }

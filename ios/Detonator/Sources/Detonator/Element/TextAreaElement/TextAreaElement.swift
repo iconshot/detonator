@@ -132,6 +132,7 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
     
     class TextAreaAttributes: Attributes {
         var placeholder: String?
+        var placeholderColor: StyleColor?
         var value: String?
         var onChange: Bool?
         
@@ -139,6 +140,7 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
             let container = try decoder.container(keyedBy: CodingKeys.self)
             
             placeholder = try container.decodeIfPresent(String.self, forKey: .placeholder)
+            placeholderColor = try container.decodeIfPresent(StyleColor.self, forKey: .placeholderColor)
             value = try container.decodeIfPresent(String.self, forKey: .value)
             onChange = try container.decodeIfPresent(Bool.self, forKey: .onChange)
             
@@ -147,6 +149,7 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         
         private enum CodingKeys: String, CodingKey {
             case placeholder
+            case placeholderColor
             case value
             case onChange
         }

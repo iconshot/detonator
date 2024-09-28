@@ -4,7 +4,7 @@ import { Detonator } from "../Detonator";
 
 import { BaseView } from "./BaseView";
 
-import { ViewProps } from "./View";
+import { StyleColor, ViewProps } from "./View";
 
 interface InputChangeEvent extends Event {
   value: string;
@@ -14,6 +14,7 @@ interface InputNextEvent extends Event {}
 
 interface InputProps extends ViewProps {
   placeholder?: string | number | null;
+  placeholderColor?: StyleColor | null;
   value?: string | null;
   inputType?: "text" | "password" | "email" | null;
   onChange?: ((event: InputChangeEvent) => void) | null;
