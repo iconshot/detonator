@@ -1,5 +1,7 @@
 package com.iconshot.detonator.element;
 
+import com.iconshot.detonator.element.Style.StyleTransform;
+
 public class Styler {
     private Style style;
 
@@ -257,5 +259,9 @@ public class Styler {
 
     public Object getBorderRightColor() {
         return style != null ? style.borderRightColor : null;
+    }
+
+    public StyleTransform getTransform() {
+        return style != null ? style.transform : null;
     }
 }

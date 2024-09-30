@@ -137,6 +137,7 @@ class Element: NSObject {
         let borderBottomColor = styler.getBorderBottomColor()
         let borderRightWidth = styler.getBorderRightWidth()
         let borderRightColor = styler.getBorderRightColor()
+        let transform = styler.getTransform()
 
         let currentFlex = currentStyler.getFlex()
         let currentFlexDirection = currentStyler.getFlexDirection()
@@ -201,6 +202,7 @@ class Element: NSObject {
         let currentBorderBottomColor = currentStyler.getBorderBottomColor()
         let currentBorderRightWidth = currentStyler.getBorderRightWidth()
         let currentBorderRightColor = currentStyler.getBorderRightColor()
+        let currentTransform = currentStyler.getTransform()
 
         let patchFlexBool = forcePatch || flex != currentFlex
         let patchFlexDirectionBool = forcePatch || flexDirection != currentFlexDirection
@@ -265,6 +267,7 @@ class Element: NSObject {
         let patchBorderBottomColorBool = forcePatch || !CompareHelper.compareStyleColors(borderBottomColor, currentBorderBottomColor)
         let patchBorderRightWidthBool = forcePatch || borderRightWidth != currentBorderRightWidth
         let patchBorderRightColorBool = forcePatch || !CompareHelper.compareStyleColors(borderRightColor, currentBorderRightColor)
+        let patchTransformBool = forcePatch || !CompareHelper.compareStyleTransforms(transform, currentTransform)
 
         if patchFlexBool {
             patchFlex(flex: flex)
@@ -493,25 +496,29 @@ class Element: NSObject {
             patchBorderRightColor(borderRightColor: borderRightColor)
         }
         
+        if patchTransformBool {
+            patchTransform(transform: transform)
+        }
+        
         patchView()
     }
     
-    public func patchFlex(flex: Int?) {
+    func patchFlex(flex: Int?) {
         let layoutParams = view.layoutParams
         
         layoutParams.flex = flex
     }
 
-    public func patchFlexDirection(flexDirection: String?) {
+    func patchFlexDirection(flexDirection: String?) {
     }
 
-    public func patchJustifyContent(justifyContent: String?) {
+    func patchJustifyContent(justifyContent: String?) {
     }
 
-    public func patchAlignItems(alignItems: String?) {
+    func patchAlignItems(alignItems: String?) {
     }
 
-    public func patchAlignSelf(alignSelf: String?) {
+    func patchAlignSelf(alignSelf: String?) {
         let layoutParams = view.layoutParams
         
         switch alignSelf {
@@ -547,13 +554,13 @@ class Element: NSObject {
         }
     }
 
-    public func patchBackgroundColor(backgroundColor: StyleColor?) {
+    func patchBackgroundColor(backgroundColor: StyleColor?) {
         let tmpBackgroundColor = backgroundColor != nil ? ColorHelper.parseColor(color: backgroundColor!) : nil
                     
         view.backgroundColor = tmpBackgroundColor ?? UIColor.clear
     }
 
-    public func patchWidth(width: StyleSize?) {
+    func patchWidth(width: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch width {
@@ -577,7 +584,7 @@ class Element: NSObject {
         }
     }
 
-    public func patchHeight(height: StyleSize?) {
+    func patchHeight(height: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch height {
@@ -601,7 +608,7 @@ class Element: NSObject {
         }
     }
 
-    public func patchMinWidth(minWidth: StyleSize?) {
+    func patchMinWidth(minWidth: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch minWidth {
@@ -625,7 +632,7 @@ class Element: NSObject {
         }
     }
 
-    public func patchMinHeight(minHeight: StyleSize?) {
+    func patchMinHeight(minHeight: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch minHeight {
@@ -649,7 +656,7 @@ class Element: NSObject {
         }
     }
 
-    public func patchMaxWidth(maxWidth: StyleSize?) {
+    func patchMaxWidth(maxWidth: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch maxWidth {
@@ -673,7 +680,7 @@ class Element: NSObject {
         }
     }
 
-    public func patchMaxHeight(maxHeight: StyleSize?) {
+    func patchMaxHeight(maxHeight: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch maxHeight {
@@ -697,7 +704,7 @@ class Element: NSObject {
         }
     }
 
-    public func patchPadding(
+    func patchPadding(
         padding: Float?,
         paddingHorizontal: Float?,
         paddingVertical: Float?,
@@ -747,7 +754,7 @@ class Element: NSObject {
         layoutParams.padding.right = tmpPaddingRight
     }
 
-    public func patchMargin(
+    func patchMargin(
         margin: Float?,
         marginHorizontal: Float?,
         marginVertical: Float?,
@@ -797,37 +804,37 @@ class Element: NSObject {
         layoutParams.margin.right = tmpMarginRight
     }
 
-    public func patchFontSize(fontSize: Float?) {
+    func patchFontSize(fontSize: Float?) {
     }
 
-    public func patchLineHeight(lineHeight: Float?) {
+    func patchLineHeight(lineHeight: Float?) {
     }
 
-    public func patchFontWeight(fontWeight: String?) {
+    func patchFontWeight(fontWeight: String?) {
     }
 
-    public func patchColor(color: StyleColor?) {
+    func patchColor(color: StyleColor?) {
     }
 
-    public func patchTextAlign(textAlign: String?) {
+    func patchTextAlign(textAlign: String?) {
     }
 
-    public func patchTextDecoration(textDecoration: String?) {
+    func patchTextDecoration(textDecoration: String?) {
     }
 
-    public func patchTextTransform(textTransform: String?) {
+    func patchTextTransform(textTransform: String?) {
     }
 
-    public func patchTextOverflow(textOverflow: String?) {
+    func patchTextOverflow(textOverflow: String?) {
     }
 
-    public func patchOverflowWrap(overflowWrap: String?) {
+    func patchOverflowWrap(overflowWrap: String?) {
     }
 
-    public func patchWordBreak(wordBreak: String?) {
+    func patchWordBreak(wordBreak: String?) {
     }
 
-    public func patchPosition(position: String?) {
+    func patchPosition(position: String?) {
         let layoutParams = view.layoutParams
         
         switch position {
@@ -843,35 +850,35 @@ class Element: NSObject {
         }
     }
 
-    public func patchTop(top: Float?) {
+    func patchTop(top: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.positionTop = top
     }
 
-    public func patchLeft(left: Float?) {
+    func patchLeft(left: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.positionLeft = left
     }
 
-    public func patchBottom(bottom: Float?) {
+    func patchBottom(bottom: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.positionBottom = bottom
     }
 
-    public func patchRight(right: Float?) {
+    func patchRight(right: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.positionRight = right
     }
 
-    public func patchZIndex(zIndex: Int?) {
+    func patchZIndex(zIndex: Int?) {
         view.layer.zPosition = zIndex != nil ? CGFloat(zIndex!) : 0
     }
 
-    public func patchDisplay(display: String?) {
+    func patchDisplay(display: String?) {
         let layoutParams = view.layoutParams
         
         switch display {
@@ -893,26 +900,26 @@ class Element: NSObject {
         }
     }
 
-    public func patchPointerEvents(pointerEvents: String?) {
+    func patchPointerEvents(pointerEvents: String?) {
     }
 
-    public func patchObjectFit(objectFit: String?) {
+    func patchObjectFit(objectFit: String?) {
     }
 
-    public func patchOverflow(overflow: String?) {
+    func patchOverflow(overflow: String?) {
     }
 
-    public func patchOpacity(opacity: Float?) {
+    func patchOpacity(opacity: Float?) {
         view.alpha = opacity != nil ? CGFloat(opacity!) : 1.0
     }
 
-    public func patchAspectRatio(aspectRatio: Float?) {
+    func patchAspectRatio(aspectRatio: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.aspectRatio = aspectRatio
     }
 
-    public func patchBorderRadius(
+    func patchBorderRadius(
         borderRadius: StyleSize?,
         borderRadiusTopLeft: StyleSize?,
         borderRadiusTopRight: StyleSize?,
@@ -1034,34 +1041,111 @@ class Element: NSObject {
         return CGFloat(min(value, maxRadius))
     }
 
-    public func patchBorderWidth(borderWidth: Float?) {
+    func patchBorderWidth(borderWidth: Float?) {
     }
 
-    public func patchBorderColor(borderColor: StyleColor?) {
+    func patchBorderColor(borderColor: StyleColor?) {
     }
 
-    public func patchBorderTopWidth(borderTopWidth: Float?) {
+    func patchBorderTopWidth(borderTopWidth: Float?) {
     }
 
-    public func patchBorderTopColor(borderTopColor: StyleColor?) {
+    func patchBorderTopColor(borderTopColor: StyleColor?) {
     }
 
-    public func patchBorderLeftWidth(borderLeftWidth: Float?) {
+    func patchBorderLeftWidth(borderLeftWidth: Float?) {
     }
 
-    public func patchBorderLeftColor(borderLeftColor: StyleColor?) {
+    func patchBorderLeftColor(borderLeftColor: StyleColor?) {
     }
 
-    public func patchBorderBottomWidth(borderBottomWidth: Float?) {
+    func patchBorderBottomWidth(borderBottomWidth: Float?) {
     }
 
-    public func patchBorderBottomColor(borderBottomColor: StyleColor?) {
+    func patchBorderBottomColor(borderBottomColor: StyleColor?) {
     }
 
-    public func patchBorderRightWidth(borderRightWidth: Float?) {
+    func patchBorderRightWidth(borderRightWidth: Float?) {
     }
 
-    public func patchBorderRightColor(borderRightColor: StyleColor?) {
+    func patchBorderRightColor(borderRightColor: StyleColor?) {
+    }
+    
+    func patchTransform(transform: StyleTransform?) {
+        let layoutParams = view.layoutParams
+        
+        layoutParams.onLayoutClosures["transform"] = {
+            var translateX: CGFloat = 0;
+            var translateY: CGFloat = 0;
+
+            var scaleX: CGFloat = 1;
+            var scaleY: CGFloat = 1;
+            
+            if let transform = transform {
+                if transform.translateX != nil {
+                    translateX = self.getTranslate(self.view.frame.size.width, transform.translateX!);
+                }
+                
+                if transform.translateY != nil {
+                    translateY = self.getTranslate(self.view.frame.size.height, transform.translateY!);
+                }
+                
+                if transform.scale != nil {
+                    let scale = self.getScale(transform.scale!)
+                    
+                    scaleX = scale
+                    scaleY = scale
+                }
+                
+                if transform.scaleX != nil {
+                    scaleX = self.getScale(transform.scaleX!);
+                }
+                
+                if transform.scaleY != nil {
+                    scaleY = self.getScale(transform.scaleY!);
+                }
+            }
+            
+            self.view.frame.origin.x += translateX
+            self.view.frame.origin.y += translateY
+            
+//            self.view.transform = CGAffineTransform.identity
+//                .scaledBy(x: scaleX, y: scaleY)
+        }
+    }
+    
+    func getTranslate(_ size: CGFloat, _ translateValue: StyleSize) -> CGFloat {
+        switch translateValue {
+        case .float(let float):
+            return CGFloat(float)
+            
+            break
+        
+        case .string(let string):
+            let percent = AttributeHelper.convertPercentStringToFloat(string)!
+            
+            return size * CGFloat(percent)
+            
+            break
+        }
+        
+        return 0
+    }
+    
+    func getScale(_ scaleValue: StyleSize) -> CGFloat {
+        switch scaleValue {
+        case .float(let float):
+            return CGFloat(float)
+            
+            break
+        
+        case .string(let string):
+            return CGFloat(AttributeHelper.convertPercentStringToFloat(string)!)
+            
+            break
+        }
+        
+        return 0
     }
     
     public func applyStyle(style: Style, keys: [String]) {
@@ -1130,6 +1214,7 @@ class Element: NSObject {
         let borderBottomColor = styler.getBorderBottomColor()
         let borderRightWidth = styler.getBorderRightWidth()
         let borderRightColor = styler.getBorderRightColor()
+        let transform = styler.getTransform()
     
         let patchFlexBool = keys.contains("flex")
         let patchFlexDirectionBool = keys.contains("flexDirection")
@@ -1194,6 +1279,7 @@ class Element: NSObject {
         let patchBorderBottomColorBool = keys.contains("borderBottomColor")
         let patchBorderRightWidthBool = keys.contains("borderRightWidth")
         let patchBorderRightColorBool = keys.contains("borderRightColor")
+        let patchTransformBool = keys.contains("transform")
 
         if patchFlexBool {
             patchFlex(flex: flex)
@@ -1419,6 +1505,10 @@ class Element: NSObject {
 
         if patchBorderRightColorBool {
             patchBorderRightColor(borderRightColor: borderRightColor)
+        }
+        
+        if patchTransformBool {
+            patchTransform(transform: transform)
         }
     }
     

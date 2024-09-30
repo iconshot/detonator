@@ -19,6 +19,7 @@ import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.PixelHelper;
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
 import com.iconshot.detonator.tree.Edge;
+import com.iconshot.detonator.element.Style.StyleTransform;
 
 public abstract class Element<K extends View, T extends Element.Attributes> {
     protected Detonator detonator;
@@ -138,6 +139,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         Object borderBottomColor = styler.getBorderBottomColor();
         Float borderRightWidth = styler.getBorderRightWidth();
         Object borderRightColor = styler.getBorderRightColor();
+        StyleTransform transform = styler.getTransform();
 
         Integer currentFlex = currentStyler.getFlex();
         String currentFlexDirection = currentStyler.getFlexDirection();
@@ -202,6 +204,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         Object currentBorderBottomColor = currentStyler.getBorderBottomColor();
         Float currentBorderRightWidth = currentStyler.getBorderRightWidth();
         Object currentBorderRightColor = currentStyler.getBorderRightColor();
+        StyleTransform currentTransform = currentStyler.getTransform();
 
         boolean patchFlex = forcePatch || !CompareHelper.compareObjects(flex, currentFlex);
         boolean patchFlexDirection = forcePatch || !CompareHelper.compareObjects(flexDirection, currentFlexDirection);
@@ -209,11 +212,6 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         boolean patchAlignItems = forcePatch || !CompareHelper.compareObjects(alignItems, currentAlignItems);
         boolean patchAlignSelf = forcePatch || !CompareHelper.compareObjects(alignSelf, currentAlignSelf);
         boolean patchBackgroundColor = forcePatch || !CompareHelper.compareColors(backgroundColor, currentBackgroundColor);
-        boolean patchBorderRadius = forcePatch || !CompareHelper.compareObjects(borderRadius, currentBorderRadius);
-        boolean patchBorderRadiusTopLeft = forcePatch || !CompareHelper.compareObjects(borderRadiusTopLeft, currentBorderRadiusTopLeft);
-        boolean patchBorderRadiusTopRight = forcePatch || !CompareHelper.compareObjects(borderRadiusTopRight, currentBorderRadiusTopRight);
-        boolean patchBorderRadiusBottomLeft = forcePatch || !CompareHelper.compareObjects(borderRadiusBottomLeft, currentBorderRadiusBottomLeft);
-        boolean patchBorderRadiusBottomRight = forcePatch || !CompareHelper.compareObjects(borderRadiusBottomRight, currentBorderRadiusBottomRight);
         boolean patchWidth = forcePatch || !CompareHelper.compareObjects(width, currentWidth);
         boolean patchHeight = forcePatch || !CompareHelper.compareObjects(height, currentHeight);
         boolean patchMinWidth = forcePatch || !CompareHelper.compareObjects(minWidth, currentMinWidth);
@@ -256,6 +254,12 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         boolean patchOverflow = forcePatch || !CompareHelper.compareObjects(overflow, currentOverflow);
         boolean patchOpacity = forcePatch || !CompareHelper.compareObjects(opacity, currentOpacity);
         boolean patchAspectRatio = forcePatch || !CompareHelper.compareObjects(aspectRatio, currentAspectRatio);
+        boolean patchBorderRadius = forcePatch || !CompareHelper.compareObjects(borderRadius, currentBorderRadius);
+        boolean patchBorderRadiusTopLeft = forcePatch || !CompareHelper.compareObjects(borderRadiusTopLeft, currentBorderRadiusTopLeft);
+        boolean patchBorderRadiusTopRight = forcePatch || !CompareHelper.compareObjects(borderRadiusTopRight, currentBorderRadiusTopRight);
+        boolean patchBorderRadiusBottomLeft = forcePatch || !CompareHelper.compareObjects(borderRadiusBottomLeft, currentBorderRadiusBottomLeft);
+        boolean patchBorderRadiusBottomRight = forcePatch || !CompareHelper.compareObjects(borderRadiusBottomRight, currentBorderRadiusBottomRight);
+        boolean patchTransform = forcePatch || !CompareHelper.compareTransform(transform, currentTransform);
 
         if (patchFlex) {
             patchFlex(flex);
@@ -445,6 +449,10 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (patchAspectRatio) {
             patchAspectRatio(aspectRatio);
+        }
+
+        if (patchTransform) {
+            patchTransform(transform);
         }
 
         patchView();
@@ -966,6 +974,71 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     protected void patchBorderRightColor(Object borderRightColor) {
     }
 
+    protected void patchTransform(StyleTransform transform) {
+        LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+
+        layoutParams.onLayoutClosures.put("transform", () -> {
+            float translateX = 0;
+            float translateY = 0;
+
+            float scaleX = 1;
+            float scaleY = 1;
+
+            if (transform != null) {
+                if (transform.translateX != null) {
+                    translateX = getTranslate(view.getWidth(), transform.translateX);
+                }
+
+                if (transform.translateY != null) {
+                    translateY = getTranslate(view.getHeight(), transform.translateY);
+                }
+
+                if (transform.scale != null) {
+                    float scale = getScale(transform.scale);
+
+                    scaleX = scale;
+                    scaleY = scale;
+                }
+
+                if (transform.scaleX != null) {
+                    scaleX = getScale(transform.scaleX);
+                }
+
+                if (transform.scaleY != null) {
+                    scaleY = getScale(transform.scaleY);
+                }
+            }
+
+            view.setTranslationX(translateX);
+            view.setTranslationY(translateY);
+
+            view.setScaleX(scaleX);
+            view.setScaleY(scaleY);
+        });
+    }
+
+    protected float getTranslate(int size, Object translateValue) {
+        if (translateValue instanceof Double) {
+            return PixelHelper.dpToPx((Double) translateValue);
+        } else if (translateValue instanceof String) {
+            float percent = AttributeHelper.convertPercentStringToFloat((String) translateValue);
+
+            return size * percent;
+        }
+
+        return 0;
+    }
+
+    protected float getScale(Object scaleValue) {
+        if (scaleValue instanceof Double) {
+            return ((Double) scaleValue).floatValue();
+        } else if (scaleValue instanceof String) {
+            return AttributeHelper.convertPercentStringToFloat((String) scaleValue);
+        }
+
+        return 0;
+    }
+
     public void applyStyle(Style style, List<String> keys) {
         Styler styler = new Styler(style);
 
@@ -1032,6 +1105,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         Object borderBottomColor = styler.getBorderBottomColor();
         Float borderRightWidth = styler.getBorderRightWidth();
         Object borderRightColor = styler.getBorderRightColor();
+        StyleTransform transform = styler.getTransform();
 
         boolean patchFlex = keys.contains("flex");
         boolean patchFlexDirection = keys.contains("flexDirection");
@@ -1039,11 +1113,6 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         boolean patchAlignItems = keys.contains("alignItems");
         boolean patchAlignSelf = keys.contains("alignSelf");
         boolean patchBackgroundColor = keys.contains("backgroundColor");
-        boolean patchBorderRadius = keys.contains("borderRadius");
-        boolean patchBorderRadiusTopLeft = keys.contains("borderRadiusTopLeft");
-        boolean patchBorderRadiusTopRight = keys.contains("borderRadiusTopRight");
-        boolean patchBorderRadiusBottomLeft = keys.contains("borderRadiusBottomLeft");
-        boolean patchBorderRadiusBottomRight = keys.contains("borderRadiusBottomRight");
         boolean patchWidth = keys.contains("width");
         boolean patchHeight = keys.contains("height");
         boolean patchMinWidth = keys.contains("minWidth");
@@ -1086,6 +1155,11 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         boolean patchOverflow = keys.contains("overflow");
         boolean patchOpacity = keys.contains("opacity");
         boolean patchAspectRatio = keys.contains("aspectRatio");
+        boolean patchBorderRadius = keys.contains("borderRadius");
+        boolean patchBorderRadiusTopLeft = keys.contains("borderRadiusTopLeft");
+        boolean patchBorderRadiusTopRight = keys.contains("borderRadiusTopRight");
+        boolean patchBorderRadiusBottomLeft = keys.contains("borderRadiusBottomLeft");
+        boolean patchBorderRadiusBottomRight = keys.contains("borderRadiusBottomRight");
         boolean patchBorderWidth = keys.contains("borderWidth");
         boolean patchBorderColor = keys.contains("borderColor");
         boolean patchBorderTopWidth = keys.contains("borderTopWidth");
@@ -1096,6 +1170,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         boolean patchBorderBottomColor = keys.contains("borderBottomColor");
         boolean patchBorderRightWidth = keys.contains("borderRightWidth");
         boolean patchBorderRightColor = keys.contains("borderRightColor");
+        boolean patchTransform = keys.contains("transform");
 
         if (patchFlex) {
             patchFlex(flex);
@@ -1325,6 +1400,10 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (patchBorderRightColor) {
             patchBorderRightColor(borderRightColor);
+        }
+
+        if (patchTransform) {
+            patchTransform(transform);
         }
     }
 

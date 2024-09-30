@@ -96,4 +96,26 @@ class CompareHelper {
         
         return true
     }
+    
+    public static func compareStyleTransforms(_ a: StyleTransform?, _ b: StyleTransform?) -> Bool {
+        let aTranslateX = a != nil ? a!.translateX : nil;
+        let aTranslateY = a != nil ? a!.translateY : nil;
+        let aScale = a != nil ? a!.scale : nil;
+        let aScaleX = a != nil ? a!.scaleX : nil;
+        let aScaleY = a != nil ? a!.scaleY : nil;
+
+        let bTranslateX = b != nil ? b!.translateX : nil;
+        let bTranslateY = b != nil ? b!.translateY : nil;
+        let bScale = b != nil ? b!.scale : nil;
+        let bScaleX = b != nil ? b!.scaleX : nil;
+        let bScaleY = b != nil ? b!.scaleY : nil;
+        
+        return (
+            CompareHelper.compareStyleSizes(aTranslateX, bTranslateX) &&
+            CompareHelper.compareStyleSizes(aTranslateY, bTranslateY) &&
+            CompareHelper.compareStyleSizes(aScale, bScale) &&
+            CompareHelper.compareStyleSizes(aScaleX, bScaleX) &&
+            CompareHelper.compareStyleSizes(aScaleY, bScaleY)
+        );
+    }
 }

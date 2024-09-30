@@ -9,6 +9,14 @@ export type StyleColor =
 
 export type StyleSize = string | number;
 
+export interface StyleTransform {
+  translateX?: StyleSize | null;
+  translateY?: StyleSize | null;
+  scale?: StyleSize | null;
+  scaleX?: StyleSize | null;
+  scaleY?: StyleSize | null;
+}
+
 export interface Style {
   flex?: number | null;
   flexDirection?: "row" | "row-reverse" | "column" | "column-reverse" | null;
@@ -95,6 +103,8 @@ export interface Style {
 
   borderRightWidth?: number | null;
   borderRightColor?: StyleColor | null;
+
+  transform?: StyleTransform | null;
 }
 
 interface TapEvent extends Event {}

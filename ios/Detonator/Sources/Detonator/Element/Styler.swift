@@ -256,4 +256,8 @@ class Styler {
     public func getBorderRightColor() -> StyleColor? {
         return style?.borderRightColor
     }
+    
+    public func getTransform() -> StyleTransform? {
+        return style?.transform
+    }
 }

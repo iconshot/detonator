@@ -1,9 +1,12 @@
 class AttributeHelper {
     static func convertPercentStringToFloat(_ percentString: String) -> Float? {
         let numberString = percentString.replacingOccurrences(of: "%", with: "")
+            .replacingOccurrences(of: "-", with: "")
         
         if let value = Float(numberString) {
-            return value / 100
+            let percent = value / 100
+            
+            return percentString.starts(with: "-") ? percent * -1 : percent
         } else {
             return nil
         }

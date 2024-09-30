@@ -2,12 +2,15 @@ package com.iconshot.detonator.helpers;
 
 public class AttributeHelper {
     public static Float convertPercentStringToFloat(String percentString) {
-        String numberString = percentString.replace("%", "");
+        String numberString = percentString.replace("%", "")
+                .replace("-", "");
 
         try {
             float value = Float.parseFloat(numberString);
 
-            return value / 100;
+            float percent = value / 100;
+
+            return percentString.startsWith("-") ? percent * -1 : percent;
         } catch (Exception e) {
             return null;
         }

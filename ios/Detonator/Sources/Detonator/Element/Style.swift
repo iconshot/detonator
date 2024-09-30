@@ -32,6 +32,32 @@ enum StyleSize: Decodable {
     }
 }
 
+struct StyleTransform: Decodable {
+    var translateX: StyleSize?
+    var translateY: StyleSize?
+    var scale: StyleSize?
+    var scaleX: StyleSize?
+    var scaleY: StyleSize?
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        
+        translateX = try container.decodeIfPresent(StyleSize.self, forKey: .translateX)
+        translateY = try container.decodeIfPresent(StyleSize.self, forKey: .translateY)
+        scale = try container.decodeIfPresent(StyleSize.self, forKey: .scale)
+        scaleX = try container.decodeIfPresent(StyleSize.self, forKey: .scaleX)
+        scaleY = try container.decodeIfPresent(StyleSize.self, forKey: .scaleY)
+    }
+    
+    private enum CodingKeys: String, CodingKey {
+        case translateX
+        case translateY
+        case scale
+        case scaleX
+        case scaleY
+    }
+}
+
 struct Style: Decodable {
     // layout
     
@@ -130,6 +156,10 @@ struct Style: Decodable {
     var borderRightWidth: Float?
     var borderRightColor: StyleColor?
     
+    // transform
+    
+    var transform: StyleTransform?
+    
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
@@ -195,6 +225,7 @@ struct Style: Decodable {
         borderBottomColor = try container.decodeIfPresent(StyleColor.self, forKey: .borderBottomColor)
         borderRightWidth = try container.decodeIfPresent(Float.self, forKey: .borderRightWidth)
         borderRightColor = try container.decodeIfPresent(StyleColor.self, forKey: .borderRightColor)
+        transform = try container.decodeIfPresent(StyleTransform.self, forKey: .transform)
     }
     
     private enum CodingKeys: String, CodingKey {
@@ -260,5 +291,6 @@ struct Style: Decodable {
         case borderBottomColor
         case borderRightWidth
         case borderRightColor
+        case transform
     }
 }
