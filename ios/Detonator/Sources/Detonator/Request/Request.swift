@@ -49,12 +49,16 @@ class Request {
         emit(response: response)
     }
     
-    func error(error: Error) {
-        let tmpError = OutgoingResponse.Error(message: error.localizedDescription)
+    func error(message: String) {
+        let tmpError = OutgoingResponse.Error(message: message)
         
         let response = OutgoingResponse(id: id, data: nil, error: tmpError)
         
         emit(response: response)
+    }
+    
+    func error(error: Error) {
+        self.error(message: error.localizedDescription)
     }
     
     func emit(response: OutgoingResponse) {

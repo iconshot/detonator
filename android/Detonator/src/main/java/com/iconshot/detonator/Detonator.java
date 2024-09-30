@@ -15,6 +15,7 @@ import com.iconshot.detonator.emitter.EventEmitter;
 import com.iconshot.detonator.emitter.HandlerEmitter;
 
 import com.iconshot.detonator.request.Request;
+import com.iconshot.detonator.request.OpenUrlRequest;
 import com.iconshot.detonator.request.InputBlurRequest;
 import com.iconshot.detonator.request.InputFocusRequest;
 import com.iconshot.detonator.request.ImageGetSizeRequest;
@@ -107,6 +108,7 @@ public class Detonator {
         addElementClass("com.iconshot.detonator.scrollview", ScrollViewElement.class);
         addElementClass("com.iconshot.detonator.safeareaview", SafeAreaViewElement.class);
 
+        addRequestClass("com.iconshot.detonator/openUrl", OpenUrlRequest.class);
         addRequestClass("com.iconshot.detonator.input/focus", InputFocusRequest.class);
         addRequestClass("com.iconshot.detonator.input/blur", InputBlurRequest.class);
         addRequestClass("com.iconshot.detonator.textarea/focus", TextAreaFocusRequest.class);

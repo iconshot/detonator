@@ -143,6 +143,10 @@ export class Detonator {
     });
   }
 
+  public static async openUrl(url: string): Promise<void> {
+    await this.request({ name: "com.iconshot.detonator/openUrl", data: url });
+  }
+
   public static log(data: any): void {
     Messenger.log(data);
   }
