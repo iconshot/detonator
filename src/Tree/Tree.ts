@@ -40,7 +40,7 @@ export class Tree {
     Messenger.treeInit({ treeId, elementId });
   }
 
-  deinit(): void {
+  public deinit(): void {
     if (this.deinitialized) {
       return;
     }
@@ -52,7 +52,7 @@ export class Tree {
     Messenger.treeDeinit({ treeId: this.treeId });
   }
 
-  mount(slot: Slot): void {
+  public mount(slot: Slot): void {
     if (this.deinitialized) {
       return;
     }
@@ -72,7 +72,7 @@ export class Tree {
     Messenger.mount({ treeId: this.treeId, edge: serializedEdge });
   }
 
-  unmount(): void {
+  public unmount(): void {
     if (this.deinitialized) {
       return;
     }

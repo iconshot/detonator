@@ -2,6 +2,8 @@ import { Detonator } from "./Detonator";
 
 export default Detonator;
 
+export * from "./Tree/Tree";
+
 export * from "./Component/View";
 export * from "./Component/Text";
 export * from "./Component/Input";
