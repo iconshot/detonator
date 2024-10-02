@@ -8,7 +8,7 @@ import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.layout.ViewLayout;
 
 public class DetonatorActivity extends AppCompatActivity {
-    private Detonator detonator;
+    protected Detonator detonator;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

@@ -1,7 +1,7 @@
-class Module {
+open class Module {
     let detonator: Detonator
     
-    required init(_ detonator: Detonator) {
+    required public init(_ detonator: Detonator) {
         self.detonator = detonator
     }
     

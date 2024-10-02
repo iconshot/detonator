@@ -12,7 +12,7 @@ class Attributes: Decodable {
     }
 }
 
-class Element: NSObject {
+open class Element: NSObject {
     let detonator: Detonator
     
     var edge: Edge!
@@ -30,7 +30,7 @@ class Element: NSObject {
     
     var tapGestureRecognizer: UITapGestureRecognizer!
     
-    required init(_ detonator: Detonator) {
+    required public init(_ detonator: Detonator) {
         self.detonator = detonator
         
         super.init()

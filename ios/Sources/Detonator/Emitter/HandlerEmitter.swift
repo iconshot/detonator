@@ -1,4 +1,4 @@
-class HandlerEmitter: Emitter {
+public class HandlerEmitter: Emitter {
     public func emit(name: String, edgeId: Int, data: Encodable? = nil) {
         let handler = Handler(name: name, edgeId: edgeId, data: data)
         

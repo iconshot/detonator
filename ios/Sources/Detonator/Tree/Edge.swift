@@ -1,6 +1,6 @@
 import UIKit
 
-class Edge: Decodable {
+public class Edge: Decodable {
     var id: Int
     var parent: Int?
     var contentType: String?

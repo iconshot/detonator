@@ -1,4 +1,4 @@
-class EventEmitter: Emitter {
+public class EventEmitter: Emitter {
     public func emit(name: String, data: Encodable? = nil) {
         let handler = Event(name: name, data: data)
         

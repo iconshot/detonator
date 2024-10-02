@@ -1,4 +1,4 @@
-class Emitter {
+public class Emitter {
     let detonator: Detonator
     
     init(_ detonator: Detonator) {

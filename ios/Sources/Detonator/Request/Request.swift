@@ -1,13 +1,13 @@
 import UIKit
 
-class Request {
+open class Request {
     let detonator: Detonator
     
     let id: Int
     let componentId: Int?
     let data: String?
     
-    required init(_ detonator: Detonator, incomingRequest: IncomingRequest) {
+    required public init(_ detonator: Detonator, incomingRequest: IncomingRequest) {
         self.detonator = detonator
         
         self.id = incomingRequest.id
@@ -65,7 +65,7 @@ class Request {
         detonator.emit(name: "response", value: response)
     }
     
-    struct IncomingRequest: Decodable {
+    public struct IncomingRequest: Decodable {
         let id: Int
         let name: String
         let componentId: Int?

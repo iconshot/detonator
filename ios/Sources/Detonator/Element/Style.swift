@@ -58,7 +58,7 @@ struct StyleTransform: Decodable {
     }
 }
 
-struct Style: Decodable {
+public struct Style: Decodable {
     // layout
     
     var flex: Int?
@@ -160,7 +160,7 @@ struct Style: Decodable {
     
     var transform: StyleTransform?
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         flex = try container.decodeIfPresent(Int.self, forKey: .flex)

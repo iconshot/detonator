@@ -2,7 +2,7 @@ import Foundation
 import WebKit
 import UIKit
 
-class Detonator: NSObject, WKScriptMessageHandler {
+public class Detonator: NSObject, WKScriptMessageHandler {
     private let filename: String
     
     private var elementClasses: [String: Element.Type]
@@ -21,7 +21,7 @@ class Detonator: NSObject, WKScriptMessageHandler {
     private let rootView: ViewLayout
     
     private var workItem: DispatchWorkItem?
-
+    
     init(rootView: ViewLayout, filename: String) {
         elementClasses = [:]
         requestClasses = [:]
@@ -73,7 +73,7 @@ class Detonator: NSObject, WKScriptMessageHandler {
         let contentController = WKUserContentController()
         
         contentController.add(self, name: "detonator")
-
+        
         let config = WKWebViewConfiguration()
         
         config.userContentController = contentController
@@ -118,7 +118,7 @@ class Detonator: NSObject, WKScriptMessageHandler {
         
         return "";
     }
-
+    
     private func evaluate(code: String, completion: ((Any?, Error?) -> Void)? = nil) {
         webView.evaluateJavaScript(code, completionHandler: completion)
     }
@@ -141,11 +141,11 @@ class Detonator: NSObject, WKScriptMessageHandler {
         } catch {}
     }
     
-    func collectModuleClasses() {
+    private func collectModuleClasses() {
         
     }
     
-    func registerModules() {
+    private func registerModules() {
         for (key, moduleClass) in moduleClasses {
             let module = moduleClass.init(self)
             
@@ -154,8 +154,8 @@ class Detonator: NSObject, WKScriptMessageHandler {
             modules[key] = module
         }
     }
-
-    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+    
+    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
         /*
          
          why the asyncAfter?
@@ -379,7 +379,7 @@ class Detonator: NSObject, WKScriptMessageHandler {
         print(dataString)
     }
     
-    public func performLayout() {        
+    public func performLayout() {
         workItem?.cancel()
         
         workItem = DispatchWorkItem { [weak self] in
