@@ -1,5 +1,22 @@
 package com.iconshot.detonator;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import android.view.ViewGroup;
+import android.webkit.JavascriptInterface;
+import android.webkit.ValueCallback;
+import android.webkit.WebView;
+
+import android.os.Handler;
+import android.os.Looper;
+
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.element.SafeAreaViewElement;
 import com.iconshot.detonator.element.scrollviewelement.ScrollViewElement;
@@ -38,23 +55,6 @@ import com.iconshot.detonator.layout.ViewLayout;
 import com.iconshot.detonator.tree.Tree;
 import com.iconshot.detonator.tree.Edge;
 import com.iconshot.detonator.tree.Target;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import android.view.ViewGroup;
-import android.webkit.JavascriptInterface;
-import android.webkit.ValueCallback;
-import android.webkit.WebView;
-
-import android.os.Handler;
-import android.os.Looper;
-
-import java.lang.reflect.Constructor;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class Detonator {
     private final String path;
@@ -124,6 +124,8 @@ public class Detonator {
 
         initWebView();
 
+        collectModuleClasses();
+
         registerModules();
     }
 
@@ -174,6 +176,10 @@ public class Detonator {
         String code = "window.emitter.emit(\"" + name + "\", \"" + escape + "\");";
 
         evaluate(code);
+    }
+
+    private void collectModuleClasses() {
+
     }
 
     private void registerModules() {

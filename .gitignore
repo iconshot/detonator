@@ -5,7 +5,7 @@ package-lock.json
 
 /dist
 
-/android/Detonator/build/
+/android/build/
 
 /template/dist
 /template/android/app/src/main/assets/dist

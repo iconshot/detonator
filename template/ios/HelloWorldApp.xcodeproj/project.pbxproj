@@ -136,7 +136,7 @@
 			);
 			mainGroup = 496B1C582C965BE6000FA5DA;
 			packageReferences = (
-				496B1C7D2C9699E7000FA5DA /* XCLocalSwiftPackageReference "../node_modules/detonator/ios/Detonator" */,
+				496B1C7D2C9699E7000FA5DA /* XCLocalSwiftPackageReference "../node_modules/detonator/ios" */,
 			);
 			productRefGroup = 496B1C622C965BE6000FA5DA /* Products */;
 			projectDirPath = "";
@@ -380,9 +380,9 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		496B1C7D2C9699E7000FA5DA /* XCLocalSwiftPackageReference "../node_modules/detonator/ios/Detonator" */ = {
+		496B1C7D2C9699E7000FA5DA /* XCLocalSwiftPackageReference "../node_modules/detonator/ios" */ = {
 			isa = XCLocalSwiftPackageReference;
-			relativePath = ../node_modules/detonator/ios/Detonator;
+			relativePath = ../node_modules/detonator/ios;
 		};
 /* End XCLocalSwiftPackageReference section */
 

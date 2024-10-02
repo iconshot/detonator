@@ -64,6 +64,8 @@ class Detonator: NSObject, WKScriptMessageHandler {
         
         initWebView()
         
+        collectModuleClasses()
+        
         registerModules()
     }
     
@@ -137,6 +139,10 @@ class Detonator: NSObject, WKScriptMessageHandler {
                 evaluate(code: code)
             }
         } catch {}
+    }
+    
+    func collectModuleClasses() {
+        
     }
     
     func registerModules() {
