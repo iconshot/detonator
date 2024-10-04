@@ -1,15 +1,15 @@
 import UIKit
 
-class TextAreaView: UITextView {
+public class TextAreaView: UITextView {
     var onHeightChange: (() -> Void)?
     
-    override var text: String! {
+    override public var text: String! {
         didSet {
             onHeightChange?()
         }
     }
     
-    override var contentSize: CGSize {
+    override public var contentSize: CGSize {
         didSet {
             onHeightChange?()
         }

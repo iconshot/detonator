@@ -26,14 +26,14 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         let placeholder = attributes.placeholder
         let currentPlaceholder = currentAttributes?.placeholder
         
-        let patchPlaceholder = forcePatch || placeholder != currentPlaceholder
+        let patchPlaceholderBool = forcePatch || placeholder != currentPlaceholder
         
         let placeholderColor = attributes.placeholderColor
         let currentPlaceholderColor = currentAttributes?.placeholderColor
         
-        let patchPlaceholderColor = forcePatch || !CompareHelper.compareStyleColors(placeholderColor, currentPlaceholderColor)
+        let patchPlaceholderColorBool = forcePatch || !CompareHelper.compareStyleColors(placeholderColor, currentPlaceholderColor)
         
-        if patchPlaceholder || patchPlaceholderColor {
+        if patchPlaceholderBool || patchPlaceholderColorBool {
             if placeholder != nil {
                 var attributes: [NSAttributedString.Key: Any] = [:]
                 
@@ -51,41 +51,85 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         
         let value = attributes.value
         
-        let patchValue = forcePatch
+        let patchValueBool = forcePatch
         
-        if patchValue {
+        if patchValueBool {
             view.text = value
         }
         
         let inputType = attributes.inputType
         let currentInputType = currentAttributes?.inputType
         
-        let patchInputType = forcePatch || inputType != currentInputType
+        let patchInputTypeBool = forcePatch || inputType != currentInputType
         
-        if patchInputType {
-            switch inputType {
-            case "text":
-                view.keyboardType = .default
-                
-                break
-                
-            case "password":
-                view.keyboardType = .default
-                
-                break
-                
-            case "email":
-                view.keyboardType = .emailAddress
-                
-                break
-                
-            default:
-                view.keyboardType = .default
-
-                break
-            }
+        let autoCapitalize = attributes.autoCapitalize
+        let currentAutoCapitalize = currentAttributes?.autoCapitalize
+        
+        let patchAutoCapitalizeBool = forcePatch || autoCapitalize != currentAutoCapitalize
+        
+        if patchInputTypeBool || patchAutoCapitalizeBool {
+            patchInputType(inputType: inputType, autoCapitalize: autoCapitalize)
+        }
+    }
+    
+    private func patchInputType(inputType: String?, autoCapitalize: String?) {
+        let view = view as! InputView
+        
+        switch inputType {
+        case "text":
+            view.keyboardType = .default
             
-            view.isSecureTextEntry = inputType == "password"
+            break
+            
+        case "password":
+            view.keyboardType = .default
+            
+            break
+            
+        case "email":
+            view.keyboardType = .emailAddress
+            
+            break
+            
+        default:
+            view.keyboardType = .default
+            
+            break
+        }
+        
+        view.isSecureTextEntry = inputType == "password"
+        
+        switch autoCapitalize {
+        case "characters":
+            view.autocapitalizationType = .allCharacters
+            
+            break
+            
+        case "words":
+            view.autocapitalizationType = .words
+            
+            break
+            
+        case "sentences":
+            view.autocapitalizationType = .sentences
+            
+            break
+            
+        case "none":
+            view.autocapitalizationType = .none
+            
+            break
+            
+        default:
+            view.autocapitalizationType = .sentences
+            
+            break
+        }
+        
+        if view.isFirstResponder {
+            view.resignFirstResponder()
+            
+            view.becomeFirstResponder()
         }
     }
     
@@ -106,7 +150,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
     func textFieldShouldReturn(_ view: UITextField) -> Bool {
         view.resignFirstResponder()
 
-        detonator.handlerEmitter.emit(name: "onDone", edgeId: edge.id)
+        detonator.emitHandler(name: "onDone", edgeId: edge.id)
         
         return true
     }
@@ -114,7 +158,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
     @objc private func onChangeListener(_ view: UITextField) {
         let data = OnChangeData(value: view.text ?? "")
         
-        detonator.handlerEmitter.emit(name: "onChange", edgeId: edge.id, data: data)
+        detonator.emitHandler(name: "onChange", edgeId: edge.id, data: data)
         
         detonator.performLayout()
     }
@@ -132,6 +176,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         var placeholderColor: StyleColor?
         var value: String?
         var inputType: String?
+        var autoCapitalize: String?
         var onChange: Bool?
         var onDone: Bool?
         
@@ -142,6 +187,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
             placeholderColor = try container.decodeIfPresent(StyleColor.self, forKey: .placeholderColor)
             value = try container.decodeIfPresent(String.self, forKey: .value)
             inputType = try container.decodeIfPresent(String.self, forKey: .inputType)
+            autoCapitalize = try container.decodeIfPresent(String.self, forKey: .autoCapitalize)
             onChange = try container.decodeIfPresent(Bool.self, forKey: .onChange)
             onDone = try container.decodeIfPresent(Bool.self, forKey: .onDone)
             
@@ -153,6 +199,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
             case placeholderColor
             case value
             case inputType
+            case autoCapitalize
             case onChange
             case onDone
         }

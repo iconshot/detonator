@@ -35,18 +35,64 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         let placeholder = attributes.placeholder
         let currentPlaceholder = currentAttributes?.placeholder
         
-        let patchPlaceholder = forcePatch || placeholder != currentPlaceholder
+        let patchPlaceholderBool = forcePatch || placeholder != currentPlaceholder
         
-        if patchPlaceholder {
+        if patchPlaceholderBool {
             // view.placeholder = placeholder
         }
         
         let value = attributes.value
         
-        let patchValue = forcePatch
+        let patchValueBool = forcePatch
         
-        if patchValue {
+        if patchValueBool {
             view.text = value
+        }
+        
+        let autoCapitalize = attributes.autoCapitalize
+        let currentAutoCapitalize = currentAttributes?.autoCapitalize
+        
+        let patchAutoCapitalizeBool = forcePatch || autoCapitalize != currentAutoCapitalize
+        
+        if patchAutoCapitalizeBool {
+            patchInputType(autoCapitalize: autoCapitalize)
+        }
+    }
+    
+    private func patchInputType(autoCapitalize: String?) {
+        let view = view as! TextAreaView
+        
+        switch autoCapitalize {
+        case "characters":
+            view.autocapitalizationType = .allCharacters
+            
+            break
+            
+        case "words":
+            view.autocapitalizationType = .words
+            
+            break
+            
+        case "sentences":
+            view.autocapitalizationType = .sentences
+            
+            break
+            
+        case "none":
+            view.autocapitalizationType = .none
+            
+            break
+            
+        default:
+            view.autocapitalizationType = .sentences
+            
+            break
+        }
+        
+        if view.isFirstResponder {
+            view.resignFirstResponder()
+            
+            view.becomeFirstResponder()
         }
     }
     
@@ -119,7 +165,7 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
     func textViewDidChange(_ textView: UITextView) {
         let data = OnChangeData(value: textView.text ?? "")
         
-        self.detonator.handlerEmitter.emit(name: "onChange", edgeId: edge.id, data: data)
+        self.detonator.emitHandler(name: "onChange", edgeId: edge.id, data: data)
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
@@ -134,6 +180,7 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         var placeholder: String?
         var placeholderColor: StyleColor?
         var value: String?
+        var autoCapitalize: String?
         var onChange: Bool?
         
         required init(from decoder: Decoder) throws {
@@ -142,6 +189,7 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
             placeholder = try container.decodeIfPresent(String.self, forKey: .placeholder)
             placeholderColor = try container.decodeIfPresent(StyleColor.self, forKey: .placeholderColor)
             value = try container.decodeIfPresent(String.self, forKey: .value)
+            autoCapitalize = try container.decodeIfPresent(String.self, forKey: .autoCapitalize)
             onChange = try container.decodeIfPresent(Bool.self, forKey: .onChange)
             
             try super.init(from: decoder)
@@ -151,6 +199,7 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
             case placeholder
             case placeholderColor
             case value
+            case autoCapitalize
             case onChange
         }
     }

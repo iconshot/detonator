@@ -1,7 +1,7 @@
 import UIKit
 
-class ScrollView: UIScrollView {
-    override func measure(specWidth: CGFloat, specHeight: CGFloat, specWidthMode: Int, specHeightMode: Int) {
+public class ScrollView: UIScrollView {
+    override public func measure(specWidth: CGFloat, specHeight: CGFloat, specWidthMode: Int, specHeightMode: Int) {
         if layoutParams.remeasured {
             frame.size.width = specWidth
             frame.size.height = specHeight
@@ -52,7 +52,7 @@ class ScrollView: UIScrollView {
         )
     }
     
-    override func layout(x: CGFloat, y: CGFloat) {
+    override public func layout(x: CGFloat, y: CGFloat) {
         super.layout(x: x, y: y)
         
         let paddingTop = layoutParams.padding.top

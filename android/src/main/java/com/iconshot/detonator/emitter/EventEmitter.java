@@ -7,10 +7,6 @@ public class EventEmitter extends Emitter {
         super(detonator);
     }
 
-    public void emit(String name) {
-        emit(name, null);
-    }
-
     public void emit(String name, Object data) {
         Event handler = new Event();
 

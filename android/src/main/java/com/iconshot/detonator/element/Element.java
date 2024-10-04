@@ -60,7 +60,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         view.setLayoutParams(layoutParams);
 
         view.setOnClickListener((View v) -> {
-            detonator.handlerEmitter.emit("onTap", edge.id);
+            detonator.emitHandler("onTap", edge.id);
         });
     }
 

@@ -10,15 +10,19 @@ async function replacePath(targetPath, object) {
   const stat = await fsp.stat(targetPath);
 
   if (stat.isFile()) {
-    let content = await fsp.readFile(targetPath, "utf8");
+    const content = await fsp.readFile(targetPath, "utf8");
+
+    let tmpContent = content;
 
     for (const key in object) {
       const value = object[key];
 
-      content = content.replace(new RegExp(key, "g"), value);
+      tmpContent = tmpContent.replace(new RegExp(key, "g"), value);
     }
 
-    await fsp.writeFile(targetPath, content, "utf8");
+    if (content !== tmpContent) {
+      await fsp.writeFile(targetPath, tmpContent, "utf8");
+    }
   } else if (stat.isDirectory()) {
     const items = await fsp.readdir(targetPath);
 

@@ -1,7 +1,5 @@
 package com.iconshot.detonator.element.scrollviewelement;
 
-import android.widget.ScrollView;
-
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.helpers.CompareHelper;
@@ -14,8 +12,8 @@ public class ScrollViewElement extends Element<CustomScrollView, ScrollViewEleme
     }
 
     @Override
-    public Class<ScrollViewElement.Attributes> getAttributesClass() {
-        return ScrollViewElement.Attributes.class;
+    public Class<Attributes> getAttributesClass() {
+        return Attributes.class;
     }
 
     @Override

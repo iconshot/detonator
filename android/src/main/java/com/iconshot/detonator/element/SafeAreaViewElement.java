@@ -9,8 +9,8 @@ public class SafeAreaViewElement extends BaseViewElement<SafeAreaViewElement.Att
     }
 
     @Override
-    protected Class<SafeAreaViewElement.Attributes> getAttributesClass() {
-        return SafeAreaViewElement.Attributes.class;
+    protected Class<Attributes> getAttributesClass() {
+        return Attributes.class;
     }
 
     public static class Attributes extends BaseViewElement.Attributes {

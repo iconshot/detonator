@@ -8,7 +8,7 @@ public class ViewElement extends BaseViewElement<BaseViewElement.Attributes> {
     }
 
     @Override
-    protected Class<BaseViewElement.Attributes> getAttributesClass() {
-        return BaseViewElement.Attributes.class;
+    protected Class<Attributes> getAttributesClass() {
+        return Attributes.class;
     }
 }

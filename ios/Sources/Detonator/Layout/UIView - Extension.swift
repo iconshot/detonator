@@ -4,7 +4,7 @@ private var isViewGroupKey: UInt8 = 0
 private var layoutParamsKey: UInt8 = 0
 
 extension UIView {
-    var isViewGroup: Bool {
+    public var isViewGroup: Bool {
         get {
             let isViewGroup = objc_getAssociatedObject(self, &isViewGroupKey) as? Bool
             
@@ -15,7 +15,7 @@ extension UIView {
         }
     }
     
-    var layoutParams: LayoutParams {
+    public var layoutParams: LayoutParams {
         get {
             var layoutParams = objc_getAssociatedObject(self, &layoutParamsKey) as? LayoutParams
             
@@ -32,7 +32,7 @@ extension UIView {
         }
     }
     
-    @objc func measure(specWidth: CGFloat, specHeight: CGFloat, specWidthMode: Int, specHeightMode: Int) {
+    @objc open func measure(specWidth: CGFloat, specHeight: CGFloat, specWidthMode: Int, specHeightMode: Int) {
         var constraintWidth = CGFloat.greatestFiniteMagnitude
         var constraintHeight = CGFloat.greatestFiniteMagnitude
         
@@ -77,12 +77,12 @@ extension UIView {
         frame.size.height = resolvedHeight
     }
     
-    @objc func layout(x: CGFloat, y: CGFloat) {
+    @objc open func layout(x: CGFloat, y: CGFloat) {
         frame.origin.x = x
         frame.origin.y = y
     }
     
-    func resolveSize(size: CGFloat, specSize: CGFloat, specSizeMode: Int) -> CGFloat {
+    public func resolveSize(size: CGFloat, specSize: CGFloat, specSizeMode: Int) -> CGFloat {
         switch specSizeMode {
         case MeasureSpec.EXACTLY:
             return specSize

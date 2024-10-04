@@ -1,82 +1,82 @@
 import UIKit
 
-class LayoutParams {
-    enum Position {
+public class LayoutParams {
+    public enum Position {
         case relative, absolute
     }
     
-    enum Display {
+    public enum Display {
         case flex, none
     }
     
-    enum FlexDirection {
+    public enum FlexDirection {
         case row, rowReverse, column, columnReverse
     }
     
-    enum JustifyContent {
+    public enum JustifyContent {
         case flexStart, flexEnd, start, end, center, spaceBetween, spaceAround, spaceEvenly
     }
     
-    enum AlignItems {
+    public enum AlignItems {
         case flexStart, flexEnd, start, end, center
     }
     
-    var remeasured: Bool = false
+    public var remeasured: Bool = false
     
-    var position: Position = .relative
+    public var position: Position = .relative
     
-    var display: Display = .flex
+    public var display: Display = .flex
     
-    var width: Float?
-    var height: Float?
+    public var width: Float?
+    public var height: Float?
     
-    var widthPercent: Float?
-    var heightPercent: Float?
+    public var widthPercent: Float?
+    public var heightPercent: Float?
     
-    var minWidth: Float?
-    var minWidthPercent: Float?
+    public var minWidth: Float?
+    public var minWidthPercent: Float?
     
-    var maxWidth: Float?
-    var maxWidthPercent: Float?
+    public var maxWidth: Float?
+    public var maxWidthPercent: Float?
     
-    var minHeight: Float?
-    var minHeightPercent: Float?
+    public var minHeight: Float?
+    public var minHeightPercent: Float?
     
-    var maxHeight: Float?
-    var maxHeightPercent: Float?
+    public var maxHeight: Float?
+    public var maxHeightPercent: Float?
     
-    var flex: Int?
-    var alignSelf: AlignItems?
+    public var flex: Int?
+    public var alignSelf: AlignItems?
     
-    var aspectRatio: Float?
+    public var aspectRatio: Float?
     
-    var positionTop: Float?
-    var positionLeft: Float?
-    var positionBottom: Float?
-    var positionRight: Float?
+    public var positionTop: Float?
+    public var positionLeft: Float?
+    public var positionBottom: Float?
+    public var positionRight: Float?
     
-    var margin: LayoutInsets = LayoutInsets.zero
-    var padding: LayoutInsets = LayoutInsets.zero
+    public var margin: LayoutInsets = LayoutInsets.zero
+    public var padding: LayoutInsets = LayoutInsets.zero
     
-    var onLayoutClosures: [String: (() -> Void)] = [:]
+    public var onLayoutClosures: [String: (() -> Void)] = [:]
     
-    func callOnLayout() {
+    public func callOnLayout() {
         for (_, onLayoutClosure) in onLayoutClosures {
             onLayoutClosure()
         }
     }
 }
 
-struct LayoutInsets {
+public struct LayoutInsets {
     var top: Float
     var left: Float
     var bottom: Float
     var right: Float
     
-    static var zero: LayoutInsets = LayoutInsets(top: 0, left: 0, bottom: 0, right: 0) 
+    static var zero: LayoutInsets = LayoutInsets(top: 0, left: 0, bottom: 0, right: 0)
 }
 
-struct LayoutSize {
+public struct LayoutSize {
     var width: Float
     var height: Float
     

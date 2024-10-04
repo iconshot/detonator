@@ -21,15 +21,13 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
     }
 
     @Override
-    public Class<TextAreaElement.Attributes> getAttributesClass() {
-        return TextAreaElement.Attributes.class;
+    public Class<Attributes> getAttributesClass() {
+        return Attributes.class;
     }
 
     @Override
     protected EditText createView() {
         EditText view = new EditText(ContextHelper.context);
-
-        view.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE);
 
         defaultColor = view.getCurrentTextColor();
 
@@ -43,7 +41,7 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
 
                 data.value = s.toString();
 
-                detonator.handlerEmitter.emit("onChange", edge.id, data);
+                detonator.emitHandler("onChange", edge.id, data);
             }
 
             @Override
@@ -86,6 +84,50 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
         if (patchValue) {
             view.setText(value != null ? value : "");
         }
+
+        String autoCapitalize = attributes.autoCapitalize;
+
+        String currentAutoCapitalize = currentAttributes != null ? currentAttributes.autoCapitalize : null;
+
+        boolean patchAutoCapitalize = forcePatch || !CompareHelper.compareObjects(autoCapitalize, currentAutoCapitalize);
+
+        if (patchAutoCapitalize) {
+            patchInputType(autoCapitalize);
+        }
+    }
+
+    private void patchInputType( String autoCapitalize) {
+        int value = InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_FLAG_MULTI_LINE;
+
+        String tmpAutoCapitalize = autoCapitalize != null ? autoCapitalize : "sentences";
+
+        switch (tmpAutoCapitalize) {
+            case "characters": {
+                value |= InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS;
+
+                break;
+            }
+
+            case "words": {
+                value |= InputType.TYPE_TEXT_FLAG_CAP_WORDS;
+
+                break;
+            }
+
+            case "sentences": {
+                value |= InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
+
+                break;
+            }
+
+            case "none": {
+                value |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+
+                break;
+            }
+        }
+
+        view.setInputType(value);
     }
 
     protected void patchFontSize(Float fontSize) {
@@ -104,6 +146,7 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
         String placeholder;
         Object placeholderColor;
         String value;
+        String autoCapitalize;
         Boolean onChange;
     }
 

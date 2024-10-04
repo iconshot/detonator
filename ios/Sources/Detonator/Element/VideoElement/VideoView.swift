@@ -2,8 +2,8 @@ import UIKit
 import AVKit
 import AVFoundation
 
-class VideoView: UIView {
-    enum ObjectFit {
+public class VideoView: UIView {
+    public enum ObjectFit {
         case cover, contain, fill
     }
     
@@ -97,7 +97,7 @@ class VideoView: UIView {
         player?.seek(to: time)
     }
     
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         playerLayer?.frame = bounds
     }
     

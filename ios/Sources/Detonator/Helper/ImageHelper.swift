@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 import CommonCrypto
 
-class ImageHelper {
+public class ImageHelper {
     public static func loadImage(urlString: String, completion: @escaping (Data?, Error?) -> Void) {
         guard let url = URL(string: urlString) else {
             let error = NSError(domain: "com.iconshot.detonator.ImageHelper", code: -1, userInfo: [NSLocalizedDescriptionKey: "URL string is not valid."])

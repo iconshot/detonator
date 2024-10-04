@@ -1,7 +1,7 @@
 import UIKit
 
-class ColorHelper {
-    static func createColor(hexCode: String) -> UIColor? {
+public class ColorHelper {
+    public static func createColor(hexCode: String) -> UIColor? {
         var hex = hexCode.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
         
         if hex.count == 6 {
@@ -24,7 +24,7 @@ class ColorHelper {
         return UIColor(red: red, green: green, blue: blue, alpha: alpha)
     }
     
-    static func parseColor(color: StyleColor) -> UIColor? {
+    public static func parseColor(color: StyleColor) -> UIColor? {
         switch color {
         case .string(let string):
             if string == "transparent" {
@@ -56,7 +56,7 @@ class ColorHelper {
         }
     }
 
-    class Colors {
+    public class Colors {
         private static let map: [String: String] = {
             var map = [String: String]()
             
@@ -212,11 +212,11 @@ class ColorHelper {
             return map
         }()
 
-        static func has(_ key: String) -> Bool {
+        public static func has(_ key: String) -> Bool {
             return map[key] != nil
         }
 
-        static func get(_ key: String) -> String? {
+        public static func get(_ key: String) -> String? {
             return map[key]
         }
     }

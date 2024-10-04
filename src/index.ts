@@ -13,6 +13,7 @@ export * from "./Component/Image";
 export * from "./Component/Video";
 export * from "./Component/ScrollView";
 export * from "./Component/SafeAreaView";
+export * from "./Component/Icon";
 
 export * from "./Utility/Toast";
 export * from "./Utility/Color";

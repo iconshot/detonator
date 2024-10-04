@@ -147,7 +147,7 @@ export class Detonator {
     await this.request({ name: "com.iconshot.detonator/openUrl", data: url });
   }
 
-  public static log(data: any): void {
+  public static log(...data: any[]): void {
     Messenger.log(data);
   }
 }

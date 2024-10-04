@@ -9,5 +9,11 @@
 		<key>UISceneConfigurations</key>
 		<dict/>
 	</dict>
+    <key>UIAppFonts</key>
+    <array>
+        <string>fa-regular-400.ttf</string>
+        <string>fa-solid-900.ttf</string>
+        <string>fa-brands-400.ttf</string>
+    </array>
 </dict>
 </plist>

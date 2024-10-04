@@ -47,7 +47,7 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
                 data.value = s.toString();
 
-                detonator.handlerEmitter.emit("onChange", edge.id, data);
+                detonator.emitHandler("onChange", edge.id, data);
             }
 
             @Override
@@ -65,7 +65,7 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
-                    detonator.handlerEmitter.emit("onDone", edge.id);
+                    detonator.emitHandler("onDone", edge.id);
                 });
 
                 return true;
@@ -115,29 +115,65 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
         boolean patchInputType = forcePatch || !CompareHelper.compareObjects(inputType, currentInputType);
 
-        if (patchInputType) {
-            String tmpInputType = inputType != null ? inputType : "text";
+        String autoCapitalize = attributes.autoCapitalize;
 
-            switch (tmpInputType) {
-                case "text": {
-                    view.setInputType(InputType.TYPE_CLASS_TEXT);
+        String currentAutoCapitalize = currentAttributes != null ? currentAttributes.autoCapitalize : null;
 
-                    break;
-                }
+        boolean patchAutoCapitalize = forcePatch || !CompareHelper.compareObjects(autoCapitalize, currentAutoCapitalize);
 
-                case "password": {
-                    view.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+        if (patchInputType || patchAutoCapitalize) {
+            patchInputType(inputType, autoCapitalize);
+        }
+    }
 
-                    break;
-                }
+    private void patchInputType(String inputType, String autoCapitalize) {
+        int value = InputType.TYPE_CLASS_TEXT;
 
-                case "email": {
-                    view.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+        String tmpInputType = inputType != null ? inputType : "text";
 
-                    break;
-                }
+        String tmpAutoCapitalize = autoCapitalize != null ? autoCapitalize : "sentences";
+
+        switch (tmpInputType) {
+            case "password": {
+                value |= InputType.TYPE_TEXT_VARIATION_PASSWORD;
+
+                break;
+            }
+
+            case "email": {
+                value |= InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS;
+
+                break;
             }
         }
+
+        switch (tmpAutoCapitalize) {
+            case "characters": {
+                value |= InputType.TYPE_TEXT_FLAG_CAP_CHARACTERS;
+
+                break;
+            }
+
+            case "words": {
+                value |= InputType.TYPE_TEXT_FLAG_CAP_WORDS;
+
+                break;
+            }
+
+            case "sentences": {
+                value |= InputType.TYPE_TEXT_FLAG_CAP_SENTENCES;
+
+                break;
+            }
+
+            case "none": {
+                value |= InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+
+                break;
+            }
+        }
+
+        view.setInputType(value);
     }
 
     protected void patchFontSize(Float fontSize) {
@@ -157,6 +193,7 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         Object placeholderColor;
         String value;
         String inputType;
+        String autoCapitalize;
         Boolean onChange;
         Boolean onDone;
     }

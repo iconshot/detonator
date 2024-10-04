@@ -1,8 +1,8 @@
-enum StyleColor: Decodable {
+public enum StyleColor: Decodable {
     case string(String)
     case array([Float])
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         
         if let string = try? container.decode(String.self) {
@@ -15,11 +15,11 @@ enum StyleColor: Decodable {
     }
 }
 
-enum StyleSize: Decodable {
+public enum StyleSize: Decodable {
     case float(Float)
     case string(String)
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
         
         if let float = try? container.decode(Float.self) {
@@ -32,14 +32,14 @@ enum StyleSize: Decodable {
     }
 }
 
-struct StyleTransform: Decodable {
+public struct StyleTransform: Decodable {
     var translateX: StyleSize?
     var translateY: StyleSize?
     var scale: StyleSize?
     var scaleX: StyleSize?
     var scaleY: StyleSize?
     
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         
         translateX = try container.decodeIfPresent(StyleSize.self, forKey: .translateX)

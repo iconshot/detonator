@@ -56,6 +56,6 @@ public class AppStateModule extends Module {
     private void emit() {
         String currentState = foreground ? "foreground": "background";
 
-        detonator.eventEmitter.emit("com.iconshot.detonator.appstate/state", currentState);
+        detonator.emitEvent("com.iconshot.detonator.appstate/state", currentState);
     }
 }

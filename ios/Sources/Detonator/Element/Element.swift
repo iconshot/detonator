@@ -1,9 +1,9 @@
 import UIKit
 
-class Attributes: Decodable {
-    let style: Style?
-    let onTap: Bool?
-    let onDoubleTap: Bool?
+open class Attributes: Decodable {
+    public let style: Style?
+    public let onTap: Bool?
+    public let onDoubleTap: Bool?
     
     private enum CodingKeys: String, CodingKey {
         case style
@@ -13,22 +13,22 @@ class Attributes: Decodable {
 }
 
 open class Element: NSObject {
-    let detonator: Detonator
+    public let detonator: Detonator
     
-    var edge: Edge!
-    var currentEdge: Edge?
+    public var edge: Edge!
+    public var currentEdge: Edge?
     
-    var view: UIView!
+    public var view: UIView!
     
-    var attributes: Attributes!
-    var currentAttributes: Attributes?
+    public var attributes: Attributes!
+    public var currentAttributes: Attributes?
     
     var styler: Styler!
     var currentStyler: Styler!
     
-    var forcePatch: Bool = true
+    public var forcePatch: Bool = true
     
-    var tapGestureRecognizer: UITapGestureRecognizer!
+    public var tapGestureRecognizer: UITapGestureRecognizer!
     
     required public init(_ detonator: Detonator) {
         self.detonator = detonator
@@ -38,7 +38,7 @@ open class Element: NSObject {
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onTapListener(_:)))
     }
     
-    func decodeAttributes<T: Attributes>(edge: Edge) -> T? {
+    public func decodeAttributes<T: Attributes>(edge: Edge) -> T? {
         if let json = edge.attributes!.data(using: .utf8) {
             do {
                 let decoder = JSONDecoder()
@@ -52,13 +52,13 @@ open class Element: NSObject {
         return nil
     }
     
-    func decodeAttributes(edge: Edge) -> Attributes? {
+    open func decodeAttributes(edge: Edge) -> Attributes? {
         preconditionFailure("This method must be overridden.")
     }
     
     public func create() {
         let view = createView()
-                
+        
         view.addGestureRecognizer(tapGestureRecognizer)
         
         self.view = view
@@ -73,7 +73,7 @@ open class Element: NSObject {
         
         styler = Styler(style: attributes.style)
         currentStyler = Styler(style: currentAttributes?.style)
-                
+        
         let flex = styler.getFlex()
         let flexDirection = styler.getFlexDirection()
         let justifyContent = styler.getJustifyContent()
@@ -138,7 +138,7 @@ open class Element: NSObject {
         let borderRightWidth = styler.getBorderRightWidth()
         let borderRightColor = styler.getBorderRightColor()
         let transform = styler.getTransform()
-
+        
         let currentFlex = currentStyler.getFlex()
         let currentFlexDirection = currentStyler.getFlexDirection()
         let currentJustifyContent = currentStyler.getJustifyContent()
@@ -203,7 +203,7 @@ open class Element: NSObject {
         let currentBorderRightWidth = currentStyler.getBorderRightWidth()
         let currentBorderRightColor = currentStyler.getBorderRightColor()
         let currentTransform = currentStyler.getTransform()
-
+        
         let patchFlexBool = forcePatch || flex != currentFlex
         let patchFlexDirectionBool = forcePatch || flexDirection != currentFlexDirection
         let patchJustifyContentBool = forcePatch || justifyContent != currentJustifyContent
@@ -268,11 +268,11 @@ open class Element: NSObject {
         let patchBorderRightWidthBool = forcePatch || borderRightWidth != currentBorderRightWidth
         let patchBorderRightColorBool = forcePatch || !CompareHelper.compareStyleColors(borderRightColor, currentBorderRightColor)
         let patchTransformBool = forcePatch || !CompareHelper.compareStyleTransforms(transform, currentTransform)
-
+        
         if patchFlexBool {
             patchFlex(flex: flex)
         }
-
+        
         if patchFlexDirectionBool {
             patchFlexDirection(flexDirection: flexDirection)
         }
@@ -503,22 +503,22 @@ open class Element: NSObject {
         patchView()
     }
     
-    func patchFlex(flex: Int?) {
+    open func patchFlex(flex: Int?) {
         let layoutParams = view.layoutParams
         
         layoutParams.flex = flex
     }
 
-    func patchFlexDirection(flexDirection: String?) {
+    open func patchFlexDirection(flexDirection: String?) {
     }
 
-    func patchJustifyContent(justifyContent: String?) {
+    open func patchJustifyContent(justifyContent: String?) {
     }
 
-    func patchAlignItems(alignItems: String?) {
+    open func patchAlignItems(alignItems: String?) {
     }
 
-    func patchAlignSelf(alignSelf: String?) {
+    open func patchAlignSelf(alignSelf: String?) {
         let layoutParams = view.layoutParams
         
         switch alignSelf {
@@ -554,13 +554,13 @@ open class Element: NSObject {
         }
     }
 
-    func patchBackgroundColor(backgroundColor: StyleColor?) {
+    open func patchBackgroundColor(backgroundColor: StyleColor?) {
         let tmpBackgroundColor = backgroundColor != nil ? ColorHelper.parseColor(color: backgroundColor!) : nil
                     
         view.backgroundColor = tmpBackgroundColor ?? UIColor.clear
     }
 
-    func patchWidth(width: StyleSize?) {
+    open func patchWidth(width: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch width {
@@ -584,7 +584,7 @@ open class Element: NSObject {
         }
     }
 
-    func patchHeight(height: StyleSize?) {
+    open func patchHeight(height: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch height {
@@ -608,7 +608,7 @@ open class Element: NSObject {
         }
     }
 
-    func patchMinWidth(minWidth: StyleSize?) {
+    open func patchMinWidth(minWidth: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch minWidth {
@@ -632,7 +632,7 @@ open class Element: NSObject {
         }
     }
 
-    func patchMinHeight(minHeight: StyleSize?) {
+    open func patchMinHeight(minHeight: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch minHeight {
@@ -656,7 +656,7 @@ open class Element: NSObject {
         }
     }
 
-    func patchMaxWidth(maxWidth: StyleSize?) {
+    open func patchMaxWidth(maxWidth: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch maxWidth {
@@ -680,7 +680,7 @@ open class Element: NSObject {
         }
     }
 
-    func patchMaxHeight(maxHeight: StyleSize?) {
+    open func patchMaxHeight(maxHeight: StyleSize?) {
         let layoutParams = view.layoutParams
         
         switch maxHeight {
@@ -704,7 +704,7 @@ open class Element: NSObject {
         }
     }
 
-    func patchPadding(
+    open func patchPadding(
         padding: Float?,
         paddingHorizontal: Float?,
         paddingVertical: Float?,
@@ -754,7 +754,7 @@ open class Element: NSObject {
         layoutParams.padding.right = tmpPaddingRight
     }
 
-    func patchMargin(
+    open func patchMargin(
         margin: Float?,
         marginHorizontal: Float?,
         marginVertical: Float?,
@@ -804,37 +804,37 @@ open class Element: NSObject {
         layoutParams.margin.right = tmpMarginRight
     }
 
-    func patchFontSize(fontSize: Float?) {
+    open func patchFontSize(fontSize: Float?) {
     }
 
-    func patchLineHeight(lineHeight: Float?) {
+    open func patchLineHeight(lineHeight: Float?) {
     }
 
-    func patchFontWeight(fontWeight: String?) {
+    open func patchFontWeight(fontWeight: String?) {
     }
 
-    func patchColor(color: StyleColor?) {
+    open func patchColor(color: StyleColor?) {
     }
 
-    func patchTextAlign(textAlign: String?) {
+    open func patchTextAlign(textAlign: String?) {
     }
 
-    func patchTextDecoration(textDecoration: String?) {
+    open func patchTextDecoration(textDecoration: String?) {
     }
 
-    func patchTextTransform(textTransform: String?) {
+    open func patchTextTransform(textTransform: String?) {
     }
 
-    func patchTextOverflow(textOverflow: String?) {
+    open func patchTextOverflow(textOverflow: String?) {
     }
 
-    func patchOverflowWrap(overflowWrap: String?) {
+    open func patchOverflowWrap(overflowWrap: String?) {
     }
 
-    func patchWordBreak(wordBreak: String?) {
+    open func patchWordBreak(wordBreak: String?) {
     }
 
-    func patchPosition(position: String?) {
+    open func patchPosition(position: String?) {
         let layoutParams = view.layoutParams
         
         switch position {
@@ -850,35 +850,35 @@ open class Element: NSObject {
         }
     }
 
-    func patchTop(top: Float?) {
+    open func patchTop(top: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.positionTop = top
     }
 
-    func patchLeft(left: Float?) {
+    open func patchLeft(left: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.positionLeft = left
     }
 
-    func patchBottom(bottom: Float?) {
+    open func patchBottom(bottom: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.positionBottom = bottom
     }
 
-    func patchRight(right: Float?) {
+    open func patchRight(right: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.positionRight = right
     }
 
-    func patchZIndex(zIndex: Int?) {
+    open func patchZIndex(zIndex: Int?) {
         view.layer.zPosition = zIndex != nil ? CGFloat(zIndex!) : 0
     }
 
-    func patchDisplay(display: String?) {
+    open func patchDisplay(display: String?) {
         let layoutParams = view.layoutParams
         
         switch display {
@@ -900,26 +900,26 @@ open class Element: NSObject {
         }
     }
 
-    func patchPointerEvents(pointerEvents: String?) {
+    open func patchPointerEvents(pointerEvents: String?) {
     }
 
-    func patchObjectFit(objectFit: String?) {
+    open func patchObjectFit(objectFit: String?) {
     }
 
-    func patchOverflow(overflow: String?) {
+    open func patchOverflow(overflow: String?) {
     }
 
-    func patchOpacity(opacity: Float?) {
+    open func patchOpacity(opacity: Float?) {
         view.alpha = opacity != nil ? CGFloat(opacity!) : 1.0
     }
 
-    func patchAspectRatio(aspectRatio: Float?) {
+    open func patchAspectRatio(aspectRatio: Float?) {
         let layoutParams = view.layoutParams
         
         layoutParams.aspectRatio = aspectRatio
     }
 
-    func patchBorderRadius(
+    open func patchBorderRadius(
         borderRadius: StyleSize?,
         borderRadiusTopLeft: StyleSize?,
         borderRadiusTopRight: StyleSize?,
@@ -1041,37 +1041,37 @@ open class Element: NSObject {
         return CGFloat(min(value, maxRadius))
     }
 
-    func patchBorderWidth(borderWidth: Float?) {
+    open func patchBorderWidth(borderWidth: Float?) {
     }
 
-    func patchBorderColor(borderColor: StyleColor?) {
+    open func patchBorderColor(borderColor: StyleColor?) {
     }
 
-    func patchBorderTopWidth(borderTopWidth: Float?) {
+    open func patchBorderTopWidth(borderTopWidth: Float?) {
     }
 
-    func patchBorderTopColor(borderTopColor: StyleColor?) {
+    open func patchBorderTopColor(borderTopColor: StyleColor?) {
     }
 
-    func patchBorderLeftWidth(borderLeftWidth: Float?) {
+    open func patchBorderLeftWidth(borderLeftWidth: Float?) {
     }
 
-    func patchBorderLeftColor(borderLeftColor: StyleColor?) {
+    open func patchBorderLeftColor(borderLeftColor: StyleColor?) {
     }
 
-    func patchBorderBottomWidth(borderBottomWidth: Float?) {
+    open func patchBorderBottomWidth(borderBottomWidth: Float?) {
     }
 
-    func patchBorderBottomColor(borderBottomColor: StyleColor?) {
+    open func patchBorderBottomColor(borderBottomColor: StyleColor?) {
     }
 
-    func patchBorderRightWidth(borderRightWidth: Float?) {
+    open func patchBorderRightWidth(borderRightWidth: Float?) {
     }
 
-    func patchBorderRightColor(borderRightColor: StyleColor?) {
+    open func patchBorderRightColor(borderRightColor: StyleColor?) {
     }
     
-    func patchTransform(transform: StyleTransform?) {
+    open func patchTransform(transform: StyleTransform?) {
         let layoutParams = view.layoutParams
         
         layoutParams.onLayoutClosures["transform"] = {
@@ -1512,11 +1512,11 @@ open class Element: NSObject {
         }
     }
     
-    func createView() -> UIView {
+    open func createView() -> UIView {
         preconditionFailure("This method must be overridden.")
     }
     
-    func patchView() {
+    open func patchView() {
         preconditionFailure("This method must be overridden.")
     }
     
@@ -1531,6 +1531,6 @@ open class Element: NSObject {
     }
     
     @objc func onTapListener(_ sender: UITapGestureRecognizer) {
-        detonator.handlerEmitter.emit(name: "onTap", edgeId: edge.id, data: nil)
+        detonator.emitHandler(name: "onTap", edgeId: edge.id)
     }
 }

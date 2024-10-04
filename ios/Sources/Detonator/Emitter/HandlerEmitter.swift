@@ -1,5 +1,5 @@
 public class HandlerEmitter: Emitter {
-    public func emit(name: String, edgeId: Int, data: Encodable? = nil) {
+    public func emit(name: String, edgeId: Int, data: Encodable?) {
         let handler = Handler(name: name, edgeId: edgeId, data: data)
         
         detonator.emit(name: "handler", value: handler)

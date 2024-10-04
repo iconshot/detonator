@@ -7,10 +7,6 @@ public class HandlerEmitter extends Emitter {
         super(detonator);
     }
 
-    public void emit(String name, int edgeId) {
-        emit(name, edgeId, null);
-    }
-
     public void emit(String name, int edgeId, Object data) {
         Handler handler = new Handler();
 

@@ -10,13 +10,14 @@ class TextElement: Element {
         
         view.isUserInteractionEnabled = true
         
-        view.numberOfLines = 0
-        
         return view
     }
     
     override public func patchView() {
         let view = view as! TextView
+        
+        let attributes = attributes as! TextAttributes
+        let currentAttributes = currentAttributes as! TextAttributes?
         
         let stringBuilder = NSMutableString()
         
@@ -28,8 +29,19 @@ class TextElement: Element {
         
         let text = stringBuilder as String
         
-        if (text != view.text) {
+        if text != view.text {
             view.text = text
+        }
+        
+        let maxLines = attributes.maxLines
+        let currentMaxLines = currentAttributes?.maxLines
+        
+        let patchMaxLinesBool = forcePatch || maxLines != currentMaxLines
+        
+        if patchMaxLinesBool {
+            let value = maxLines ?? 0
+            
+            view.numberOfLines = value
         }
     }
     
@@ -47,5 +59,19 @@ class TextElement: Element {
         view.textColor = color != nil ? ColorHelper.parseColor(color: color!) : nil
     }
     
-    class TextAttributes: Attributes {}
+    class TextAttributes: Attributes {
+        var maxLines: Int?
+        
+        required init(from decoder: Decoder) throws {
+            let container = try decoder.container(keyedBy: CodingKeys.self)
+            
+            maxLines = try container.decodeIfPresent(Int.self, forKey: .maxLines)
+            
+            try super.init(from: decoder)
+        }
+        
+        private enum CodingKeys: String, CodingKey {
+            case maxLines
+        }
+    }
 }

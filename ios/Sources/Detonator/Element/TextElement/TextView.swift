@@ -1,7 +1,7 @@
 import UIKit
 
-class TextView: UILabel {
-    override func drawText(in rect: CGRect) {
+public class TextView: UILabel {
+    override public func drawText(in rect: CGRect) {
         let padding = layoutParams.padding
         
         let insets = UIEdgeInsets(
@@ -16,7 +16,7 @@ class TextView: UILabel {
         super.drawText(in: insetRect)
     }
     
-    override func sizeThatFits(_ size: CGSize) -> CGSize {
+    override public func sizeThatFits(_ size: CGSize) -> CGSize {
         let padding = layoutParams.padding
         
         let paddingX = padding.left + padding.right

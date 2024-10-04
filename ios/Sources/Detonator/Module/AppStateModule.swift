@@ -33,7 +33,7 @@ class AppStateModule: Module {
     }
     
     private func emit() {
-        detonator.eventEmitter.emit(name: "com.iconshot.detonator.appstate/state", data: currentState.rawValue)
+        detonator.emitEvent(name: "com.iconshot.detonator.appstate/state", data: currentState.rawValue)
     }
     
     @objc func appDidEnterBackground() {

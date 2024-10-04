@@ -17,6 +17,7 @@ interface InputProps extends ViewProps {
   placeholderColor?: StyleColor | null;
   value?: string | null;
   inputType?: "text" | "password" | "email" | null;
+  autoCapitalize?: "characters" | "words" | "sentences" | "none" | null;
   onChange?: ((event: InputChangeEvent) => void) | null;
   onDone?: ((event: InputNextEvent) => void) | null;
 }

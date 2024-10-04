@@ -1,5 +1,5 @@
 public class EventEmitter: Emitter {
-    public func emit(name: String, data: Encodable? = nil) {
+    public func emit(name: String, data: Encodable?) {
         let handler = Event(name: name, data: data)
         
         detonator.emit(name: "event", value: handler)

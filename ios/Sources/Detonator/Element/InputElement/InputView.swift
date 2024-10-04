@@ -1,19 +1,19 @@
 import UIKit
 
-class InputView: UITextField {
-    override func textRect(forBounds bounds: CGRect) -> CGRect {
+public class InputView: UITextField {
+    override public func textRect(forBounds bounds: CGRect) -> CGRect {
         return getInsetRect(bounds)
     }
     
-    override func editingRect(forBounds bounds: CGRect) -> CGRect {
+    override public func editingRect(forBounds bounds: CGRect) -> CGRect {
         return getInsetRect(bounds)
     }
     
-    override func placeholderRect(forBounds bounds: CGRect) -> CGRect {
+    override public func placeholderRect(forBounds bounds: CGRect) -> CGRect {
         return getInsetRect(bounds)
     }
     
-    func getInsetRect(_ rect: CGRect) -> CGRect {
+    public func getInsetRect(_ rect: CGRect) -> CGRect {
         let padding = layoutParams.padding
         
         let insets = UIEdgeInsets(

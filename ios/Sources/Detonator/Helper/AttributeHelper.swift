@@ -1,5 +1,5 @@
-class AttributeHelper {
-    static func convertPercentStringToFloat(_ percentString: String) -> Float? {
+public class AttributeHelper {
+    public static func convertPercentStringToFloat(_ percentString: String) -> Float? {
         let numberString = percentString.replacingOccurrences(of: "%", with: "")
             .replacingOccurrences(of: "-", with: "")
         

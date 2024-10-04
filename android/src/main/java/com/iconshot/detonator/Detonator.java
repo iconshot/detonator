@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.iconshot.detonator.element.Element;
+import com.iconshot.detonator.element.IconElement;
 import com.iconshot.detonator.element.SafeAreaViewElement;
 import com.iconshot.detonator.element.scrollviewelement.ScrollViewElement;
 import com.iconshot.detonator.element.imageelement.ImageElement;
@@ -62,8 +63,8 @@ public class Detonator {
     private final Map<String, Class<? extends Request>> requestClasses;
     private final Map<String, Class<? extends Module>> moduleClasses;
     private final Map<String, Module> modules;
-    public final HandlerEmitter handlerEmitter;
-    public final EventEmitter eventEmitter;
+    private final HandlerEmitter handlerEmitter;
+    private final EventEmitter eventEmitter;
     private final Map<Integer, Tree> trees;
     private final Map<Integer, Edge> edges;
     private final Handler uiHandler;
@@ -107,6 +108,7 @@ public class Detonator {
         addElementClass("com.iconshot.detonator.video", VideoElement.class);
         addElementClass("com.iconshot.detonator.scrollview", ScrollViewElement.class);
         addElementClass("com.iconshot.detonator.safeareaview", SafeAreaViewElement.class);
+        addElementClass("com.iconshot.detonator.icon", IconElement.class);
 
         addRequestClass("com.iconshot.detonator/openUrl", OpenUrlRequest.class);
         addRequestClass("com.iconshot.detonator.input/focus", InputFocusRequest.class);
@@ -176,6 +178,22 @@ public class Detonator {
         String code = "window.emitter.emit(\"" + name + "\", \"" + escape + "\");";
 
         evaluate(code);
+    }
+
+    public void emitHandler(String name, int edgeId) {
+        emitHandler(name, edgeId, null);
+    }
+
+    public void emitHandler(String name, int edgeId, Object data) {
+        handlerEmitter.emit(name, edgeId, data);
+    }
+
+    public void emitEvent(String name) {
+        emitEvent(name, null);
+    }
+
+    public void emitEvent(String name, Object data) {
+        eventEmitter.emit(name, data);
     }
 
     private void collectModuleClasses() {
@@ -397,7 +415,9 @@ public class Detonator {
     }
 
     private void log(String dataString) {
-        System.out.println(dataString);
+        String str = dataString.substring(1, dataString.length() - 1);
+
+        System.out.println(str);
     }
 
     public void performLayout() {

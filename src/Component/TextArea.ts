@@ -14,6 +14,7 @@ interface TextAreaProps extends ViewProps {
   placeholder?: string | number | null;
   placeholderColor?: StyleColor | null;
   value?: string | null;
+  autoCapitalize?: "characters" | "words" | "sentences" | "none" | null;
   onChange?: ((event: TextAreaChangeEvent) => void) | null;
 }
 

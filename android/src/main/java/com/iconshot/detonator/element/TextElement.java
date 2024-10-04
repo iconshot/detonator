@@ -48,6 +48,18 @@ public class TextElement extends Element<TextView, TextElement.Attributes> {
                 view.setText(text);
             }
         }
+
+        Integer maxLines = attributes.maxLines;
+
+        Integer currentMaxLines = currentAttributes != null ? currentAttributes.maxLines : null;
+
+        boolean patchMaxLines = forcePatch || !CompareHelper.compareObjects(maxLines, currentMaxLines);
+
+        if (patchMaxLines) {
+            int value = maxLines != null && maxLines > 0 ? maxLines : Integer.MAX_VALUE;
+
+            view.setMaxLines(value);
+        }
     }
 
     protected void patchFontSize(Float fontSize) {
@@ -62,5 +74,7 @@ public class TextElement extends Element<TextView, TextElement.Attributes> {
         view.setTextColor(tmpColor != null ? tmpColor : defaultColor);
     }
 
-    protected static class Attributes extends Element.Attributes {}
+    protected static class Attributes extends Element.Attributes {
+        Integer maxLines;
+    }
 }
