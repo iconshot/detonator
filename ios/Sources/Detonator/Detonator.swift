@@ -49,6 +49,7 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         addElementClass(key: "com.iconshot.detonator.scrollview", elementClass: ScrollViewElement.self)
         addElementClass(key: "com.iconshot.detonator.safeareaview", elementClass: SafeAreaViewElement.self)
         addElementClass(key: "com.iconshot.detonator.icon", elementClass: IconElement.self)
+        addElementClass(key: "com.iconshot.detonator.activityindicator", elementClass: ActivityIndicatorElement.self)
         
         addRequestClass(key: "com.iconshot.detonator/openUrl", requestClass: OpenUrlRequest.self)
         addRequestClass(key: "com.iconshot.detonator.input/focus", requestClass: InputFocusRequest.self)

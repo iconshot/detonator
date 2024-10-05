@@ -14,6 +14,7 @@ export * from "./Component/Video";
 export * from "./Component/ScrollView";
 export * from "./Component/SafeAreaView";
 export * from "./Component/Icon";
+export * from "./Component/ActivityIndicator";
 
 export * from "./Utility/Toast";
 export * from "./Utility/Color";

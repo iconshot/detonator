@@ -12,8 +12,8 @@ class VideoElement: Element {
     override public func patchView() {
         let view = view as! VideoView
         
-        let attributes = self.attributes as! VideoAttributes
-        let currentAttributes = self.currentAttributes as! VideoAttributes?
+        let attributes = attributes as! VideoAttributes
+        let currentAttributes = currentAttributes as! VideoAttributes?
         
         let url = attributes.url
         let currentUrl = currentAttributes?.url

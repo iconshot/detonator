@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.iconshot.detonator.element.Element;
+import com.iconshot.detonator.element.ActivityIndicatorElement;
 import com.iconshot.detonator.element.IconElement;
 import com.iconshot.detonator.element.SafeAreaViewElement;
 import com.iconshot.detonator.element.scrollviewelement.ScrollViewElement;
@@ -109,6 +110,7 @@ public class Detonator {
         addElementClass("com.iconshot.detonator.scrollview", ScrollViewElement.class);
         addElementClass("com.iconshot.detonator.safeareaview", SafeAreaViewElement.class);
         addElementClass("com.iconshot.detonator.icon", IconElement.class);
+        addElementClass("com.iconshot.detonator.activityindicator", ActivityIndicatorElement.class);
 
         addRequestClass("com.iconshot.detonator/openUrl", OpenUrlRequest.class);
         addRequestClass("com.iconshot.detonator.input/focus", InputFocusRequest.class);
