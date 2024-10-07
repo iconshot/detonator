@@ -1,4 +1,4 @@
-package com.iconshot.detonator.element.scrollviewelement;
+package com.iconshot.detonator.element.verticalscrollviewelement;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
@@ -6,8 +6,8 @@ import com.iconshot.detonator.helpers.CompareHelper;
 import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 
-public class ScrollViewElement extends Element<CustomScrollView, ScrollViewElement.Attributes> {
-    public ScrollViewElement(Detonator detonator) {
+public class VerticalScrollViewElement extends Element<CustomVerticalScrollView, VerticalScrollViewElement.Attributes> {
+    public VerticalScrollViewElement(Detonator detonator) {
         super(detonator);
     }
 
@@ -17,12 +17,34 @@ public class ScrollViewElement extends Element<CustomScrollView, ScrollViewEleme
     }
 
     @Override
-    public CustomScrollView createView() {
-        return new CustomScrollView(ContextHelper.context);
+    public CustomVerticalScrollView createView() {
+        CustomVerticalScrollView view = new CustomVerticalScrollView(ContextHelper.context);
+
+        view.setOnPageChangeListener(page -> {
+            OnPageChangeData data = new OnPageChangeData();
+
+            data.page = page;
+
+            detonator.emitHandler("onPageChange", edge.id, data);
+        });
+
+        return view;
     }
 
     @Override
     protected void patchView() {
+        Boolean paginated = attributes.paginated;
+
+        Boolean currentPaginated = currentAttributes != null ? currentAttributes.paginated : null;
+
+        boolean patchPaginated = forcePatch || !CompareHelper.compareObjects(paginated, currentPaginated);
+
+        if (patchPaginated) {
+            boolean tmpPaginated = paginated != null ? paginated : false;
+
+            view.setPaginated(tmpPaginated);
+        }
+
         Boolean showsIndicator = attributes.showsIndicator;
 
         Boolean currentShowsIndicator = currentAttributes != null ? currentAttributes.showsIndicator : null;
@@ -30,11 +52,9 @@ public class ScrollViewElement extends Element<CustomScrollView, ScrollViewEleme
         boolean patchShowsIndicator = forcePatch || !CompareHelper.compareObjects(showsIndicator, currentShowsIndicator);
 
         if (patchShowsIndicator) {
-            if (showsIndicator != null && showsIndicator) {
-                view.setVerticalScrollBarEnabled(true);
-            } else {
-                view.setVerticalScrollBarEnabled(false);
-            }
+            boolean value = showsIndicator != null && showsIndicator;
+
+            view.setVerticalScrollBarEnabled(value);
         }
     }
 
@@ -70,8 +90,13 @@ public class ScrollViewElement extends Element<CustomScrollView, ScrollViewEleme
         });
     }
 
+    private static class OnPageChangeData {
+        int page;
+    }
+
     protected static class Attributes extends Element.Attributes {
         Boolean horizontal;
+        Boolean paginated;
         Boolean showsIndicator;
     }
 }

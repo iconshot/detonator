@@ -37,7 +37,7 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                TextAreaElement.OnChangeData data = new TextAreaElement.OnChangeData();
+                OnChangeData data = new OnChangeData();
 
                 data.value = s.toString();
 
@@ -142,15 +142,15 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
         view.setTextColor(tmpColor != null ? tmpColor : defaultColor);
     }
 
+    private static class OnChangeData {
+        String value;
+    }
+
     protected static class Attributes extends Element.Attributes {
         String placeholder;
         Object placeholderColor;
         String value;
         String autoCapitalize;
         Boolean onChange;
-    }
-
-    private static class OnChangeData {
-        String value;
     }
 }

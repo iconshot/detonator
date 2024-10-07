@@ -188,6 +188,10 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         view.setTextColor(tmpColor != null ? tmpColor : defaultColor);
     }
 
+    private static class OnChangeData {
+        String value;
+    }
+
     protected static class Attributes extends Element.Attributes {
         String placeholder;
         Object placeholderColor;
@@ -196,9 +200,5 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         String autoCapitalize;
         Boolean onChange;
         Boolean onDone;
-    }
-
-    private static class OnChangeData {
-        String value;
     }
 }

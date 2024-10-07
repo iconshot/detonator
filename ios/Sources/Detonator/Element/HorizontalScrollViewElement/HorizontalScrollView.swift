@@ -1,6 +1,18 @@
 import UIKit
 
-public class ScrollView: UIScrollView {
+public class HorizontalScrollView: UIScrollView, UIScrollViewDelegate {
+    private var page: Int = 0
+    
+    public var onPageChangeListener: ((_ page: Int) -> Void)!
+    
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+    
+    public required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+    
     override public func measure(specWidth: CGFloat, specHeight: CGFloat, specWidthMode: Int, specHeightMode: Int) {
         if layoutParams.remeasured {
             frame.size.width = specWidth
@@ -18,6 +30,7 @@ public class ScrollView: UIScrollView {
         let paddingY = paddingTop + paddingBottom
         
         let innerWidth = specWidth - CGFloat(paddingX)
+        let innerHeight = specHeight - CGFloat(paddingY)
         
         var contentWidth: Float = 0
         var contentHeight: Float = 0
@@ -25,10 +38,10 @@ public class ScrollView: UIScrollView {
         let child = subviews.first!
         
         child.measure(
-            specWidth: innerWidth,
-            specHeight: 0,
-            specWidthMode: specWidthMode,
-            specHeightMode: MeasureSpec.UNSPECIFIED
+            specWidth: isPagingEnabled ? innerWidth * CGFloat(child.subviews.count) : 0,
+            specHeight: innerHeight,
+            specWidthMode: isPagingEnabled ? MeasureSpec.EXACTLY : MeasureSpec.UNSPECIFIED,
+            specHeightMode: specHeightMode
         )
         
         let childWidth = Float(child.frame.size.width)
@@ -64,5 +77,47 @@ public class ScrollView: UIScrollView {
         let child = subviews.first!
         
         child.layout(x: CGFloat(x), y: CGFloat(y))
+    }
+    
+    func scrollToPage(page: Int) {
+        if !isPagingEnabled {
+            return
+        }
+        
+        let width = frame.size.width
+        
+        let child = subviews.first!
+        
+        let pagesCount = child.subviews.count
+        
+        let tmpPage = max(0, min(page, pagesCount - 1));
+        
+        if tmpPage == self.page {
+            return
+        }
+        
+        self.page = tmpPage
+        
+        onPageChangeListener(tmpPage)
+        
+        let targetOffset = CGPoint(x: width * CGFloat(tmpPage), y: 0)
+        
+        setContentOffset(targetOffset, animated: true)
+    }
+    
+    public func scrollViewDidEndDecelerating(_ view: UIScrollView) {
+        if !isPagingEnabled {
+            return
+        }
+        
+        let tmpPage = Int(view.contentOffset.x / view.frame.size.width)
+        
+        if tmpPage == self.page {
+            return
+        }
+        
+        self.page = tmpPage
+        
+        onPageChangeListener(tmpPage)
     }
 }
