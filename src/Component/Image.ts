@@ -6,9 +6,9 @@ import { BaseView } from "./BaseView";
 
 import { ViewProps } from "./View";
 
-interface ImageLoadEvent extends Event {}
+export interface ImageLoadEvent extends Event {}
 
-interface ImageErrorEvent extends Event {}
+export interface ImageErrorEvent extends Event {}
 
 interface ImageProps extends ViewProps {
   url?: string | null;

@@ -6,15 +6,19 @@ import { BaseView } from "./BaseView";
 
 import { ViewProps } from "./View";
 
-interface OnSeekData {
-  time: number;
+export interface VideoPlayEvent extends Event {}
+
+export interface VideoPauseEvent extends Event {}
+
+export interface VideoSeekEvent extends Event {
+  ms: number;
 }
 
 interface VideoProps extends ViewProps {
   url?: string | null;
-  onPlay?: () => void;
-  onPause?: () => void;
-  onSeek?: (data: OnSeekData) => void;
+  onPlay?: ((event: VideoPlayEvent) => void) | null;
+  onPause?: ((event: VideoPauseEvent) => void) | null;
+  onSeek?: ((event: VideoSeekEvent) => void) | null;
 }
 
 export class Video extends BaseView<VideoProps> {

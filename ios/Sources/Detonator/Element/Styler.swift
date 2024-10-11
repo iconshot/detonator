@@ -153,19 +153,19 @@ class Styler {
         return style?.position
     }
     
-    public func getTop() -> Float? {
+    public func getTop() -> StyleSize? {
         return style?.top
     }
     
-    public func getLeft() -> Float? {
+    public func getLeft() -> StyleSize? {
         return style?.left
     }
     
-    public func getBottom() -> Float? {
+    public func getBottom() -> StyleSize? {
         return style?.bottom
     }
     
-    public func getRight() -> Float? {
+    public func getRight() -> StyleSize? {
         return style?.right
     }
     

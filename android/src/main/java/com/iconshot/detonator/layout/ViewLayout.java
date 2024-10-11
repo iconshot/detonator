@@ -669,8 +669,11 @@ public class ViewLayout extends ViewGroup {
             boolean hasMaxWidth = layoutParams.maxWidth != null || layoutParams.maxWidthPercent != null;
             boolean hasMaxHeight = layoutParams.maxHeight != null || layoutParams.maxHeightPercent != null;
 
-            boolean hasPositionWidth = layoutParams.positionLeft != null && layoutParams.positionRight != null;
-            boolean hasPositionHeight = layoutParams.positionTop != null && layoutParams.positionBottom != null;
+            boolean hasPositionWidth = (layoutParams.positionLeft != null || layoutParams.positionLeftPercent != null)
+                    && (layoutParams.positionRight != null || layoutParams.positionRightPercent != null);
+
+            boolean hasPositionHeight = (layoutParams.positionTop != null || layoutParams.positionTopPercent != null)
+                    && (layoutParams.positionBottom != null || layoutParams.positionBottomPercent != null);
 
             // alias to keep consistency with the other loops
 
@@ -709,7 +712,15 @@ public class ViewLayout extends ViewGroup {
 
                 childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
             } else if (usePositionWidth) {
-                int width = measuredWidth - layoutParams.positionLeft - layoutParams.positionRight;
+                int left = layoutParams.positionLeft != null
+                        ? layoutParams.positionLeft
+                        : (int) (measuredWidth * layoutParams.positionLeftPercent);
+
+                int right = layoutParams.positionRight != null
+                        ? layoutParams.positionRight
+                        : (int) (measuredWidth * layoutParams.positionRightPercent);
+
+                int width = measuredWidth - left - right;
 
                 if (useMaxWidth) {
                     int maxWidth = layoutParams.maxWidth != null
@@ -761,7 +772,15 @@ public class ViewLayout extends ViewGroup {
 
                 childHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
             } else if (usePositionHeight) {
-                int height = measuredHeight - layoutParams.positionTop - layoutParams.positionBottom;
+                int top = layoutParams.positionTop != null
+                        ? layoutParams.positionTop
+                        : (int) (measuredHeight * layoutParams.positionTopPercent);
+
+                int bottom = layoutParams.positionBottom != null
+                        ? layoutParams.positionBottom
+                        : (int) (measuredHeight * layoutParams.positionBottomPercent);
+
+                int height = measuredHeight - top - bottom;
 
                 if (useMaxHeight) {
                     int maxHeight = layoutParams.maxHeight != null
@@ -1143,9 +1162,16 @@ public class ViewLayout extends ViewGroup {
             int outerHeight = childHeight + marginY;
 
             Integer positionTop = layoutParams.positionTop;
+            Float positionTopPercent = layoutParams.positionTopPercent;
+
             Integer positionLeft = layoutParams.positionLeft;
+            Float positionLeftPercent = layoutParams.positionLeftPercent;
+
             Integer positionBottom = layoutParams.positionBottom;
+            Float positionBottomPercent = layoutParams.positionBottomPercent;
+
             Integer positionRight = layoutParams.positionRight;
+            Float positionRightPercent = layoutParams.positionRightPercent;
 
             int x = 0;
             int y = 0;
@@ -1214,14 +1240,22 @@ public class ViewLayout extends ViewGroup {
 
             if (positionLeft != null) {
                 x += positionLeft;
+            } else if (positionLeftPercent != null) {
+                x += (int) measuredWidth * positionLeftPercent;
             } else if (positionRight != null) {
                 x -= positionRight;
+            } else if (positionRightPercent != null) {
+                x -= (int) measuredWidth * positionRightPercent;
             }
 
             if (positionTop != null) {
                 y += positionTop;
+            } else if (positionTopPercent != null) {
+                y += (int) measuredHeight * positionTopPercent;
             } else if (positionBottom != null) {
                 y -= positionBottom;
+            } else if (positionBottomPercent != null) {
+                y -= (int) measuredHeight * positionBottomPercent;
             }
 
             layoutChild(child, x, y, x + childWidth, y + childHeight);
@@ -1276,9 +1310,16 @@ public class ViewLayout extends ViewGroup {
             int outerHeight = childHeight + marginY;
 
             Integer positionTop = layoutParams.positionTop;
+            Float positionTopPercent = layoutParams.positionTopPercent;
+
             Integer positionLeft = layoutParams.positionLeft;
+            Float positionLeftPercent = layoutParams.positionLeftPercent;
+
             Integer positionBottom = layoutParams.positionBottom;
+            Float positionBottomPercent = layoutParams.positionBottomPercent;
+
             Integer positionRight = layoutParams.positionRight;
+            Float positionRightPercent = layoutParams.positionRightPercent;
 
             int x = 0;
             int y = 0;
@@ -1411,14 +1452,22 @@ public class ViewLayout extends ViewGroup {
 
             if (positionLeft != null) {
                 x = positionLeft + marginLeft;
+            } else if (positionLeftPercent != null) {
+                x = (int) (measuredWidth * positionLeftPercent) + marginLeft;
             } else if (positionRight != null) {
                 x = measuredWidth - positionRight - marginRight - childWidth;
+            } else if (positionRightPercent != null) {
+                x = measuredWidth - (int) (measuredWidth * positionRightPercent) - marginRight - childWidth;
             }
 
             if (positionTop != null) {
                 y = positionTop + marginTop;
+            } else if (positionTopPercent != null) {
+                y = (int) (measuredHeight * positionTopPercent) + marginTop;
             } else if (positionBottom != null) {
                 y = measuredHeight - positionBottom - marginBottom - childHeight;
+            } else if (positionBottomPercent != null) {
+                y = measuredHeight - (int) (measuredHeight * positionBottomPercent) - marginBottom - childHeight;
             }
 
             layoutChild(child, x, y, x + childWidth, y + childHeight);
@@ -1520,9 +1569,16 @@ public class ViewLayout extends ViewGroup {
         public Float aspectRatio;
 
         public Integer positionTop;
+        public Float positionTopPercent;
+
         public Integer positionLeft;
+        public Float positionLeftPercent;
+
         public Integer positionBottom;
+        public Float positionBottomPercent;
+
         public Integer positionRight;
+        public Float positionRightPercent;
 
         public Map<String, OnLayoutClosure> onLayoutClosures = new HashMap<>();
 

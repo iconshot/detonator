@@ -6,11 +6,11 @@ import { BaseView } from "./BaseView";
 
 import { StyleColor, ViewProps } from "./View";
 
-interface InputChangeEvent extends Event {
+export interface InputChangeEvent extends Event {
   value: string;
 }
 
-interface InputNextEvent extends Event {}
+export interface InputNextEvent extends Event {}
 
 interface InputProps extends ViewProps {
   placeholder?: string | number | null;

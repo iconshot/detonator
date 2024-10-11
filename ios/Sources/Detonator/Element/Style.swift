@@ -116,10 +116,10 @@ public struct Style: Decodable {
     // position
     
     var position: String?
-    var top: Float?
-    var left: Float?
-    var bottom: Float?
-    var right: Float?
+    var top: StyleSize?
+    var left: StyleSize?
+    var bottom: StyleSize?
+    var right: StyleSize?
     var zIndex: Int?
     
     // misc
@@ -199,10 +199,10 @@ public struct Style: Decodable {
         overflowWrap = try container.decodeIfPresent(String.self, forKey: .overflowWrap)
         wordBreak = try container.decodeIfPresent(String.self, forKey: .wordBreak)
         position = try container.decodeIfPresent(String.self, forKey: .position)
-        top = try container.decodeIfPresent(Float.self, forKey: .top)
-        left = try container.decodeIfPresent(Float.self, forKey: .left)
-        bottom = try container.decodeIfPresent(Float.self, forKey: .bottom)
-        right = try container.decodeIfPresent(Float.self, forKey: .right)
+        top = try container.decodeIfPresent(StyleSize.self, forKey: .top)
+        left = try container.decodeIfPresent(StyleSize.self, forKey: .left)
+        bottom = try container.decodeIfPresent(StyleSize.self, forKey: .bottom)
+        right = try container.decodeIfPresent(StyleSize.self, forKey: .right)
         zIndex = try container.decodeIfPresent(Int.self, forKey: .zIndex)
         display = try container.decodeIfPresent(String.self, forKey: .display)
         pointerEvents = try container.decodeIfPresent(String.self, forKey: .pointerEvents)

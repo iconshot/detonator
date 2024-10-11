@@ -6,7 +6,7 @@ import { BaseView } from "./BaseView";
 
 import { StyleColor, ViewProps } from "./View";
 
-interface TextAreaChangeEvent extends Event {
+export interface TextAreaChangeEvent extends Event {
   value: string;
 }
 

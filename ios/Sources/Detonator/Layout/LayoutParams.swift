@@ -51,9 +51,16 @@ public class LayoutParams {
     public var aspectRatio: Float?
     
     public var positionTop: Float?
+    public var positionTopPercent: Float?
+    
     public var positionLeft: Float?
+    public var positionLeftPercent: Float?
+    
     public var positionBottom: Float?
+    public var positionBottomPercent: Float?
+    
     public var positionRight: Float?
+    public var positionRightPercent: Float?
     
     public var margin: LayoutInsets = LayoutInsets.zero
     public var padding: LayoutInsets = LayoutInsets.zero

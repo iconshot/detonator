@@ -241,10 +241,10 @@ open class Element: NSObject {
         let patchOverflowWrapBool = forcePatch || overflowWrap != currentOverflowWrap
         let patchWordBreakBool = forcePatch || wordBreak != currentWordBreak
         let patchPositionBool = forcePatch || position != currentPosition
-        let patchTopBool = forcePatch || top != currentTop
-        let patchLeftBool = forcePatch || left != currentLeft
-        let patchBottomBool = forcePatch || bottom != currentBottom
-        let patchRightBool = forcePatch || right != currentRight
+        let patchTopBool = forcePatch || !CompareHelper.compareStyleSizes(top, currentTop)
+        let patchLeftBool = forcePatch || !CompareHelper.compareStyleSizes(left, currentLeft)
+        let patchBottomBool = forcePatch || !CompareHelper.compareStyleSizes(bottom, currentBottom)
+        let patchRightBool = forcePatch || !CompareHelper.compareStyleSizes(right, currentRight)
         let patchZIndexBool = forcePatch || zIndex != currentZIndex
         let patchDisplayBool = forcePatch || display != currentDisplay
         let patchPointerEventsBool = forcePatch || pointerEvents != currentPointerEvents
@@ -850,28 +850,100 @@ open class Element: NSObject {
         }
     }
 
-    open func patchTop(top: Float?) {
+    open func patchTop(top: StyleSize?) {
         let layoutParams = view.layoutParams
         
-        layoutParams.positionTop = top
+        switch top {
+        case .float(let float):
+            layoutParams.positionTop = float
+            layoutParams.positionTopPercent = nil
+            
+            break
+        
+        case .string(let string):
+            layoutParams.positionTop = nil
+            layoutParams.positionTopPercent = AttributeHelper.convertPercentStringToFloat(string)
+            
+            break
+            
+        default:
+            layoutParams.positionTop = nil
+            layoutParams.positionTopPercent = nil
+            
+            break
+        }
     }
 
-    open func patchLeft(left: Float?) {
+    open func patchLeft(left: StyleSize?) {
         let layoutParams = view.layoutParams
         
-        layoutParams.positionLeft = left
+        switch left {
+        case .float(let float):
+            layoutParams.positionLeft = float
+            layoutParams.positionLeftPercent = nil
+            
+            break
+        
+        case .string(let string):
+            layoutParams.positionLeft = nil
+            layoutParams.positionLeftPercent = AttributeHelper.convertPercentStringToFloat(string)
+            
+            break
+            
+        default:
+            layoutParams.positionLeft = nil
+            layoutParams.positionLeftPercent = nil
+            
+            break
+        }
     }
 
-    open func patchBottom(bottom: Float?) {
+    open func patchBottom(bottom: StyleSize?) {
         let layoutParams = view.layoutParams
         
-        layoutParams.positionBottom = bottom
+        switch bottom {
+        case .float(let float):
+            layoutParams.positionBottom = float
+            layoutParams.positionBottomPercent = nil
+            
+            break
+        
+        case .string(let string):
+            layoutParams.positionBottom = nil
+            layoutParams.positionBottomPercent = AttributeHelper.convertPercentStringToFloat(string)
+            
+            break
+            
+        default:
+            layoutParams.positionBottom = nil
+            layoutParams.positionBottomPercent = nil
+            
+            break
+        }
     }
 
-    open func patchRight(right: Float?) {
+    open func patchRight(right: StyleSize?) {
         let layoutParams = view.layoutParams
         
-        layoutParams.positionRight = right
+        switch right {
+        case .float(let float):
+            layoutParams.positionRight = float
+            layoutParams.positionRightPercent = nil
+            
+            break
+        
+        case .string(let string):
+            layoutParams.positionRight = nil
+            layoutParams.positionRightPercent = AttributeHelper.convertPercentStringToFloat(string)
+            
+            break
+            
+        default:
+            layoutParams.positionRight = nil
+            layoutParams.positionRightPercent = nil
+            
+            break
+        }
     }
 
     open func patchZIndex(zIndex: Int?) {

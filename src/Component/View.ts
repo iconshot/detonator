@@ -70,10 +70,10 @@ export interface Style {
   wordBreak?: "normal" | "break-all" | "keep-all" | null;
 
   position?: "relative" | "absolute" | null;
-  top?: number | null;
-  left?: number | null;
-  bottom?: number | null;
-  right?: number | null;
+  top?: StyleSize | null;
+  left?: StyleSize | null;
+  bottom?: StyleSize | null;
+  right?: StyleSize | null;
   zIndex?: number | null;
 
   display?: "flex" | "none" | null;

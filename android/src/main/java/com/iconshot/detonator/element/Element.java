@@ -113,10 +113,10 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         String overflowWrap = styler.getOverflowWrap();
         String wordBreak = styler.getWordBreak();
         String position = styler.getPosition();
-        Float top = styler.getTop();
-        Float left = styler.getLeft();
-        Float bottom = styler.getBottom();
-        Float right = styler.getRight();
+        Object top = styler.getTop();
+        Object left = styler.getLeft();
+        Object bottom = styler.getBottom();
+        Object right = styler.getRight();
         Integer zIndex = styler.getZIndex();
         String display = styler.getDisplay();
         String pointerEvents = styler.getPointerEvents();
@@ -178,10 +178,10 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         String currentOverflowWrap = currentStyler.getOverflowWrap();
         String currentWordBreak = currentStyler.getWordBreak();
         String currentPosition = currentStyler.getPosition();
-        Float currentTop = currentStyler.getTop();
-        Float currentLeft = currentStyler.getLeft();
-        Float currentBottom = currentStyler.getBottom();
-        Float currentRight = currentStyler.getRight();
+        Object currentTop = currentStyler.getTop();
+        Object currentLeft = currentStyler.getLeft();
+        Object currentBottom = currentStyler.getBottom();
+        Object currentRight = currentStyler.getRight();
         Integer currentZIndex = currentStyler.getZIndex();
         String currentDisplay = currentStyler.getDisplay();
         String currentPointerEvents = currentStyler.getPointerEvents();
@@ -872,28 +872,72 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         layoutParams.position = tmpPosition;
     }
 
-    protected void patchTop(Float top) {
+    protected void patchTop(Object top) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        layoutParams.positionTop = top != null ? PixelHelper.dpToPx(top) : null;
+        if (top != null) {
+            if (top instanceof Double) {
+                layoutParams.positionTop = PixelHelper.dpToPx((double) top);
+                layoutParams.positionTopPercent = null;
+            } else {
+                layoutParams.positionTop = null;
+                layoutParams.positionTopPercent = AttributeHelper.convertPercentStringToFloat((String) top);
+            }
+        } else {
+            layoutParams.positionTop = null;
+            layoutParams.positionTopPercent = null;
+        }
     }
 
-    protected void patchLeft(Float left) {
+    protected void patchLeft(Object left) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        layoutParams.positionLeft = left != null ? PixelHelper.dpToPx(left) : null;
+        if (left != null) {
+            if (left instanceof Double) {
+                layoutParams.positionLeft = PixelHelper.dpToPx((double) left);
+                layoutParams.positionLeftPercent = null;
+            } else {
+                layoutParams.positionLeft = null;
+                layoutParams.positionLeftPercent = AttributeHelper.convertPercentStringToFloat((String) left);
+            }
+        } else {
+            layoutParams.positionLeft = null;
+            layoutParams.positionLeftPercent = null;
+        }
     }
 
-    protected void patchBottom(Float bottom) {
+    protected void patchBottom(Object bottom) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        layoutParams.positionBottom = bottom != null ? PixelHelper.dpToPx(bottom) : null;
+        if (bottom != null) {
+            if (bottom instanceof Double) {
+                layoutParams.positionBottom = PixelHelper.dpToPx((double) bottom);
+                layoutParams.positionBottomPercent = null;
+            } else {
+                layoutParams.positionBottom = null;
+                layoutParams.positionBottomPercent = AttributeHelper.convertPercentStringToFloat((String) bottom);
+            }
+        } else {
+            layoutParams.positionBottom = null;
+            layoutParams.positionBottomPercent = null;
+        }
     }
 
-    protected void patchRight(Float right) {
+    protected void patchRight(Object right) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        layoutParams.positionRight = right != null ? PixelHelper.dpToPx(right) : null;
+        if (right != null) {
+            if (right instanceof Double) {
+                layoutParams.positionRight = PixelHelper.dpToPx((double) right);
+                layoutParams.positionRightPercent = null;
+            } else {
+                layoutParams.positionRight = null;
+                layoutParams.positionRightPercent = AttributeHelper.convertPercentStringToFloat((String) right);
+            }
+        } else {
+            layoutParams.positionRight = null;
+            layoutParams.positionRightPercent = null;
+        }
     }
 
     protected void patchZIndex(Integer zIndex) {
@@ -1079,10 +1123,10 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         String overflowWrap = styler.getOverflowWrap();
         String wordBreak = styler.getWordBreak();
         String position = styler.getPosition();
-        Float top = styler.getTop();
-        Float left = styler.getLeft();
-        Float bottom = styler.getBottom();
-        Float right = styler.getRight();
+        Object top = styler.getTop();
+        Object left = styler.getLeft();
+        Object bottom = styler.getBottom();
+        Object right = styler.getRight();
         Integer zIndex = styler.getZIndex();
         String display = styler.getDisplay();
         String pointerEvents = styler.getPointerEvents();

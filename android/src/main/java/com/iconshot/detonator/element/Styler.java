@@ -157,19 +157,19 @@ public class Styler {
         return style != null ? style.position : null;
     }
 
-    public Float getTop() {
+    public Object getTop() {
         return style != null ? style.top : null;
     }
 
-    public Float getLeft() {
+    public Object getLeft() {
         return style != null ? style.left : null;
     }
 
-    public Float getBottom() {
+    public Object getBottom() {
         return style != null ? style.bottom : null;
     }
 
-    public Float getRight() {
+    public Object getRight() {
         return style != null ? style.right : null;
     }
 

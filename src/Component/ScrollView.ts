@@ -4,7 +4,7 @@ import { BaseView } from "./BaseView";
 
 import { Style, View, ViewProps } from "./View";
 
-interface ScrollViewPageChangeEvent extends Event {
+export interface ScrollViewPageChangeEvent extends Event {
   page: number;
 }
 

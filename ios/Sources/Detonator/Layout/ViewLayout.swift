@@ -570,8 +570,11 @@ class ViewLayout: UIView {
             let hasMaxWidth = layoutParams.maxWidth != nil || layoutParams.maxWidthPercent != nil
             let hasMaxHeight = layoutParams.maxHeight != nil || layoutParams.maxHeightPercent != nil
             
-            let hasPositionWidth = layoutParams.positionLeft != nil && layoutParams.positionRight != nil
-            let hasPositionHeight = layoutParams.positionTop != nil && layoutParams.positionBottom != nil
+            let hasPositionWidth = (layoutParams.positionLeft != nil || layoutParams.positionLeftPercent != nil)
+            && (layoutParams.positionRight != nil || layoutParams.positionRightPercent != nil)
+            
+            let hasPositionHeight = (layoutParams.positionTop != nil || layoutParams.positionTopPercent != nil)
+            && (layoutParams.positionBottom != nil || layoutParams.positionBottomPercent != nil)
             
             let useWidth = hasWidth
             let useHeight = hasHeight
@@ -603,7 +606,11 @@ class ViewLayout: UIView {
                 childSpecWidth = width
                 childSpecWidthMode = MeasureSpec.EXACTLY
             } else if usePositionWidth {
-                var width = measuredWidth - layoutParams.positionLeft! - layoutParams.positionRight!
+                let left = layoutParams.positionLeft ?? measuredWidth * layoutParams.positionLeftPercent!
+                
+                let right = layoutParams.positionRight ?? measuredWidth * layoutParams.positionRightPercent!
+                
+                var width = measuredWidth - left - right
                 
                 if useMaxWidth {
                     let maxWidth = layoutParams.maxWidth ?? measuredWidth * layoutParams.maxWidthPercent!
@@ -646,7 +653,11 @@ class ViewLayout: UIView {
                 childSpecHeight = height
                 childSpecHeightMode = MeasureSpec.EXACTLY
             } else if usePositionHeight {
-                var height = measuredHeight - layoutParams.positionTop! - layoutParams.positionBottom!
+                let top = layoutParams.positionTop ?? measuredHeight * layoutParams.positionTopPercent!
+                
+                let bottom = layoutParams.positionBottom ?? measuredHeight * layoutParams.positionBottomPercent!
+                
+                var height = measuredHeight - top - bottom
                 
                 if useMaxHeight {
                     let maxHeight = layoutParams.maxHeight ?? measuredHeight * layoutParams.maxHeightPercent!
@@ -981,9 +992,16 @@ class ViewLayout: UIView {
             let outerHeight = childHeight + marginY
             
             let positionTop = layoutParams.positionTop
+            let positionTopPercent = layoutParams.positionTopPercent
+            
             let positionLeft = layoutParams.positionLeft
+            let positionLeftPercent = layoutParams.positionLeftPercent
+            
             let positionBottom = layoutParams.positionBottom
+            let positionBottomPercent = layoutParams.positionBottomPercent
+            
             let positionRight = layoutParams.positionRight
+            let positionRightPercent = layoutParams.positionRightPercent
             
             var x: Float = 0
             var y: Float = 0
@@ -1040,14 +1058,22 @@ class ViewLayout: UIView {
             
             if positionLeft != nil {
                 x += positionLeft!
+            } else if positionLeftPercent != nil {
+                x += measuredWidth * positionLeftPercent!
             } else if positionRight != nil {
                 x -= positionRight!
+            } else if positionRightPercent != nil {
+                x -= measuredWidth * positionRightPercent!
             }
             
             if positionTop != nil {
                 y += positionTop!
+            } else if positionTopPercent != nil {
+                y += measuredHeight * positionTopPercent!
             } else if positionBottom != nil {
                 y -= positionBottom!
+            } else if positionBottomPercent != nil {
+                y -= measuredHeight * positionBottomPercent!
             }
             
             layoutChild(view: child, x: x, y: y)
@@ -1090,9 +1116,16 @@ class ViewLayout: UIView {
             let outerHeight = childHeight + marginY
             
             let positionTop = layoutParams.positionTop
+            let positionTopPercent = layoutParams.positionTopPercent
+            
             let positionLeft = layoutParams.positionLeft
+            let positionLeftPercent = layoutParams.positionLeftPercent
+            
             let positionBottom = layoutParams.positionBottom
+            let positionBottomPercent = layoutParams.positionBottomPercent
+            
             let positionRight = layoutParams.positionRight
+            let positionRightPercent = layoutParams.positionRightPercent
             
             var x: Float = 0
             var y: Float = 0
@@ -1199,14 +1232,22 @@ class ViewLayout: UIView {
             
             if positionLeft != nil {
                 x = positionLeft! + marginLeft
+            } else if positionLeftPercent != nil {
+                x = measuredWidth * positionLeftPercent! + marginLeft
             } else if positionRight != nil {
                 x = measuredWidth - positionRight! - marginRight - childWidth
+            } else if positionRightPercent != nil {
+                x = measuredWidth - measuredWidth * positionRightPercent! - marginRight - childWidth
             }
             
             if positionTop != nil {
                 y = positionTop! + marginTop
+            } else if positionTopPercent != nil {
+                y = measuredHeight * positionTopPercent! + marginTop
             } else if positionBottom != nil {
                 y = measuredHeight - positionBottom! - marginBottom - childHeight
+            } else if positionBottomPercent != nil {
+                y = measuredHeight - measuredHeight * positionBottomPercent! - marginBottom - childHeight
             }
             
             layoutChild(view: child, x: x, y: y)

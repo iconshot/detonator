@@ -58,10 +58,10 @@ public class Style {
     // position
 
     public String position;
-    public Float top;
-    public Float left;
-    public Float bottom;
-    public Float right;
+    public Object top;
+    public Object left;
+    public Object bottom;
+    public Object right;
     public Integer zIndex;
 
     // misc
