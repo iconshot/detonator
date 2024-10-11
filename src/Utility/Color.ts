@@ -10,4 +10,8 @@ export class Color extends PalettoColor {
 
     return [...rgb, alpha];
   }
+
+  public static get blank(): Color {
+    return new Color(0, 0);
+  }
 }
