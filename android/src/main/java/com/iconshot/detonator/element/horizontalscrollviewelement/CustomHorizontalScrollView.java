@@ -85,6 +85,8 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
 
         int childHeightSpec = MeasureSpec.makeMeasureSpec(innerHeight, specHeightMode);
 
+        child.forceLayout();
+
         child.measure(childWidthSpec, childHeightSpec);
 
         int childWidth = child.getMeasuredWidth();

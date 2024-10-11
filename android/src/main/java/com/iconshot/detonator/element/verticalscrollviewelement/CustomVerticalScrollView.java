@@ -90,6 +90,8 @@ public class CustomVerticalScrollView extends ScrollView {
                 ? MeasureSpec.makeMeasureSpec(innerHeight * child.getChildCount(), MeasureSpec.EXACTLY)
                 : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
 
+        child.forceLayout();
+
         child.measure(childWidthSpec, childHeightSpec);
 
         int childWidth = child.getMeasuredWidth();
