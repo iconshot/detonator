@@ -248,8 +248,8 @@ export class Tree {
 
     try {
       if (slot instanceof Slot) {
-        if (slot.isComponent()) {
-          this.renderComponent(edge, currentEdge, target);
+        if (slot.isClass()) {
+          this.renderClass(edge, currentEdge, target);
         } else if (slot.isFunction()) {
           this.renderFunction(edge, currentEdge, target);
         } else if (slot.isElement()) {
@@ -267,7 +267,7 @@ export class Tree {
     TreeHub.edges.set(edge.id!, edge);
   }
 
-  private renderComponent(
+  private renderClass(
     edge: Edge,
     currentEdge: Edge | null,
     target: Target
@@ -616,8 +616,8 @@ export class Tree {
     let object: SerializedEdge | null = null;
 
     if (slot instanceof Slot) {
-      if (slot.isComponent()) {
-        object = this.serializeComponent(edge);
+      if (slot.isClass()) {
+        object = this.serializeClass(edge);
       } else if (slot.isFunction()) {
         object = this.serializeFunction(edge);
       } else if (slot.isElement()) {
@@ -642,7 +642,7 @@ export class Tree {
     return object!;
   }
 
-  private serializeComponent(edge: Edge): SerializedEdge {
+  private serializeClass(edge: Edge): SerializedEdge {
     const id = edge.id!;
 
     const parent = edge.parent?.id ?? null;
