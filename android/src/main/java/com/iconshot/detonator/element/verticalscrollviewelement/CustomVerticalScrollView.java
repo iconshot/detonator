@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.ScrollView;
 
@@ -32,7 +33,7 @@ public class CustomVerticalScrollView extends ScrollView {
 
     private Runnable scrollRunnable;
 
-    private float initialScrollY;
+    private float initialY = 0;
 
     public CustomVerticalScrollView(Context context) {
         super(context);
@@ -160,7 +161,19 @@ public class CustomVerticalScrollView extends ScrollView {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: {
-                return true;
+                initialY = event.getY();
+
+                return false;
+            }
+
+            case MotionEvent.ACTION_MOVE: {
+                float deltaY = Math.abs(event.getY() - initialY);
+
+                int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+
+                if (deltaY > slop) {
+                    return true;
+                }
             }
         }
 
@@ -174,17 +187,11 @@ public class CustomVerticalScrollView extends ScrollView {
         }
 
         switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN: {
-                initialScrollY = getScrollY();
-
-                break;
-            }
-
             case MotionEvent.ACTION_UP: {
                 scrollRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        float deltaY = getScrollY() - initialScrollY;
+                        float deltaY = event.getY() - initialY;
 
                         int height = getHeight();
 
@@ -193,7 +200,7 @@ public class CustomVerticalScrollView extends ScrollView {
                         float half = height / 2;
 
                         if (Math.abs(deltaY) >= half) {
-                            if (deltaY > 0) {
+                            if (deltaY < initialY) {
                                 targetPage++;
                             } else {
                                 targetPage--;
@@ -204,7 +211,7 @@ public class CustomVerticalScrollView extends ScrollView {
                     }
                 };
 
-                scrollHandler.postDelayed(scrollRunnable, 100);
+                scrollHandler.postDelayed(scrollRunnable, 10);
             }
         }
 

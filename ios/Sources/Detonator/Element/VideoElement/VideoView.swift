@@ -101,7 +101,9 @@ public class VideoView: UIView {
         playerLayer?.frame = bounds
     }
     
-    deinit {
+    public override func removeFromSuperview() {
         deinitPlayer()
+        
+        super.removeFromSuperview()
     }
 }

@@ -6,6 +6,7 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Handler;
 import android.view.MotionEvent;
+import android.view.ViewConfiguration;
 import android.widget.HorizontalScrollView;
 
 import com.iconshot.detonator.layout.ViewLayout;
@@ -27,7 +28,7 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
 
     private Runnable scrollRunnable;
 
-    private float initialScrollX;
+    private float initialX = 0;
 
     public CustomHorizontalScrollView(Context context) {
         super(context);
@@ -155,7 +156,19 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
 
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN: {
-                return true;
+                initialX = event.getX();
+
+                return false;
+            }
+
+            case MotionEvent.ACTION_MOVE: {
+                float deltaX = Math.abs(event.getX() - initialX);
+
+                int slop = ViewConfiguration.get(getContext()).getScaledTouchSlop();
+
+                if (deltaX > slop) {
+                    return true;
+                }
             }
         }
 
@@ -169,17 +182,11 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
         }
 
         switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN: {
-                initialScrollX = getScrollX();
-
-                break;
-            }
-
             case MotionEvent.ACTION_UP: {
                 scrollRunnable = new Runnable() {
                     @Override
                     public void run() {
-                        float deltaX = getScrollX() - initialScrollX;
+                        float deltaX = event.getX() - initialX;
 
                         int width = getWidth();
 
@@ -188,7 +195,7 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
                         float half = width / 2;
 
                         if (Math.abs(deltaX) >= half) {
-                            if (deltaX > 0) {
+                            if (deltaX < initialX) {
                                 targetPage++;
                             } else {
                                 targetPage--;
@@ -199,7 +206,7 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
                     }
                 };
 
-                scrollHandler.postDelayed(scrollRunnable, 100);
+                scrollHandler.postDelayed(scrollRunnable, 10);
             }
         }
 
