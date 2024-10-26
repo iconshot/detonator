@@ -101,9 +101,11 @@ public class VideoView: UIView {
         playerLayer?.frame = bounds
     }
     
-    public override func removeFromSuperview() {
-        deinitPlayer()
+    override public func willMove(toWindow newWindow: UIWindow?) {
+        super.willMove(toWindow: newWindow)
         
-        super.removeFromSuperview()
+        if newWindow == nil {
+            deinitPlayer()
+        }
     }
 }
