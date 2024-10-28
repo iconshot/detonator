@@ -1,10 +1,78 @@
 const path = require("node:path");
 const fsp = require("node:fs/promises");
 const util = require("node:util");
+const readline = require("node:readline");
 
 const exec = util.promisify(require("node:child_process").exec);
 
 const fse = require("fs-extra");
+
+async function init(appName, appId) {
+  {
+    console.log(`Initializing project "${appName}"`);
+
+    const currentDir = process.cwd();
+
+    const templateDir = path.resolve(__dirname, "../template");
+
+    await fse.copy(templateDir, currentDir);
+
+    const replaceObject = { HelloWorldApp: appName };
+
+    const packagePath = path.resolve(currentDir, "package.json");
+
+    await replacePath(packagePath, replaceObject);
+
+    const androidPath = path.resolve(currentDir, "android");
+    const iosPath = path.resolve(currentDir, "ios");
+
+    const androidReplaceObject = {
+      "com.example.helloworldapp": appId,
+      ...replaceObject,
+    };
+
+    const iosReplaceObject = {
+      "com.example.HelloWorldApp": appId,
+      ...replaceObject,
+    };
+
+    await replacePath(androidPath, androidReplaceObject);
+    await replacePath(iosPath, iosReplaceObject);
+
+    const androidRenameObject = {
+      "com/example/helloworldapp": appId.replace(".", "/"),
+    };
+
+    const iosRenameObject = {
+      HelloWorldApp: appName,
+      "HelloWorldApp.xcodeproj": `${appName}.xcodeproj`,
+    };
+
+    await renamePath(androidPath, androidRenameObject);
+    await renamePath(iosPath, iosRenameObject);
+  }
+
+  {
+    console.log("Installing dependencies");
+
+    await exec("npm i");
+  }
+
+  {
+    console.log("Bundling");
+
+    const libraryConfigPath = path.resolve(
+      __dirname,
+      "../config/webpack.config.js"
+    );
+
+    const command = `npx webpack --config ${libraryConfigPath}`;
+
+    await exec(command);
+  }
+
+  console.log("\x1b[32m%s\x1b[0m", "\u2713 Finished. Happy coding!");
+}
 
 async function replacePath(targetPath, object) {
   const stat = await fsp.stat(targetPath);
@@ -39,22 +107,17 @@ async function replacePath(targetPath, object) {
 async function renamePath(targetPath, object) {
   const stat = await fsp.stat(targetPath);
 
-  const dirname = path.dirname(targetPath);
-  const basename = path.basename(targetPath);
-
   let finalTargetPath = targetPath;
-
-  let finalBasename = basename;
 
   for (const key in object) {
     const value = object[key];
 
-    finalBasename = finalBasename.replace(key, value);
+    const regex = new RegExp(`${key}$`);
+
+    finalTargetPath = finalTargetPath.replace(regex, value);
   }
 
-  if (finalBasename !== basename) {
-    finalTargetPath = path.resolve(dirname, finalBasename);
-
+  if (targetPath !== finalTargetPath) {
     await fsp.rename(targetPath, finalTargetPath);
   }
 
@@ -71,66 +134,21 @@ async function renamePath(targetPath, object) {
   }
 }
 
-module.exports = async () => {
-  const templateDir = path.resolve(__dirname, "../template");
+module.exports = () => {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
 
-  const currentDir = process.cwd();
+  rl.question("App name: ", (appName) => {
+    const appIdPlaceholder = `com.${appName.toLowerCase()}`;
 
-  const name = path.basename(currentDir);
+    rl.question(`App id [${appIdPlaceholder}]: `, async (appIdValue) => {
+      const appId = appIdValue.trim() || appIdPlaceholder;
 
-  {
-    console.log(`Initializing project "${name}"`);
+      await init(appName, appId);
 
-    await fse.copy(templateDir, currentDir);
-
-    const replaceObject = { HelloWorldApp: name };
-
-    const packagePath = path.resolve(currentDir, "package.json");
-
-    await replacePath(packagePath, replaceObject);
-
-    const androidPath = path.resolve(currentDir, "android");
-    const iosPath = path.resolve(currentDir, "ios");
-
-    const androidReplaceObject = {
-      ...replaceObject,
-      "com.example.helloworldapp": `com.example.${name.toLowerCase()}`,
-    };
-
-    const iosReplaceObject = {
-      ...replaceObject,
-      "com.example.HelloWorldApp": `com.example.${name}`,
-    };
-
-    await replacePath(androidPath, androidReplaceObject);
-    await replacePath(iosPath, iosReplaceObject);
-
-    const androidRenameObject = { helloworldapp: name.toLowerCase() };
-
-    const iosRenameObject = { HelloWorldApp: name };
-
-    await renamePath(androidPath, androidRenameObject);
-    await renamePath(iosPath, iosRenameObject);
-  }
-
-  {
-    console.log("Installing dependencies");
-
-    await exec("npm i");
-  }
-
-  {
-    console.log("Bundling");
-
-    const libraryConfigPath = path.resolve(
-      __dirname,
-      "../config/webpack.config.js"
-    );
-
-    const command = `npx webpack --config ${libraryConfigPath}`;
-
-    await exec(command);
-  }
-
-  console.log("\x1b[32m%s\x1b[0m", "\u2713 Finished. Happy coding!");
+      rl.close();
+    });
+  });
 };
