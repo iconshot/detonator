@@ -7,6 +7,7 @@ import android.graphics.RectF;
 import android.view.View;
 import android.view.ViewGroup;
 import android.util.AttributeSet;
+import android.widget.TextView;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -173,14 +174,16 @@ public class ViewLayout extends ViewGroup {
         int contentWidth = 0;
         int contentHeight = 0;
 
+        boolean canItemsExpand = isHorizontal()
+                ? specWidthMode != MeasureSpec.UNSPECIFIED
+                : specHeightMode != MeasureSpec.UNSPECIFIED;
+
+        int availableSize = isHorizontal() ? innerWidth : innerHeight;
+
         int flexCount = 0;
         int totalFlex = 0;
-        int usedSize = 0;
 
-        boolean canUseFlex = (isHorizontal() && specWidthMode == MeasureSpec.EXACTLY)
-                || (!isHorizontal() && specHeightMode == MeasureSpec.EXACTLY);
-
-        // measure non-flex relative children and gather totalFlex
+        // measure relative non-flex non-expandable items and gather totalFlex
 
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
@@ -208,20 +211,17 @@ public class ViewLayout extends ViewGroup {
 
             boolean hasFlex = layoutParams.flex != null;
 
-            boolean useFlex = hasFlex && canUseFlex;
+            boolean useFlex = hasFlex && canItemsExpand;
 
             if (useFlex) {
                 flexCount++;
 
                 totalFlex += layoutParams.flex;
 
-                usedSize += isHorizontal() ? marginX : marginY;
+                availableSize -= isHorizontal() ? marginX : marginY;
 
                 continue;
             }
-
-            int childWidthSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            int childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
 
             boolean hasWidth = layoutParams.width >= 0 || layoutParams.widthPercent != null;
             boolean hasHeight = layoutParams.height >= 0 || layoutParams.heightPercent != null;
@@ -232,14 +232,36 @@ public class ViewLayout extends ViewGroup {
             boolean hasMaxWidth = layoutParams.maxWidth != null || layoutParams.maxWidthPercent != null;
             boolean hasMaxHeight = layoutParams.maxHeight != null || layoutParams.maxHeightPercent != null;
 
-            boolean useWidth = hasWidth && (layoutParams.widthPercent == null || specWidthMode == MeasureSpec.EXACTLY);
-            boolean useHeight = hasHeight && (layoutParams.heightPercent == null || specHeightMode == MeasureSpec.EXACTLY);
+            boolean useWidth = hasWidth && (layoutParams.widthPercent == null || specWidthMode != MeasureSpec.UNSPECIFIED);
+            boolean useHeight = hasHeight && (layoutParams.heightPercent == null || specHeightMode != MeasureSpec.UNSPECIFIED);
 
-            boolean useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == null || specWidthMode == MeasureSpec.EXACTLY);
-            boolean useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == null || specHeightMode == MeasureSpec.EXACTLY);
+            boolean useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == null || specWidthMode != MeasureSpec.UNSPECIFIED);
+            boolean useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == null || specHeightMode != MeasureSpec.UNSPECIFIED);
 
-            boolean useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == null || specWidthMode == MeasureSpec.EXACTLY);
-            boolean useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == null || specHeightMode == MeasureSpec.EXACTLY);
+            boolean useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == null || specWidthMode != MeasureSpec.UNSPECIFIED);
+            boolean useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == null || specHeightMode != MeasureSpec.UNSPECIFIED);
+
+            if (isHorizontal()) {
+                if (!useWidth) {
+                    availableSize -= marginX;
+
+                    continue;
+                }
+            } else {
+                if (!useHeight) {
+                    availableSize -= marginY;
+
+                    continue;
+                }
+            }
+
+            int childWidthSpec = specWidthMode != MeasureSpec.UNSPECIFIED
+                    ? MeasureSpec.makeMeasureSpec(innerWidth, MeasureSpec.AT_MOST)
+                    : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+
+            int childHeightSpec = specHeightMode != MeasureSpec.UNSPECIFIED
+                    ? MeasureSpec.makeMeasureSpec(innerHeight, MeasureSpec.AT_MOST)
+                    : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
 
             if (useWidth) {
                 int width = layoutParams.width >= 0
@@ -377,9 +399,216 @@ public class ViewLayout extends ViewGroup {
             int outerWidth = childWidth + marginX;
             int outerHeight = childHeight + marginY;
 
-            if (canUseFlex) {
-                usedSize += isHorizontal() ? outerWidth : outerHeight;
+            availableSize -= isHorizontal() ? outerWidth : outerHeight;
+        }
+
+        // measure relative expandable items
+
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+
+            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+
+            boolean isHidden = layoutParams.display == LayoutParams.DISPLAY_NONE;
+            boolean isAbsolute = layoutParams.position == LayoutParams.POSITION_ABSOLUTE;
+
+            if (isHidden) {
+                continue;
             }
+
+            if (isAbsolute) {
+                continue;
+            }
+
+            int marginTop = layoutParams.topMargin;
+            int marginLeft = layoutParams.leftMargin;
+            int marginBottom = layoutParams.bottomMargin;
+            int marginRight = layoutParams.rightMargin;
+
+            int marginX = marginLeft + marginRight;
+            int marginY = marginTop + marginBottom;
+
+            boolean hasFlex = layoutParams.flex != null;
+
+            boolean useFlex = hasFlex && canItemsExpand;
+
+            if (useFlex) {
+                continue;
+            }
+
+            boolean hasWidth = layoutParams.width >= 0 || layoutParams.widthPercent != null;
+            boolean hasHeight = layoutParams.height >= 0 || layoutParams.heightPercent != null;
+
+            boolean hasMinWidth = layoutParams.minWidth != null || layoutParams.minWidthPercent != null;
+            boolean hasMinHeight = layoutParams.minHeight != null || layoutParams.minHeightPercent != null;
+
+            boolean hasMaxWidth = layoutParams.maxWidth != null || layoutParams.maxWidthPercent != null;
+            boolean hasMaxHeight = layoutParams.maxHeight != null || layoutParams.maxHeightPercent != null;
+
+            boolean useWidth = hasWidth && (layoutParams.widthPercent == null || specWidthMode != MeasureSpec.UNSPECIFIED);
+            boolean useHeight = hasHeight && (layoutParams.heightPercent == null || specHeightMode != MeasureSpec.UNSPECIFIED);
+
+            boolean useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == null || specWidthMode != MeasureSpec.UNSPECIFIED);
+            boolean useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == null || specHeightMode != MeasureSpec.UNSPECIFIED);
+
+            boolean useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == null || specWidthMode != MeasureSpec.UNSPECIFIED);
+            boolean useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == null || specHeightMode != MeasureSpec.UNSPECIFIED);
+
+            if (isHorizontal()) {
+                if (useWidth) {
+                    continue;
+                }
+            } else {
+                if (useHeight) {
+                    continue;
+                }
+            }
+
+            int childWidthSpec = specWidthMode != MeasureSpec.UNSPECIFIED
+                    ? MeasureSpec.makeMeasureSpec(isHorizontal() ? availableSize : innerWidth, MeasureSpec.AT_MOST)
+                    : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+
+            int childHeightSpec = specHeightMode != MeasureSpec.UNSPECIFIED
+                    ? MeasureSpec.makeMeasureSpec(!isHorizontal() ? availableSize : innerHeight, MeasureSpec.AT_MOST)
+                    : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+
+            if (useWidth) {
+                int width = layoutParams.width >= 0
+                        ? layoutParams.width
+                        : (int) (innerWidth * layoutParams.widthPercent);
+
+                if (useMaxWidth) {
+                    int maxWidth = layoutParams.maxWidth != null
+                            ? layoutParams.maxWidth
+                            : (int) (innerWidth * layoutParams.maxWidthPercent);
+
+                    width = Math.min(width, maxWidth);
+                }
+
+                if (useMinWidth) {
+                    int minWidth = layoutParams.minWidth != null
+                            ? layoutParams.minWidth
+                            : (int) (innerWidth * layoutParams.minWidthPercent);
+
+                    width = Math.max(width, minWidth);
+                }
+
+                childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+            } else {
+                if (useMaxWidth) {
+                    int maxWidth = layoutParams.maxWidth != null
+                            ? layoutParams.maxWidth
+                            : (int) (innerWidth * layoutParams.maxWidthPercent);
+
+                    childWidthSpec = MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.AT_MOST);
+                }
+            }
+
+            if (useHeight) {
+                int height = layoutParams.height >= 0
+                        ? layoutParams.height
+                        : (int) (innerHeight * layoutParams.heightPercent);
+
+                if (useMaxHeight) {
+                    int maxHeight = layoutParams.maxHeight != null
+                            ? layoutParams.maxHeight
+                            : (int) (innerHeight * layoutParams.maxHeightPercent);
+
+                    height = Math.min(height, maxHeight);
+                }
+
+                if (useMinHeight) {
+                    int minHeight = layoutParams.minHeight != null
+                            ? layoutParams.minHeight
+                            : (int) (innerHeight * layoutParams.minHeightPercent);
+
+                    height = Math.max(height, minHeight);
+                }
+
+                childHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+            } else {
+                if (useMaxHeight) {
+                    int maxHeight = layoutParams.maxHeight != null
+                            ? layoutParams.maxHeight
+                            : (int) (innerHeight * layoutParams.maxHeightPercent);
+
+                    childHeightSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST);
+                }
+            }
+
+            if (layoutParams.aspectRatio != null) {
+                if (useWidth) {
+                    int height = (int) (MeasureSpec.getSize(childWidthSpec) * layoutParams.aspectRatio);
+
+                    childHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+                } else if (useHeight) {
+                    int width = (int) (MeasureSpec.getSize(childHeightSpec) * layoutParams.aspectRatio);
+
+                    childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+                }
+            }
+
+            forceChildMeasure(child, childWidthSpec, childHeightSpec);
+
+            childWidthSpec = MeasureSpec.makeMeasureSpec(child.getMeasuredWidth(), MeasureSpec.EXACTLY);
+            childHeightSpec = MeasureSpec.makeMeasureSpec(child.getMeasuredHeight(), MeasureSpec.EXACTLY);
+
+            if (!useWidth) {
+                int width = MeasureSpec.getSize(childWidthSpec);
+
+                if (useMinWidth) {
+                    int minWidth = layoutParams.minWidth != null
+                            ? layoutParams.minWidth
+                            : (int) (innerWidth * layoutParams.minWidthPercent);
+
+                    width = Math.max(width, minWidth);
+                }
+
+                childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+            }
+
+            if (!useHeight) {
+                int height = MeasureSpec.getSize(childHeightSpec);
+
+                if (useMinHeight) {
+                    int minHeight = layoutParams.minHeight != null
+                            ? layoutParams.minHeight
+                            : (int) (innerHeight * layoutParams.minHeightPercent);
+
+                    height = Math.max(height, minHeight);
+                }
+
+                childHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+            }
+
+            if (layoutParams.aspectRatio != null && !useWidth && !useHeight) {
+                boolean hasAnyWidth = hasWidth || hasMinWidth || hasMaxWidth;
+                boolean hasAnyHeight = hasHeight || hasMinHeight || hasMaxHeight;
+
+                if (hasAnyWidth) {
+                    int height = (int) (MeasureSpec.getSize(childWidthSpec) * layoutParams.aspectRatio);
+
+                    childHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+                } else if (hasAnyHeight) {
+                    int width = (int) (MeasureSpec.getSize(childHeightSpec) * layoutParams.aspectRatio);
+
+                    childWidthSpec = MeasureSpec.makeMeasureSpec(width, MeasureSpec.EXACTLY);
+                } else {
+                    int height = (int) (MeasureSpec.getSize(childWidthSpec) * layoutParams.aspectRatio);
+
+                    childHeightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+                }
+            }
+
+            remeasureChild(child, childWidthSpec, childHeightSpec);
+
+            int childWidth = child.getMeasuredWidth();
+            int childHeight = child.getMeasuredHeight();
+
+            int outerWidth = childWidth + marginX;
+            int outerHeight = childHeight + marginY;
+
+            availableSize -= isHorizontal() ? outerWidth : outerHeight;
         }
 
         // calculate flex values
@@ -389,8 +618,6 @@ public class ViewLayout extends ViewGroup {
         int flexRemainder = 0;
 
         if (flexCount > 0) {
-            int availableSize = (isHorizontal() ? innerWidth : innerHeight) - usedSize;
-
             flexBaseSize = availableSize / totalFlex;
 
             int baseFlexRemainder = availableSize % totalFlex;
@@ -400,7 +627,7 @@ public class ViewLayout extends ViewGroup {
             flexRemainder = baseFlexRemainder % flexCount;
         }
 
-        // measure flex children
+        // measure flex items
 
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
@@ -420,7 +647,7 @@ public class ViewLayout extends ViewGroup {
 
             boolean hasFlex = layoutParams.flex != null;
 
-            boolean useFlex = hasFlex && canUseFlex;
+            boolean useFlex = hasFlex && canItemsExpand;
 
             if (!useFlex) {
                 continue;
@@ -434,8 +661,13 @@ public class ViewLayout extends ViewGroup {
                 flexRemainder--;
             }
 
-            int childWidthSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
-            int childHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            int childWidthSpec = specWidthMode != MeasureSpec.UNSPECIFIED
+                    ? MeasureSpec.makeMeasureSpec(innerWidth, MeasureSpec.AT_MOST)
+                    : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+
+            int childHeightSpec = specHeightMode != MeasureSpec.UNSPECIFIED
+                    ? MeasureSpec.makeMeasureSpec(innerHeight, MeasureSpec.AT_MOST)
+                    : MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
 
             boolean hasWidth = layoutParams.width >= 0 || layoutParams.widthPercent != null;
             boolean hasHeight = layoutParams.height >= 0 || layoutParams.heightPercent != null;
@@ -446,14 +678,14 @@ public class ViewLayout extends ViewGroup {
             boolean hasMaxWidth = layoutParams.maxWidth != null || layoutParams.maxWidthPercent != null;
             boolean hasMaxHeight = layoutParams.maxHeight != null || layoutParams.maxHeightPercent != null;
 
-            boolean useWidth = hasWidth && (layoutParams.widthPercent == null || specWidthMode == MeasureSpec.EXACTLY);
-            boolean useHeight = hasHeight && (layoutParams.heightPercent == null || specHeightMode == MeasureSpec.EXACTLY);
+            boolean useWidth = hasWidth && (layoutParams.widthPercent == null || specWidthMode != MeasureSpec.UNSPECIFIED);
+            boolean useHeight = hasHeight && (layoutParams.heightPercent == null || specHeightMode != MeasureSpec.UNSPECIFIED);
 
-            boolean useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == null || specWidthMode == MeasureSpec.EXACTLY);
-            boolean useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == null || specHeightMode == MeasureSpec.EXACTLY);
+            boolean useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == null || specWidthMode != MeasureSpec.UNSPECIFIED);
+            boolean useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == null || specHeightMode != MeasureSpec.UNSPECIFIED);
 
-            boolean useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == null || specWidthMode == MeasureSpec.EXACTLY);
-            boolean useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == null || specHeightMode == MeasureSpec.EXACTLY);
+            boolean useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == null || specWidthMode != MeasureSpec.UNSPECIFIED);
+            boolean useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == null || specHeightMode != MeasureSpec.UNSPECIFIED);
 
             int flexSpec = MeasureSpec.makeMeasureSpec(flexSize, MeasureSpec.EXACTLY);
 

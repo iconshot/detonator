@@ -48,6 +48,28 @@ public class TextView: UILabel {
             outputHeight = min(outputHeight, size.height)
         }
         
+        if size.width != .greatestFiniteMagnitude {
+            if let text = text {
+                let lines = text.components(separatedBy: "\n")
+                
+                var maxReached = false
+
+                for line in lines {
+                    let lineSize = (line as NSString).size(withAttributes: [NSAttributedString.Key.font: font])
+                                        
+                    if lineSize.width >= inputWidth {
+                        maxReached = true
+                        
+                        break
+                    }
+                }
+                
+                if maxReached {
+                    outputWidth = size.width
+                }
+            }
+        }
+        
         let outputSize = CGSize(width: outputWidth, height: outputHeight)
         
         return outputSize

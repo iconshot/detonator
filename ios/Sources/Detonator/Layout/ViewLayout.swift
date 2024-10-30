@@ -99,14 +99,16 @@ class ViewLayout: UIView {
         var contentWidth: Float = 0
         var contentHeight: Float = 0
         
+        let canItemsExpand = isHorizontal()
+        ? specWidthMode != MeasureSpec.UNSPECIFIED
+        : specHeightMode != MeasureSpec.UNSPECIFIED
+        
+        var availableSize = isHorizontal() ? innerWidth : innerHeight
+        
         var flexCount: Int = 0
         var totalFlex: Int = 0
-        var usedSize: Float = 0
         
-        let canUseFlex = (isHorizontal() && specWidthMode == MeasureSpec.EXACTLY)
-            || (!isHorizontal() && specHeightMode == MeasureSpec.EXACTLY)
-        
-        // non-flex
+        // relative non-flex non-expandable
         
         for child in subviews {
             let layoutParams = child.layoutParams
@@ -132,22 +134,17 @@ class ViewLayout: UIView {
             
             let hasFlex = layoutParams.flex != nil
             
-            let useFlex = hasFlex && canUseFlex
+            let useFlex = hasFlex && canItemsExpand
             
             if useFlex {
                 flexCount += 1
                 
                 totalFlex += layoutParams.flex!
                 
-                usedSize += isHorizontal() ? marginX : marginY
+                availableSize -= isHorizontal() ? marginX : marginY
                 
                 continue
             }
-            
-            var childSpecWidth: Float = 0
-            var childSpecHeight: Float = 0
-            var childSpecWidthMode: Int = MeasureSpec.UNSPECIFIED
-            var childSpecHeightMode: Int = MeasureSpec.UNSPECIFIED
             
             let hasWidth = layoutParams.width != nil || layoutParams.widthPercent != nil
             let hasHeight = layoutParams.height != nil || layoutParams.heightPercent != nil
@@ -158,14 +155,33 @@ class ViewLayout: UIView {
             let hasMaxWidth = layoutParams.maxWidth != nil || layoutParams.maxWidthPercent != nil
             let hasMaxHeight = layoutParams.maxHeight != nil || layoutParams.maxHeightPercent != nil
             
-            let useWidth = hasWidth && (layoutParams.widthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
-            let useHeight = hasHeight && (layoutParams.heightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
+            let useWidth = hasWidth && (layoutParams.widthPercent == nil || specWidthMode != MeasureSpec.UNSPECIFIED)
+            let useHeight = hasHeight && (layoutParams.heightPercent == nil || specHeightMode != MeasureSpec.UNSPECIFIED)
             
-            let useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
-            let useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
+            let useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == nil || specWidthMode != MeasureSpec.UNSPECIFIED)
+            let useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == nil || specHeightMode != MeasureSpec.UNSPECIFIED)
             
-            let useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
-            let useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
+            let useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == nil || specWidthMode != MeasureSpec.UNSPECIFIED)
+            let useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == nil || specHeightMode != MeasureSpec.UNSPECIFIED)
+            
+            if isHorizontal() {
+                if !useWidth {
+                    availableSize -= marginX
+                    
+                    continue
+                }
+            } else {
+                if !useHeight {
+                    availableSize -= marginY
+                    
+                    continue
+                }
+            }
+            
+            var childSpecWidth: Float = specWidthMode != MeasureSpec.UNSPECIFIED ? innerWidth : 0
+            var childSpecHeight: Float = specHeightMode != MeasureSpec.UNSPECIFIED ? innerHeight : 0
+            var childSpecWidthMode: Int = specWidthMode != MeasureSpec.UNSPECIFIED ? MeasureSpec.AT_MOST : MeasureSpec.UNSPECIFIED
+            var childSpecHeightMode: Int = specHeightMode != MeasureSpec.UNSPECIFIED ? MeasureSpec.AT_MOST : MeasureSpec.UNSPECIFIED
             
             if useWidth {
                 var width = layoutParams.width ?? innerWidth * layoutParams.widthPercent!
@@ -294,9 +310,202 @@ class ViewLayout: UIView {
             let outerWidth = childWidth + marginX
             let outerHeight = childHeight + marginY
             
-            if canUseFlex {
-                usedSize += isHorizontal() ? outerWidth : outerHeight
+            availableSize -= isHorizontal() ? outerWidth : outerHeight
+        }
+        
+        // relative expandable
+        
+        for child in subviews {
+            let layoutParams = child.layoutParams
+            
+            let isHidden = layoutParams.display == .none
+            let isAbsolute = layoutParams.position == .absolute
+            
+            if isHidden {
+                continue
             }
+            
+            if isAbsolute {
+                continue
+            }
+            
+            let marginTop = layoutParams.margin.top
+            let marginLeft = layoutParams.margin.left
+            let marginBottom = layoutParams.margin.bottom
+            let marginRight = layoutParams.margin.right
+            
+            let marginX = marginLeft + marginRight
+            let marginY = marginTop + marginBottom
+            
+            let hasFlex = layoutParams.flex != nil
+            
+            let useFlex = hasFlex && canItemsExpand
+            
+            if useFlex {
+                continue
+            }
+            
+            let hasWidth = layoutParams.width != nil || layoutParams.widthPercent != nil
+            let hasHeight = layoutParams.height != nil || layoutParams.heightPercent != nil
+            
+            let hasMinWidth = layoutParams.minWidth != nil || layoutParams.minWidthPercent != nil
+            let hasMinHeight = layoutParams.minHeight != nil || layoutParams.minHeightPercent != nil
+            
+            let hasMaxWidth = layoutParams.maxWidth != nil || layoutParams.maxWidthPercent != nil
+            let hasMaxHeight = layoutParams.maxHeight != nil || layoutParams.maxHeightPercent != nil
+            
+            let useWidth = hasWidth && (layoutParams.widthPercent == nil || specWidthMode != MeasureSpec.UNSPECIFIED)
+            let useHeight = hasHeight && (layoutParams.heightPercent == nil || specHeightMode != MeasureSpec.UNSPECIFIED)
+            
+            let useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == nil || specWidthMode != MeasureSpec.UNSPECIFIED)
+            let useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == nil || specHeightMode != MeasureSpec.UNSPECIFIED)
+            
+            let useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == nil || specWidthMode != MeasureSpec.UNSPECIFIED)
+            let useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == nil || specHeightMode != MeasureSpec.UNSPECIFIED)
+            
+            if isHorizontal() {
+                if useWidth {
+                    continue
+                }
+            } else {
+                if useHeight {
+                    continue
+                }
+            }
+            
+            var childSpecWidth: Float = specWidthMode != MeasureSpec.UNSPECIFIED ? (isHorizontal() ? availableSize : innerWidth) : 0
+            var childSpecHeight: Float = specHeightMode != MeasureSpec.UNSPECIFIED ? (!isHorizontal() ? availableSize : innerHeight) : 0
+            var childSpecWidthMode: Int = specWidthMode != MeasureSpec.UNSPECIFIED ? MeasureSpec.AT_MOST : MeasureSpec.UNSPECIFIED
+            var childSpecHeightMode: Int = specHeightMode != MeasureSpec.UNSPECIFIED ? MeasureSpec.AT_MOST : MeasureSpec.UNSPECIFIED
+            
+            if useWidth {
+                var width = layoutParams.width ?? innerWidth * layoutParams.widthPercent!
+                
+                if useMaxWidth {
+                    let maxWidth = layoutParams.maxWidth ?? innerWidth * layoutParams.maxWidthPercent!
+                    
+                    width = min(width, maxWidth)
+                }
+                
+                if useMinWidth {
+                    let minWidth = layoutParams.minWidth ?? innerWidth * layoutParams.minWidthPercent!
+                    
+                    width = max(width, minWidth)
+                }
+                
+                childSpecWidth = width
+                childSpecWidthMode = MeasureSpec.EXACTLY
+            } else {
+                if useMaxWidth {
+                    let maxWidth = layoutParams.maxWidth ?? innerWidth * layoutParams.maxWidthPercent!
+                    
+                    childSpecWidth = maxWidth
+                    childSpecWidthMode = MeasureSpec.AT_MOST
+                }
+            }
+            
+            if useHeight {
+                var height = layoutParams.height ?? innerHeight * layoutParams.heightPercent!
+                
+                if useMaxHeight {
+                    let maxHeight = layoutParams.maxHeight ?? innerHeight * layoutParams.maxHeightPercent!
+                    
+                    height = min(height, maxHeight)
+                }
+                
+                if useMinHeight {
+                    let minHeight = layoutParams.minHeight ?? innerHeight * layoutParams.minHeightPercent!
+                    
+                    height = max(height, minHeight)
+                }
+                
+                childSpecHeight = height
+                childSpecHeightMode = MeasureSpec.EXACTLY
+            } else {
+                if useMaxHeight {
+                    let maxHeight = layoutParams.maxHeight ?? innerHeight * layoutParams.maxHeightPercent!
+                    
+                    childSpecHeight = maxHeight
+                    childSpecHeightMode = MeasureSpec.AT_MOST
+                }
+            }
+            
+            if layoutParams.aspectRatio != nil {
+                if useWidth {
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
+                    childSpecHeightMode = MeasureSpec.EXACTLY
+                } else if useHeight {
+                    childSpecWidth = childSpecHeight * layoutParams.aspectRatio!
+                    childSpecWidthMode = MeasureSpec.EXACTLY
+                }
+            }
+            
+            measureChild(
+                view: child,
+                specWidth: childSpecWidth,
+                specHeight: childSpecHeight,
+                specWidthMode: childSpecWidthMode,
+                specHeightMode: childSpecHeightMode
+            )
+            
+            childSpecWidth = Float(child.frame.size.width)
+            childSpecHeight = Float(child.frame.size.height)
+            
+            childSpecWidthMode = MeasureSpec.EXACTLY
+            childSpecHeightMode = MeasureSpec.EXACTLY
+            
+            if !useWidth {
+                var width = childSpecWidth
+                
+                if useMinWidth {
+                    let minWidth = layoutParams.minWidth ?? innerWidth * layoutParams.minWidthPercent!
+                    
+                    width = max(width, minWidth)
+                }
+                
+                childSpecWidth = width
+            }
+            
+            if !useHeight {
+                var height = childSpecHeight
+                
+                if useMinHeight {
+                    let minHeight = layoutParams.minHeight ?? innerHeight * layoutParams.minHeightPercent!
+                    
+                    height = max(height, minHeight)
+                }
+                
+                childSpecHeight = height
+            }
+            
+            if layoutParams.aspectRatio != nil && !useWidth && !useHeight {
+                let hasAnyWidth = hasWidth || hasMinWidth || hasMaxWidth
+                let hasAnyHeight = hasHeight || hasMinHeight || hasMaxHeight
+                
+                if hasAnyWidth {
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
+                } else if hasAnyHeight {
+                    childSpecWidth = childSpecHeight * layoutParams.aspectRatio!
+                } else {
+                    childSpecHeight = childSpecWidth * layoutParams.aspectRatio!
+                }
+            }
+            
+            remeasureChild(
+                view: child,
+                specWidth: childSpecWidth,
+                specHeight: childSpecHeight,
+                specWidthMode: childSpecWidthMode,
+                specHeightMode: childSpecHeightMode
+            )
+            
+            let childWidth = Float(child.frame.size.width)
+            let childHeight = Float(child.frame.size.height)
+            
+            let outerWidth = childWidth + marginX
+            let outerHeight = childHeight + marginY
+            
+            availableSize -= isHorizontal() ? outerWidth : outerHeight
         }
         
         // flex
@@ -305,8 +514,6 @@ class ViewLayout: UIView {
         var flexDistribution: Float = 0
         
         if flexCount > 0 {
-            let availableSize = (isHorizontal() ? innerWidth : innerHeight) - usedSize
-            
             flexBaseSize = availableSize / Float(totalFlex)
             
             let baseFlexRemainder = availableSize.truncatingRemainder(dividingBy: Float(totalFlex))
@@ -330,7 +537,7 @@ class ViewLayout: UIView {
             
             let hasFlex = layoutParams.flex != nil
             
-            let useFlex = hasFlex && canUseFlex
+            let useFlex = hasFlex && canItemsExpand
             
             if !useFlex {
                 continue
@@ -338,10 +545,10 @@ class ViewLayout: UIView {
             
             let flexSize = flexBaseSize * Float(layoutParams.flex!) + flexDistribution
             
-            var childSpecWidth: Float = 0
-            var childSpecHeight: Float = 0
-            var childSpecWidthMode: Int = MeasureSpec.UNSPECIFIED
-            var childSpecHeightMode: Int = MeasureSpec.UNSPECIFIED
+            var childSpecWidth: Float = specWidthMode != MeasureSpec.UNSPECIFIED ? innerWidth : 0
+            var childSpecHeight: Float = specHeightMode != MeasureSpec.UNSPECIFIED ? innerHeight : 0
+            var childSpecWidthMode: Int = specWidthMode != MeasureSpec.UNSPECIFIED ? MeasureSpec.AT_MOST : MeasureSpec.UNSPECIFIED
+            var childSpecHeightMode: Int = specHeightMode != MeasureSpec.UNSPECIFIED ? MeasureSpec.AT_MOST : MeasureSpec.UNSPECIFIED
             
             let hasWidth = layoutParams.width != nil || layoutParams.widthPercent != nil
             let hasHeight = layoutParams.height != nil || layoutParams.heightPercent != nil
@@ -352,14 +559,14 @@ class ViewLayout: UIView {
             let hasMaxWidth = layoutParams.maxWidth != nil || layoutParams.maxWidthPercent != nil
             let hasMaxHeight = layoutParams.maxHeight != nil || layoutParams.maxHeightPercent != nil
             
-            let useWidth = hasWidth && (layoutParams.widthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
-            let useHeight = hasHeight && (layoutParams.heightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
+            let useWidth = hasWidth && (layoutParams.widthPercent == nil || specWidthMode != MeasureSpec.UNSPECIFIED)
+            let useHeight = hasHeight && (layoutParams.heightPercent == nil || specHeightMode != MeasureSpec.UNSPECIFIED)
             
-            let useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
-            let useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
+            let useMinWidth = hasMinWidth && (layoutParams.minWidthPercent == nil || specWidthMode != MeasureSpec.UNSPECIFIED)
+            let useMinHeight = hasMinHeight && (layoutParams.minHeightPercent == nil || specHeightMode != MeasureSpec.UNSPECIFIED)
             
-            let useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == nil || specWidthMode == MeasureSpec.EXACTLY)
-            let useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == nil || specHeightMode == MeasureSpec.EXACTLY)
+            let useMaxWidth = hasMaxWidth && (layoutParams.maxWidthPercent == nil || specWidthMode != MeasureSpec.UNSPECIFIED)
+            let useMaxHeight = hasMaxHeight && (layoutParams.maxHeightPercent == nil || specHeightMode != MeasureSpec.UNSPECIFIED)
             
             if isHorizontal() {
                 childSpecWidth = flexSize

@@ -19,10 +19,14 @@ interface ScrollViewProps extends ViewProps {
 
 export class ScrollView extends BaseView<ScrollViewProps> {
   public render(): any {
-    const { style, contentContainerStyle, children, ...attributes } =
-      this.props;
+    const {
+      style,
+      contentContainerStyle = null,
+      children,
+      ...attributes
+    } = this.props;
 
-    let tmpStyle: Style = { ...style };
+    const tmpStyle: Style = { ...style };
 
     tmpStyle.padding = null;
     tmpStyle.paddingHorizontal = null;
@@ -36,7 +40,7 @@ export class ScrollView extends BaseView<ScrollViewProps> {
 
     const tmpAttributes = { ...attributes, style: tmpStyle, horizontal };
 
-    let tmpContentContainerStyle = contentContainerStyle ?? {};
+    const tmpContentContainerStyle = { ...(contentContainerStyle ?? {}) };
 
     tmpContentContainerStyle.flexDirection = horizontal ? "row" : "column";
 
