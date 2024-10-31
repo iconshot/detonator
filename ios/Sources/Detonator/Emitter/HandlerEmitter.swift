@@ -8,7 +8,7 @@ public class HandlerEmitter: Emitter {
     struct Handler: Encodable {
         let name: String
         let edgeId: Int
-        let data: AnyEncodable?
+        let data: AnyEncodable??
 
         init(name: String, edgeId: Int, data: Encodable?) {
             self.name = name
@@ -17,7 +17,7 @@ public class HandlerEmitter: Emitter {
             if let data = data {
                 self.data = AnyEncodable(data)
             } else {
-                self.data = nil
+                self.data = .some(nil)
             }
         }
     }

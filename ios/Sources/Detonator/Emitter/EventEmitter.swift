@@ -7,7 +7,7 @@ public class EventEmitter: Emitter {
     
     struct Event: Encodable {
         let name: String
-        let data: AnyEncodable?
+        let data: AnyEncodable??
 
         init(name: String, data: Encodable?) {
             self.name = name
@@ -15,7 +15,7 @@ public class EventEmitter: Emitter {
             if let data = data {
                 self.data = AnyEncodable(data)
             } else {
-                self.data = nil
+                self.data = .some(nil)
             }
         }
     }

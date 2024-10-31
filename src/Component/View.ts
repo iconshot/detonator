@@ -59,6 +59,7 @@ export interface Style {
   marginRight?: number | null;
 
   fontSize?: number | null;
+  fontStyle?: "normal" | "italic" | null;
   lineHeight?: number | null;
   fontWeight?: "normal" | "bold" | null;
   color?: StyleColor | null;
@@ -109,11 +110,14 @@ export interface Style {
 
 interface TapEvent extends Event {}
 
+interface LongTapEvent extends Event {}
+
 interface DoubleTapEvent extends Event {}
 
 export interface ViewProps extends Props {
   style?: Style | null;
   onTap?: ((event: TapEvent) => void) | null;
+  onLongTap?: ((event: LongTapEvent) => void) | null;
   onDoubleTap?: ((event: DoubleTapEvent) => void) | null;
 }
 

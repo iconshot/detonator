@@ -37,6 +37,8 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
     protected boolean forcePatch = true;
 
+    private boolean longTapped = false;
+
     public Element(Detonator detonator) {
         this.detonator = detonator;
     }
@@ -60,7 +62,23 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         view.setLayoutParams(layoutParams);
 
         view.setOnClickListener((View v) -> {
+            boolean tmpLongTapped = longTapped;
+
+            longTapped = false;
+
+            if (tmpLongTapped) {
+                return;
+            }
+
             detonator.emitHandler("onTap", edge.id);
+        });
+
+        view.setOnLongClickListener((View v) -> {
+            detonator.emitHandler("onLongTap", edge.id);
+
+            longTapped = true;
+
+            return false;
         });
     }
 
@@ -1481,6 +1499,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     public static class Attributes {
         public Style style;
         public Boolean onTap;
+        public Boolean onLongTap;
         public Boolean onDoubleTap;
     }
 }

@@ -45,22 +45,20 @@ export class Input extends BaseView<InputProps> {
     );
   }
 
+  private onChange = (event: InputChangeEvent): void => {
+    const { onChange = null } = this.props;
+
+    this.value = event.value;
+
+    if (onChange !== null) {
+      onChange(event);
+    }
+  };
+
   public render(): any {
-    const {
-      children,
-      onChange: tmpOnChange = null,
-      ...tmpAttributes
-    } = this.props;
+    const { children, ...tmpAttributes } = this.props;
 
-    const onChange = (event: InputChangeEvent) => {
-      this.value = event.value;
-
-      if (tmpOnChange !== null) {
-        tmpOnChange(event);
-      }
-    };
-
-    const attributes = { ...tmpAttributes, onChange };
+    const attributes = { ...tmpAttributes, onChange: this.onChange };
 
     return $("com.iconshot.detonator.input", attributes, children);
   }

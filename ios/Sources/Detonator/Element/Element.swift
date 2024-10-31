@@ -3,11 +3,13 @@ import UIKit
 open class Attributes: Decodable {
     public let style: Style?
     public let onTap: Bool?
+    public let onLongTap: Bool?
     public let onDoubleTap: Bool?
     
     private enum CodingKeys: String, CodingKey {
         case style
         case onTap
+        case onLongTap
         case onDoubleTap
     }
 }
@@ -29,6 +31,7 @@ open class Element: NSObject {
     public var forcePatch: Bool = true
     
     public var tapGestureRecognizer: UITapGestureRecognizer!
+    public var longTapGestureRecognizer: UILongPressGestureRecognizer!
     
     required public init(_ detonator: Detonator) {
         self.detonator = detonator
@@ -36,6 +39,7 @@ open class Element: NSObject {
         super.init()
         
         tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(onTapListener(_:)))
+        longTapGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(onLongTapListener(_:)))
     }
     
     public func decodeAttributes<T: Attributes>(edge: Edge) -> T? {
@@ -60,6 +64,7 @@ open class Element: NSObject {
         let view = createView()
         
         view.addGestureRecognizer(tapGestureRecognizer)
+        view.addGestureRecognizer(longTapGestureRecognizer)
         
         self.view = view
     }
@@ -1602,7 +1607,13 @@ open class Element: NSObject {
         }
     }
     
-    @objc func onTapListener(_ sender: UITapGestureRecognizer) {
+    @objc func onTapListener(_ gestureRecognizer: UITapGestureRecognizer) {
         detonator.emitHandler(name: "onTap", edgeId: edge.id)
+    }
+    
+    @objc func onLongTapListener(_ gestureRecognizer: UILongPressGestureRecognizer) {
+        if gestureRecognizer.state == .began {
+            detonator.emitHandler(name: "onLongTap", edgeId: edge.id)
+        }
     }
 }
