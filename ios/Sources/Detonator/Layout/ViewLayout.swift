@@ -132,6 +132,8 @@ class ViewLayout: UIView {
             let marginX = marginLeft + marginRight
             let marginY = marginTop + marginBottom
             
+            availableSize -= isHorizontal() ? marginX : marginY
+            
             let hasFlex = layoutParams.flex != nil
             
             let useFlex = hasFlex && canItemsExpand
@@ -140,8 +142,6 @@ class ViewLayout: UIView {
                 flexCount += 1
                 
                 totalFlex += layoutParams.flex!
-                
-                availableSize -= isHorizontal() ? marginX : marginY
                 
                 continue
             }
@@ -166,14 +166,10 @@ class ViewLayout: UIView {
             
             if isHorizontal() {
                 if !useWidth {
-                    availableSize -= marginX
-                    
                     continue
                 }
             } else {
                 if !useHeight {
-                    availableSize -= marginY
-                    
                     continue
                 }
             }
@@ -307,10 +303,7 @@ class ViewLayout: UIView {
             let childWidth = Float(child.frame.size.width)
             let childHeight = Float(child.frame.size.height)
             
-            let outerWidth = childWidth + marginX
-            let outerHeight = childHeight + marginY
-            
-            availableSize -= isHorizontal() ? outerWidth : outerHeight
+            availableSize -= isHorizontal() ? childWidth : childHeight
         }
         
         // relative expandable
@@ -328,14 +321,6 @@ class ViewLayout: UIView {
             if isAbsolute {
                 continue
             }
-            
-            let marginTop = layoutParams.margin.top
-            let marginLeft = layoutParams.margin.left
-            let marginBottom = layoutParams.margin.bottom
-            let marginRight = layoutParams.margin.right
-            
-            let marginX = marginLeft + marginRight
-            let marginY = marginTop + marginBottom
             
             let hasFlex = layoutParams.flex != nil
             
@@ -502,10 +487,7 @@ class ViewLayout: UIView {
             let childWidth = Float(child.frame.size.width)
             let childHeight = Float(child.frame.size.height)
             
-            let outerWidth = childWidth + marginX
-            let outerHeight = childHeight + marginY
-            
-            availableSize -= isHorizontal() ? outerWidth : outerHeight
+            availableSize -= isHorizontal() ? childWidth : childHeight
         }
         
         // flex

@@ -209,6 +209,8 @@ public class ViewLayout extends ViewGroup {
             int marginX = marginLeft + marginRight;
             int marginY = marginTop + marginBottom;
 
+            availableSize -= isHorizontal() ? marginX : marginY;
+
             boolean hasFlex = layoutParams.flex != null;
 
             boolean useFlex = hasFlex && canItemsExpand;
@@ -217,8 +219,6 @@ public class ViewLayout extends ViewGroup {
                 flexCount++;
 
                 totalFlex += layoutParams.flex;
-
-                availableSize -= isHorizontal() ? marginX : marginY;
 
                 continue;
             }
@@ -243,14 +243,10 @@ public class ViewLayout extends ViewGroup {
 
             if (isHorizontal()) {
                 if (!useWidth) {
-                    availableSize -= marginX;
-
                     continue;
                 }
             } else {
                 if (!useHeight) {
-                    availableSize -= marginY;
-
                     continue;
                 }
             }
@@ -396,10 +392,7 @@ public class ViewLayout extends ViewGroup {
             int childWidth = child.getMeasuredWidth();
             int childHeight = child.getMeasuredHeight();
 
-            int outerWidth = childWidth + marginX;
-            int outerHeight = childHeight + marginY;
-
-            availableSize -= isHorizontal() ? outerWidth : outerHeight;
+            availableSize -= isHorizontal() ? childWidth : childHeight;
         }
 
         // measure relative expandable items
@@ -419,14 +412,6 @@ public class ViewLayout extends ViewGroup {
             if (isAbsolute) {
                 continue;
             }
-
-            int marginTop = layoutParams.topMargin;
-            int marginLeft = layoutParams.leftMargin;
-            int marginBottom = layoutParams.bottomMargin;
-            int marginRight = layoutParams.rightMargin;
-
-            int marginX = marginLeft + marginRight;
-            int marginY = marginTop + marginBottom;
 
             boolean hasFlex = layoutParams.flex != null;
 
@@ -605,10 +590,7 @@ public class ViewLayout extends ViewGroup {
             int childWidth = child.getMeasuredWidth();
             int childHeight = child.getMeasuredHeight();
 
-            int outerWidth = childWidth + marginX;
-            int outerHeight = childHeight + marginY;
-
-            availableSize -= isHorizontal() ? outerWidth : outerHeight;
+            availableSize -= isHorizontal() ? childWidth : childHeight;
         }
 
         // calculate flex values
