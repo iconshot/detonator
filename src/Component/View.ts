@@ -108,17 +108,17 @@ export interface Style {
   transform?: StyleTransform | null;
 }
 
-interface TapEvent extends Event {}
+export interface ViewTapEvent extends Event {}
 
-interface LongTapEvent extends Event {}
+export interface ViewLongTapEvent extends Event {}
 
-interface DoubleTapEvent extends Event {}
+export interface ViewDoubleTapEvent extends Event {}
 
 export interface ViewProps extends Props {
   style?: Style | null;
-  onTap?: ((event: TapEvent) => void) | null;
-  onLongTap?: ((event: LongTapEvent) => void) | null;
-  onDoubleTap?: ((event: DoubleTapEvent) => void) | null;
+  onTap?: ((event: ViewTapEvent) => void) | null;
+  onLongTap?: ((event: ViewLongTapEvent) => void) | null;
+  onDoubleTap?: ((event: ViewDoubleTapEvent) => void) | null;
 }
 
 export class View extends BaseView {
