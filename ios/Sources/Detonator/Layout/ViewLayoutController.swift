@@ -1,6 +1,8 @@
 import UIKit
 
 class ViewLayoutController: UIViewController {
+    private var height: CGFloat? = nil
+    
     override func loadView() {
         view = ViewLayout()
     }
@@ -21,7 +23,17 @@ class ViewLayoutController: UIViewController {
         let view = view as! ViewLayout
         
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            view.frame.size.height -= keyboardFrame.height
+            if height == nil {
+                height = view.frame.size.height
+            }
+            
+            let tmpHeight = height! - keyboardFrame.height
+            
+            if tmpHeight == view.frame.size.height {
+                return
+            }
+            
+            view.frame.size.height = tmpHeight
             
             view.performLayout()
         }
@@ -31,7 +43,13 @@ class ViewLayoutController: UIViewController {
         let view = view as! ViewLayout
 
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
-            view.frame.size.height += keyboardFrame.height
+            let tmpHeight = height!
+            
+            if tmpHeight == view.frame.size.height {
+                return
+            }
+            
+            view.frame.size.height = tmpHeight
             
             view.performLayout()
         }
