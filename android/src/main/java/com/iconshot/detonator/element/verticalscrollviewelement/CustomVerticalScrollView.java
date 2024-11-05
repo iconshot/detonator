@@ -5,19 +5,15 @@ import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.RectF;
 import android.os.Handler;
-import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.ViewGroup;
 import android.widget.ScrollView;
-
-import androidx.annotation.NonNull;
 
 import com.iconshot.detonator.layout.ViewLayout;
 
 public class CustomVerticalScrollView extends ScrollView {
     private boolean paginated = false;
+    private boolean inverted = false;
 
     private int page = 0;
 
@@ -41,6 +37,10 @@ public class CustomVerticalScrollView extends ScrollView {
 
     public void setPaginated(boolean paginated) {
         this.paginated = paginated;
+    }
+
+    public void setInverted(boolean inverted) {
+        this.inverted = inverted;
     }
 
     public void setOnPageChangeListener(OnPageChangeListener onPageChangeListener) {
@@ -97,6 +97,22 @@ public class CustomVerticalScrollView extends ScrollView {
 
         int childWidth = child.getMeasuredWidth();
         int childHeight = child.getMeasuredHeight();
+
+        boolean remeasure = inverted && specHeightMode == MeasureSpec.EXACTLY && childHeight < innerHeight;
+
+        if (remeasure) {
+            int tmpChildWidthSpec = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY);
+            int tmpChildHeightSpec = MeasureSpec.makeMeasureSpec(innerHeight, MeasureSpec.EXACTLY);
+
+            child.remeasured = true;
+
+            child.measure(tmpChildWidthSpec, tmpChildHeightSpec);
+
+            child.remeasured = false;
+        }
+
+        childWidth = child.getMeasuredWidth();
+        childHeight = child.getMeasuredHeight();
 
         contentWidth += childWidth;
         contentHeight += childHeight;

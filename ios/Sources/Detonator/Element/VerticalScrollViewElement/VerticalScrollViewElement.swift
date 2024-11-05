@@ -1,6 +1,8 @@
 import UIKit
 
 class VerticalScrollViewElement: Element {
+    private var isAtBottom: Bool = false
+    
     override public func decodeAttributes(edge: Edge) -> VerticalScrollViewAttributes? {
         return super.decodeAttributes(edge: edge)
     }
@@ -20,11 +22,21 @@ class VerticalScrollViewElement: Element {
             self.detonator.emitHandler(name: "onPageChange", edgeId: self.edge.id, data: data)
         }
         
+        view.onScrollListener = {
+            let child = view.subviews.first!
+            
+            let diff = child.frame.maxY - (view.frame.size.height + view.contentOffset.y)
+            
+            self.isAtBottom = diff == 0
+        }
+        
         return view
     }
     
     override public func patchView() {
         let view = view as! VerticalScrollView
+        
+        let layoutParams = view.layoutParams
         
         let attributes = attributes as! VerticalScrollViewAttributes
         let currentAttributes = currentAttributes as! VerticalScrollViewAttributes?
@@ -38,6 +50,15 @@ class VerticalScrollViewElement: Element {
             view.isPagingEnabled = paginated == true
         }
         
+        let inverted = attributes.inverted
+        let currentInverted = currentAttributes?.inverted
+        
+        let patchInvertedBool = forcePatch || inverted != currentInverted
+        
+        if patchInvertedBool {
+            view.inverted = inverted == true
+        }
+        
         let showsIndicator = attributes.showsIndicator
         let currentShowsIndicator = currentAttributes?.showsIndicator
         
@@ -45,6 +66,22 @@ class VerticalScrollViewElement: Element {
         
         if patchShowsIndicatorBool {
             view.showsVerticalScrollIndicator = showsIndicator == true
+        }
+        
+        let scrollToBottom = inverted == true && (forcePatch || isAtBottom);
+        
+        if scrollToBottom {
+            layoutParams.onLayoutClosures["scroll"] = {
+                let y = view.contentSize.height - view.frame.size.height
+                
+                if y > 0 {
+                    view.contentOffset = CGPoint(x: 0, y: y)
+                }
+                
+                self.isAtBottom = true
+            }
+        } else {
+            layoutParams.onLayoutClosures["scroll"] = nil
         }
     }
     
@@ -63,6 +100,7 @@ class VerticalScrollViewElement: Element {
     class VerticalScrollViewAttributes: Attributes {
         var horizontal: Bool?
         var paginated: Bool?
+        var inverted: Bool?
         var showsIndicator: Bool?
         var onPageChange: Bool?
         
@@ -71,6 +109,7 @@ class VerticalScrollViewElement: Element {
             
             horizontal = try container.decodeIfPresent(Bool.self, forKey: .horizontal)
             paginated = try container.decodeIfPresent(Bool.self, forKey: .paginated)
+            inverted = try container.decodeIfPresent(Bool.self, forKey: .inverted)
             showsIndicator = try container.decodeIfPresent(Bool.self, forKey: .showsIndicator)
             onPageChange = try container.decodeIfPresent(Bool.self, forKey: .onPageChange)
             
@@ -80,6 +119,7 @@ class VerticalScrollViewElement: Element {
         private enum CodingKeys: String, CodingKey {
             case horizontal
             case paginated
+            case inverted
             case showsIndicator
             case onPageChange
         }

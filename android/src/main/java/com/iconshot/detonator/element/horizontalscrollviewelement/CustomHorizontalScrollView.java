@@ -13,6 +13,7 @@ import com.iconshot.detonator.layout.ViewLayout;
 
 public class CustomHorizontalScrollView extends HorizontalScrollView {
     private boolean paginated = false;
+    private boolean inverted = false;
 
     private int page = 0;
 
@@ -36,6 +37,10 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
 
     public void setPaginated(boolean paginated) {
         this.paginated = paginated;
+    }
+
+    public void setInverted(boolean inverted) {
+        this.inverted = inverted;
     }
 
     public void setOnPageChangeListener(OnPageChangeListener onPageChangeListener) {
@@ -92,6 +97,19 @@ public class CustomHorizontalScrollView extends HorizontalScrollView {
 
         int childWidth = child.getMeasuredWidth();
         int childHeight = child.getMeasuredHeight();
+
+        boolean remeasure = inverted && specWidthMode == MeasureSpec.EXACTLY && childWidth < innerWidth;
+
+        if (remeasure) {
+            int tmpChildWidthSpec = MeasureSpec.makeMeasureSpec(innerWidth, MeasureSpec.EXACTLY);
+            int tmpChildHeightSpec = MeasureSpec.makeMeasureSpec(childHeight, MeasureSpec.EXACTLY);
+
+            child.remeasured = true;
+
+            child.measure(tmpChildWidthSpec, tmpChildHeightSpec);
+
+            child.remeasured = false;
+        }
 
         contentWidth += childWidth;
         contentHeight += childHeight;

@@ -1,6 +1,8 @@
 import UIKit
 
 class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
+    private let defaultPlaceholderColor: UIColor = UIColor(white: 1, alpha: 0.75)
+    
     override public func decodeAttributes(edge: Edge) -> InputAttributes? {
         return super.decodeAttributes(edge: edge)
     }
@@ -37,7 +39,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
             if placeholder != nil {
                 var attributes: [NSAttributedString.Key: Any] = [:]
                 
-                attributes[.foregroundColor] = placeholderColor != nil ? ColorHelper.parseColor(color: placeholderColor!) : UIColor.placeholderText
+                attributes[.foregroundColor] = placeholderColor != nil ? ColorHelper.parseColor(color: placeholderColor!) : defaultPlaceholderColor
                 
                 view.placeholder = nil
                 

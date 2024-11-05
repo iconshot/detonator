@@ -1,6 +1,7 @@
 package com.iconshot.detonator.element;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
@@ -17,7 +18,7 @@ import com.iconshot.detonator.helpers.PixelHelper;
 
 public class InputElement extends Element<EditText, InputElement.Attributes> {
     private int defaultColor;
-    private int defaultPlaceholderColor;
+    private final int defaultPlaceholderColor = Color.parseColor("#BFFFFFFF");
 
     public InputElement(Detonator detonator) {
         super(detonator);
@@ -35,7 +36,6 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         view.setMaxLines(1);
 
         defaultColor = view.getCurrentTextColor();
-        defaultPlaceholderColor = view.getCurrentHintTextColor();
 
         TextWatcher textWatcher = new TextWatcher() {
             @Override

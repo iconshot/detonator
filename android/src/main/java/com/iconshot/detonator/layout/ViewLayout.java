@@ -20,6 +20,8 @@ public class ViewLayout extends ViewGroup {
     public static int OVERFLOW_VISIBLE = 0;
     public static int OVERFLOW_HIDDEN = 1;
 
+    public boolean remeasured = false;
+
     private int overflow = OVERFLOW_VISIBLE;
 
     private int flexDirection = LayoutParams.FLEX_DIRECTION_COLUMN;
@@ -146,18 +148,24 @@ public class ViewLayout extends ViewGroup {
         int specWidthMode = MeasureSpec.getMode(widthSpec);
         int specHeightMode = MeasureSpec.getMode(heightSpec);
 
+        boolean isRemeasured = false;
+
+        isRemeasured |= remeasured;
+
         boolean isParentViewLayout = getParent() instanceof ViewLayout;
 
         if (isParentViewLayout) {
             LayoutParams layoutParams = (LayoutParams) getLayoutParams();
 
-            if (layoutParams.remeasured) {
-                setMeasuredDimension(specWidth, specHeight);
+            isRemeasured |= layoutParams.remeasured;
+        }
 
-                onMeasureAbsoluteChildren();
+        if (isRemeasured) {
+            setMeasuredDimension(specWidth, specHeight);
 
-                return;
-            }
+            onMeasureAbsoluteChildren();
+
+            return;
         }
 
         int paddingTop = getPaddingTop();

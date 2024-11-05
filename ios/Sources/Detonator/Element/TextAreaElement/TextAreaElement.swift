@@ -1,6 +1,8 @@
 import UIKit
 
 class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate {
+    private let defaultPlaceholderColor: UIColor = UIColor(white: 1, alpha: 0.75)
+    
     override public func decodeAttributes(edge: Edge) -> TextAreaAttributes? {
         return super.decodeAttributes(edge: edge)
     }
@@ -19,10 +21,6 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         view.textContainer.lineBreakMode = .byWordWrapping
         view.textContainer.maximumNumberOfLines = 0
         
-        view.onHeightChange = {
-            self.detonator.performLayout()
-        }
-        
         return view
     }
     
@@ -38,7 +36,16 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         let patchPlaceholderBool = forcePatch || placeholder != currentPlaceholder
         
         if patchPlaceholderBool {
-            // view.placeholder = placeholder
+            view.placeholder.text = placeholder
+        }
+        
+        let placeholderColor = attributes.placeholderColor
+        let currentPlaceholderColor = currentAttributes?.placeholderColor
+        
+        let patchPlaceholderColorBool = forcePatch || CompareHelper.compareStyleColors(placeholderColor, currentPlaceholderColor)
+        
+        if patchPlaceholderColorBool {
+            view.placeholder.textColor = placeholderColor != nil ? ColorHelper.parseColor(color: placeholderColor!) : defaultPlaceholderColor
         }
         
         let value = attributes.value
@@ -146,6 +153,13 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
             bottom: CGFloat(tmpPaddingBottom),
             right: CGFloat(tmpPaddingRight)
         )
+        
+        view.placeholder.layoutParams.padding = LayoutInsets(
+            top: tmpPaddingTop,
+            left: tmpPaddingLeft,
+            bottom: tmpPaddingBottom,
+            right: tmpPaddingRight
+        )
     }
     
     override func patchFontSize(fontSize: Float?) {
@@ -154,6 +168,8 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         let value = CGFloat(fontSize ?? 16)
         
         view.font = UIFont.systemFont(ofSize: value)
+        
+        view.placeholder.font = view.font
     }
     
     override func patchColor(color: StyleColor?) {
@@ -165,7 +181,9 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
     func textViewDidChange(_ textView: UITextView) {
         let data = OnChangeData(value: textView.text ?? "")
         
-        self.detonator.emitHandler(name: "onChange", edgeId: edge.id, data: data)
+        detonator.emitHandler(name: "onChange", edgeId: edge.id, data: data)
+        
+        detonator.performLayout()
     }
     
     func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {

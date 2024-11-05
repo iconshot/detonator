@@ -13,6 +13,7 @@ interface ScrollViewProps extends ViewProps {
   contentContainerStyle?: Style | null;
   horizontal?: boolean | null;
   paginated?: boolean | null;
+  inverted?: boolean | null;
   showsIndicator?: boolean | null;
   onPageChange?: ((event: ScrollViewPageChangeEvent) => void) | null;
 }
@@ -37,12 +38,24 @@ export class ScrollView extends BaseView<ScrollViewProps> {
     tmpStyle.paddingRight = null;
 
     const horizontal = attributes.horizontal ?? false;
+    const inverted = attributes.inverted ?? false;
 
-    const tmpAttributes = { ...attributes, style: tmpStyle, horizontal };
+    const tmpAttributes = {
+      ...attributes,
+      style: tmpStyle,
+      horizontal,
+      inverted,
+    };
 
     const tmpContentContainerStyle = { ...(contentContainerStyle ?? {}) };
 
-    tmpContentContainerStyle.flexDirection = horizontal ? "row" : "column";
+    tmpContentContainerStyle.flexDirection = horizontal
+      ? inverted
+        ? "row-reverse"
+        : "row"
+      : inverted
+      ? "column-reverse"
+      : "column";
 
     return $(
       horizontal

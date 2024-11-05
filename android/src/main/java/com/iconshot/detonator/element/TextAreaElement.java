@@ -1,9 +1,11 @@
 package com.iconshot.detonator.element;
 
+import android.graphics.Color;
 import android.text.Editable;
 import android.text.InputType;
 import android.text.TextWatcher;
 import android.util.TypedValue;
+import android.view.Gravity;
 import android.widget.EditText;
 
 import com.iconshot.detonator.Detonator;
@@ -14,7 +16,7 @@ import com.iconshot.detonator.helpers.PixelHelper;
 
 public class TextAreaElement extends Element<EditText, TextAreaElement.Attributes> {
     private int defaultColor;
-    private int defaultPlaceholderColor;
+    private final int defaultPlaceholderColor = Color.parseColor("#BFFFFFFF");
 
     public TextAreaElement(Detonator detonator) {
         super(detonator);
@@ -28,6 +30,8 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
     @Override
     protected EditText createView() {
         EditText view = new EditText(ContextHelper.context);
+
+        view.setGravity(Gravity.TOP);
 
         defaultColor = view.getCurrentTextColor();
 

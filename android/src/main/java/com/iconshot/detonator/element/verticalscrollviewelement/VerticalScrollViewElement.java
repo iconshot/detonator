@@ -1,5 +1,7 @@
 package com.iconshot.detonator.element.verticalscrollviewelement;
 
+import android.view.View;
+
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.helpers.CompareHelper;
@@ -7,6 +9,8 @@ import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 
 public class VerticalScrollViewElement extends Element<CustomVerticalScrollView, VerticalScrollViewElement.Attributes> {
+    private boolean isAtBottom = false;
+
     public VerticalScrollViewElement(Detonator detonator) {
         super(detonator);
     }
@@ -28,11 +32,21 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
             detonator.emitHandler("onPageChange", edge.id, data);
         });
 
+        view.getViewTreeObserver().addOnScrollChangedListener(() -> {
+            View child = view.getChildAt(0);
+
+            int diff = child.getBottom() - (view.getHeight() + view.getScrollY());
+
+            isAtBottom = diff == 0;
+        });
+
         return view;
     }
 
     @Override
     protected void patchView() {
+        ViewLayout.LayoutParams layoutParams = (ViewLayout.LayoutParams) view.getLayoutParams();
+
         Boolean paginated = attributes.paginated;
 
         Boolean currentPaginated = currentAttributes != null ? currentAttributes.paginated : null;
@@ -45,6 +59,18 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
             view.setPaginated(tmpPaginated);
         }
 
+        Boolean inverted = attributes.inverted;
+
+        Boolean currentInverted = currentAttributes != null ? currentAttributes.inverted : null;
+
+        boolean patchInverted = forcePatch || !CompareHelper.compareObjects(currentInverted, inverted);
+
+        if (patchInverted) {
+            boolean tmpInverted = inverted != null ? inverted : false;
+
+            view.setInverted(tmpInverted);
+        }
+
         Boolean showsIndicator = attributes.showsIndicator;
 
         Boolean currentShowsIndicator = currentAttributes != null ? currentAttributes.showsIndicator : null;
@@ -55,6 +81,18 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
             boolean value = showsIndicator != null && showsIndicator;
 
             view.setVerticalScrollBarEnabled(value);
+        }
+
+        boolean scrollToBottom = inverted != null && inverted && (forcePatch || isAtBottom);
+
+        if (scrollToBottom) {
+            layoutParams.onLayoutClosures.put("scroll", () -> {
+                View child = view.getChildAt(0);
+
+                view.scrollTo(0, child.getBottom());
+            });
+        } else {
+            layoutParams.onLayoutClosures.remove("scroll");
         }
     }
 
@@ -97,6 +135,8 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
     protected static class Attributes extends Element.Attributes {
         Boolean horizontal;
         Boolean paginated;
+        Boolean inverted;
         Boolean showsIndicator;
+        Boolean onPageChange;
     }
 }

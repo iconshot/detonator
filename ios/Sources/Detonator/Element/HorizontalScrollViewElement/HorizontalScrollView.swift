@@ -1,9 +1,13 @@
 import UIKit
 
 public class HorizontalScrollView: UIScrollView, UIScrollViewDelegate {
+    public var inverted: Bool = false
+    
     private var page: Int = 0
     
     public var onPageChangeListener: ((_ page: Int) -> Void)!
+    
+    public var onScrollListener: (() -> Void)!
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -44,8 +48,26 @@ public class HorizontalScrollView: UIScrollView, UIScrollViewDelegate {
             specHeightMode: specHeightMode
         )
         
-        let childWidth = Float(child.frame.size.width)
-        let childHeight = Float(child.frame.size.height)
+        var childWidth = Float(child.frame.size.width)
+        var childHeight = Float(child.frame.size.height)
+        
+        let remeasure = inverted && specWidthMode == MeasureSpec.EXACTLY && CGFloat(childWidth) < innerWidth;
+        
+        if remeasure {
+            child.layoutParams.remeasured = true
+            
+            child.measure(
+                specWidth: innerWidth,
+                specHeight: CGFloat(childHeight),
+                specWidthMode: MeasureSpec.EXACTLY,
+                specHeightMode: MeasureSpec.EXACTLY
+            )
+            
+            child.layoutParams.remeasured = false
+        }
+        
+        childWidth = Float(child.frame.size.width)
+        childHeight = Float(child.frame.size.height)
         
         contentWidth += childWidth
         contentHeight += childHeight
@@ -119,5 +141,9 @@ public class HorizontalScrollView: UIScrollView, UIScrollViewDelegate {
         self.page = tmpPage
         
         onPageChangeListener(tmpPage)
+    }
+    
+    public func scrollViewDidScroll(_ view: UIScrollView) {
+        onScrollListener()
     }
 }

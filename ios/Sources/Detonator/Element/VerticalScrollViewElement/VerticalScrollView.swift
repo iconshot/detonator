@@ -1,9 +1,13 @@
 import UIKit
 
 public class VerticalScrollView: UIScrollView, UIScrollViewDelegate {
+    public var inverted: Bool = false
+    
     private var page: Int = 0
     
     public var onPageChangeListener: ((_ page: Int) -> Void)!
+    
+    public var onScrollListener: (() -> Void)!
     
     public override init(frame: CGRect) {
         super.init(frame: frame)
@@ -44,8 +48,26 @@ public class VerticalScrollView: UIScrollView, UIScrollViewDelegate {
             specHeightMode: isPagingEnabled ? MeasureSpec.EXACTLY : MeasureSpec.UNSPECIFIED
         )
         
-        let childWidth = Float(child.frame.size.width)
-        let childHeight = Float(child.frame.size.height)
+        var childWidth = Float(child.frame.size.width)
+        var childHeight = Float(child.frame.size.height)
+        
+        let remeasure = inverted && specHeightMode == MeasureSpec.EXACTLY && CGFloat(childHeight) < innerHeight;
+        
+        if remeasure {
+            child.layoutParams.remeasured = true
+            
+            child.measure(
+                specWidth: CGFloat(childWidth),
+                specHeight: innerHeight,
+                specWidthMode: MeasureSpec.EXACTLY,
+                specHeightMode: MeasureSpec.EXACTLY
+            )
+            
+            child.layoutParams.remeasured = false
+        }
+        
+        childWidth = Float(child.frame.size.width)
+        childHeight = Float(child.frame.size.height)
         
         contentWidth += childWidth
         contentHeight += childHeight
@@ -53,8 +75,8 @@ public class VerticalScrollView: UIScrollView, UIScrollViewDelegate {
         contentWidth += paddingX
         contentHeight += paddingY
         
-        let resolvedWidth = resolveSize(size: CGFloat(contentWidth), specSize: specWidth, specSizeMode: specWidthMode)
-        let resolvedHeight = resolveSize(size: CGFloat(contentHeight), specSize: specHeight, specSizeMode: specHeightMode)
+        var resolvedWidth = resolveSize(size: CGFloat(contentWidth), specSize: specWidth, specSizeMode: specWidthMode)
+        var resolvedHeight = resolveSize(size: CGFloat(contentHeight), specSize: specHeight, specSizeMode: specHeightMode)
         
         frame.size.width = resolvedWidth
         frame.size.height = resolvedHeight
@@ -119,5 +141,9 @@ public class VerticalScrollView: UIScrollView, UIScrollViewDelegate {
         self.page = tmpPage
         
         onPageChangeListener(tmpPage)
+    }
+    
+    public func scrollViewDidScroll(_ view: UIScrollView) {
+        onScrollListener()
     }
 }
