@@ -1,7 +1,15 @@
 package com.iconshot.detonator.element.videoelement;
 
 import android.net.Uri;
+import android.os.Handler;
 import android.view.View;
+
+import androidx.media3.common.MediaItem;
+import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.Player;
+import androidx.media3.exoplayer.ExoPlayer;
+import androidx.media3.ui.AspectRatioFrameLayout;
+import androidx.media3.ui.PlayerView;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
@@ -10,7 +18,14 @@ import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
 
 public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> {
-    public CustomVideoView videoView;
+    public ExoPlayer player;
+
+    public PlayerView playerView;
+
+    private final Handler handler = new Handler();
+    private Runnable progressRunnable;
+
+    private int currentPosition = 0;
 
     public VideoElement(Detonator detonator) {
         super(detonator);
@@ -25,15 +40,23 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
     public VideoLayout createView() {
         VideoLayout view = new VideoLayout(ContextHelper.context);
 
-        videoView = new CustomVideoView(ContextHelper.context);
+        playerView = new PlayerView(ContextHelper.context);
 
-        videoView.setOnPreparedListener(view::setMediaPlayer);
+        playerView.setUseController(false);
 
-        videoView.setOnClickListener((View v) -> {
+        startTrackingProgress(position -> {
+            OnProgressData data = new OnProgressData();
+
+            data.position = position;
+
+            detonator.emitHandler("onProgress", edge.id, data);
+        });
+
+        playerView.setOnClickListener((View v) -> {
             view.callOnClick();
         });
 
-        view.addView(videoView);
+        view.addView(playerView);
 
         return view;
     }
@@ -47,12 +70,49 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
         boolean patchUrl = forcePatch || !CompareHelper.compareObjects(url, currentUrl);
 
         if (patchUrl) {
-            if (url != null) {
-                videoView.setVideoURI(Uri.parse(url));
-            } else {
-                videoView.stopPlayback();
+            playerView.setAlpha(0);
 
-                videoView.setVideoURI(null);
+            if (player != null) {
+                player.release();
+            }
+
+            if (url != null) {
+                player = new ExoPlayer.Builder(ContextHelper.context).build();
+
+                player.addListener(new ExoPlayer.Listener() {
+                    @Override
+                    public void onPlaybackStateChanged(int playbackState) {
+                        switch (playbackState) {
+                            case ExoPlayer.STATE_READY: {
+                                playerView.setAlpha(1);
+
+                                break;
+                            }
+
+                            case ExoPlayer.STATE_ENDED: {
+                                detonator.emitHandler("onEnd", edge.id);
+
+                                break;
+                            }
+
+
+                        }
+                    }
+                });
+
+                playerView.setPlayer(player);
+
+                Uri uri = Uri.parse(url);
+
+                MediaItem mediaItem = MediaItem.fromUri(uri);
+
+                player.setMediaItem(mediaItem);
+
+                player.prepare();
+            } else {
+                player = null;
+
+                playerView.setPlayer(null);
             }
         }
     }
@@ -89,28 +149,71 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
         });
     }
 
+    @androidx.media3.common.util.UnstableApi
     protected void patchObjectFit(String objectFit) {
         String tmpObjectFit = objectFit != null ? objectFit : "cover";
 
         switch (tmpObjectFit) {
             case "cover": {
-                view.setObjectFit(VideoLayout.OBJECT_FIT_COVER);
+                playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_ZOOM);
 
                 break;
             }
 
             case "contain": {
-                view.setObjectFit(VideoLayout.OBJECT_FIT_CONTAIN);
+                playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FIT);
 
                 break;
             }
 
             case "fill": {
-                view.setObjectFit(VideoLayout.OBJECT_FIT_FILL);
+                playerView.setResizeMode(AspectRatioFrameLayout.RESIZE_MODE_FILL);
 
                 break;
             }
         }
+    }
+
+    @Override
+    protected void removeView() {
+        playerView.setPlayer(null);
+
+        if (player != null) {
+            player.release();
+        }
+
+        if (progressRunnable != null) {
+            handler.removeCallbacks(progressRunnable);
+        }
+    }
+
+    private void startTrackingProgress(OnProgressListener listener) {
+        progressRunnable = new Runnable() {
+            @Override
+            public void run() {
+                handler.postDelayed(this, 250);
+
+                int position = player != null ? (int) player.getCurrentPosition() : 0;
+
+                if (position == currentPosition) {
+                    return;
+                }
+
+                currentPosition = position;
+
+                listener.onProgress(position);
+            }
+        };
+
+        handler.post(progressRunnable);
+    }
+
+    private static class OnProgressData {
+        int position;
+    }
+
+    interface OnProgressListener {
+        void onProgress(int position);
     }
 
     protected static class Attributes extends Element.Attributes {

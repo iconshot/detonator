@@ -9,8 +9,6 @@ class ViewElement: Element {
         return ViewLayout()
     }
     
-    override public func patchView() {}
-    
     override func patchOverflow(overflow: String?) {
         let tmpOverflow = overflow ?? "visible"
         

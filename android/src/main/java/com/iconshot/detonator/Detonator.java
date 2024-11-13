@@ -38,9 +38,11 @@ import com.iconshot.detonator.request.Request;
 import com.iconshot.detonator.request.OpenUrlRequest;
 import com.iconshot.detonator.request.InputBlurRequest;
 import com.iconshot.detonator.request.InputFocusRequest;
+import com.iconshot.detonator.request.InputSetValueRequest;
 import com.iconshot.detonator.request.ImageGetSizeRequest;
 import com.iconshot.detonator.request.TextAreaBlurRequest;
 import com.iconshot.detonator.request.TextAreaFocusRequest;
+import com.iconshot.detonator.request.TextAreaSetValueRequest;
 import com.iconshot.detonator.request.ToastShowRequest;
 import com.iconshot.detonator.request.VideoPauseRequest;
 import com.iconshot.detonator.request.VideoPlayRequest;
@@ -49,11 +51,13 @@ import com.iconshot.detonator.request.VideoSeekRequest;
 import com.iconshot.detonator.module.Module;
 import com.iconshot.detonator.module.AppStateModule;
 import com.iconshot.detonator.module.StorageModule;
+import com.iconshot.detonator.module.fullscreen.FullScreenModule;
 
 import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.FileHelper;
 
 import com.iconshot.detonator.layout.ViewLayout;
+
 
 import com.iconshot.detonator.tree.Tree;
 import com.iconshot.detonator.tree.Edge;
@@ -117,8 +121,10 @@ public class Detonator {
         addRequestClass("com.iconshot.detonator/openUrl", OpenUrlRequest.class);
         addRequestClass("com.iconshot.detonator.input/focus", InputFocusRequest.class);
         addRequestClass("com.iconshot.detonator.input/blur", InputBlurRequest.class);
+        addRequestClass("com.iconshot.detonator.input/setValue", InputSetValueRequest.class);
         addRequestClass("com.iconshot.detonator.textarea/focus", TextAreaFocusRequest.class);
         addRequestClass("com.iconshot.detonator.textarea/blur", TextAreaBlurRequest.class);
+        addRequestClass("com.iconshot.detonator.textarea/setValue", TextAreaSetValueRequest.class);
         addRequestClass("com.iconshot.detonator.image/getSize", ImageGetSizeRequest.class);
         addRequestClass("com.iconshot.detonator.video/play", VideoPlayRequest.class);
         addRequestClass("com.iconshot.detonator.video/pause", VideoPauseRequest.class);
@@ -127,6 +133,7 @@ public class Detonator {
 
         addModuleClass("com.iconshot.detonator.appstate", AppStateModule.class);
         addModuleClass("com.iconshot.detonator.storage", StorageModule.class);
+        addModuleClass("com.iconshot.detonator.fullscreen", FullScreenModule.class);
 
         initWebView();
 
@@ -504,14 +511,20 @@ public class Detonator {
     private void unmountEdge(Edge edge, Target target) {
         Target tmpTarget = target;
 
-        if (edge.element != null && target != null) {
-            target.remove(edge.element.view);
+        if (edge.element != null) {
+            edge.element.remove();
 
-            tmpTarget = null;
+            if (target != null) {
+                tmpTarget = null;
+            }
         }
 
         for (Edge child : edge.children) {
             unmountEdge(child, tmpTarget);
+        }
+
+        if (edge.element != null && target != null) {
+            target.remove(edge.element.view);
         }
 
         edges.remove(edge.id);

@@ -4,6 +4,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
+import com.iconshot.detonator.module.fullscreen.FullScreenModule;
+
 public class Target {
     private final ViewGroup view;
     private int index;
@@ -15,6 +17,10 @@ public class Target {
 
     public void insert(View child) {
         ViewParent parent = child.getParent();
+
+        if (child == FullScreenModule.view) {
+            return;
+        }
 
         View currentChild = view.getChildAt(index);
 

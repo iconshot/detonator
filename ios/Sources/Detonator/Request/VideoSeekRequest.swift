@@ -1,6 +1,6 @@
 class VideoSeekRequest: Request {
     override public func run() {
-        let ms: Int = decode()!
+        let position: Int = decode()!
         
         let edge = getComponentEdge()!
         
@@ -8,7 +8,7 @@ class VideoSeekRequest: Request {
         
         let videoView = videoEdge.element!.view as! VideoView
         
-        videoView.seek(to: ms)
+        videoView.seek(to: position)
         
         end()
     }

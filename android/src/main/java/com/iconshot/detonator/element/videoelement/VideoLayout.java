@@ -4,19 +4,10 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.RectF;
-import android.media.MediaPlayer;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class VideoLayout extends ViewGroup {
-    public static final int OBJECT_FIT_COVER = 0;
-    public static final int OBJECT_FIT_CONTAIN = 1;
-    public static final int OBJECT_FIT_FILL = 2;
-
-    private int objectFit = OBJECT_FIT_COVER;
-
-    private MediaPlayer mediaPlayer;
-
     private float[] radii;
 
     private final RectF rect = new RectF(0, 0, 0, 0);
@@ -27,24 +18,10 @@ public class VideoLayout extends ViewGroup {
         super(context);
     }
 
-    public void setMediaPlayer(MediaPlayer mediaPlayer) {
-        this.mediaPlayer = mediaPlayer;
-    }
-
     public void setRadii(float[] radii) {
         this.radii = radii;
 
         this.invalidate();
-    }
-
-    public void setObjectFit(int objectFit) {
-        if (this.objectFit == objectFit) {
-            return;
-        }
-
-        this.objectFit = objectFit;
-
-        requestLayout();
     }
 
     @Override
@@ -56,50 +33,6 @@ public class VideoLayout extends ViewGroup {
 
         int childWidth = specWidth;
         int childHeight = specHeight;
-
-        if (mediaPlayer != null) {
-            int videoWidth = mediaPlayer.getVideoWidth();
-            int videoHeight = mediaPlayer.getVideoHeight();
-
-            switch (objectFit) {
-                case OBJECT_FIT_COVER: {
-                    float videoAspectRatio = (float) videoWidth / videoHeight;
-                    float viewAspectRatio = (float) specWidth / specHeight;
-
-                    if (videoAspectRatio > viewAspectRatio) {
-                        childWidth = (int) (specHeight * videoAspectRatio);
-                        childHeight = specHeight;
-                    } else {
-                        childWidth = specWidth;
-                        childHeight = (int) (specWidth / videoAspectRatio);
-                    }
-
-                    break;
-                }
-
-                case OBJECT_FIT_CONTAIN: {
-                    float videoAspectRatio = (float) videoWidth / videoHeight;
-                    float viewAspectRatio = (float) specWidth / specHeight;
-
-                    if (videoAspectRatio > viewAspectRatio) {
-                        childWidth = specWidth;
-                        childHeight = (int) (specWidth / videoAspectRatio);
-                    } else {
-                        childWidth = (int) (specHeight * videoAspectRatio);
-                        childHeight = specHeight;
-                    }
-
-                    break;
-                }
-
-                case OBJECT_FIT_FILL: {
-                    childWidth = specWidth;
-                    childHeight = specHeight;
-
-                    break;
-                }
-            }
-        }
 
         child.measure(
                 MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY),
@@ -123,8 +56,6 @@ public class VideoLayout extends ViewGroup {
         int childTop = (measuredHeight - childHeight) / 2;
 
         child.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
-
-        child.setAlpha(mediaPlayer == null ? 0 : 1);
     }
 
     @Override

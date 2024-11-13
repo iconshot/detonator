@@ -1,13 +1,13 @@
 import UIKit
 
-class ViewLayoutController: UIViewController {
+public class ViewLayoutController: UIViewController {
     private var height: CGFloat? = nil
     
-    override func loadView() {
+    override public func loadView() {
         view = ViewLayout()
     }
     
-    override func viewDidLoad() {
+    override public func viewDidLoad() {
         super.viewDidLoad()
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -44,6 +44,8 @@ class ViewLayoutController: UIViewController {
 
         if let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect {
             let tmpHeight = height!
+            
+            height = nil
             
             if tmpHeight == view.frame.size.height {
                 return

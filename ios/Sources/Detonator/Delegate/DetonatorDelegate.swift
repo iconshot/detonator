@@ -9,11 +9,13 @@ open class DetonatorDelegate: UIResponder, UIApplicationDelegate {
         
         let rootViewController = ViewLayoutController()
         
-        let rootView = rootViewController.view as! ViewLayout
+        let navigationController = UINavigationController(rootViewController: rootViewController)
         
-        window!.rootViewController = rootViewController
+        window!.rootViewController = navigationController
         window!.makeKeyAndVisible()
         
+        let rootView = rootViewController.view as! ViewLayout
+
         detonator = Detonator(rootView: rootView, filename: "index")
         
         return true

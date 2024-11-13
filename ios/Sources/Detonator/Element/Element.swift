@@ -1589,13 +1589,16 @@ open class Element: NSObject {
         }
     }
     
+    public func remove() {
+        removeView()
+    }
+    
     open func createView() -> UIView {
         preconditionFailure("This method must be overridden.")
     }
     
-    open func patchView() {
-        preconditionFailure("This method must be overridden.")
-    }
+    open func patchView() {}
+    open func removeView() {}
     
     func resignFirstResponder(_ view: UIView) {
         if view.isFirstResponder {

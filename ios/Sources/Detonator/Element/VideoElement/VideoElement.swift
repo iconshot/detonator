@@ -6,7 +6,19 @@ class VideoElement: Element {
     }
     
     override public func createView() -> VideoView {
-        return VideoView()
+        let view = VideoView()
+        
+        view.onProgressListener = { position in
+            let data = OnProgressData(position: position)
+            
+            self.detonator.emitHandler(name: "onProgress", edgeId: self.edge.id, data: data)
+        }
+        
+        view.onEndListener = {
+            self.detonator.emitHandler(name: "onEnd", edgeId: self.edge.id)
+        }
+        
+        return view
     }
     
     override public func patchView() {
@@ -23,6 +35,12 @@ class VideoElement: Element {
         if patchUrl {
             view.setupPlayer(urlString: url)
         }
+    }
+    
+    override public func removeView() {
+        let view = view as! VideoView
+
+        view.remove()
     }
     
     override func patchObjectFit(objectFit: String?) {
@@ -49,6 +67,10 @@ class VideoElement: Element {
             
             break
         }
+    }
+    
+    struct OnProgressData: Encodable {
+        let position: Int
     }
     
     class VideoAttributes: Attributes {

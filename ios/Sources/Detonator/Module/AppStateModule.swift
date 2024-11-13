@@ -1,13 +1,23 @@
 import UIKit
 
 enum State: String {
+    case inactive
     case background
-    case foreground
     case active
 }
 
 class AppStateModule: Module {
-    var currentState: State = .background
+    private var state: State = .background
+    
+    private func updateState(state: State) {
+        if state == self.state {
+            return
+        }
+        
+        self.state = state
+        
+        detonator.emitEvent(name: "com.iconshot.detonator.appstate/state", data: state.rawValue)
+    }
     
     override func register() {
         NotificationCenter.default.addObserver(
@@ -32,25 +42,15 @@ class AppStateModule: Module {
         )
     }
     
-    private func emit() {
-        detonator.emitEvent(name: "com.iconshot.detonator.appstate/state", data: currentState.rawValue)
-    }
-    
     @objc func appDidEnterBackground() {
-        currentState = .background
-        
-        emit()
+        updateState(state: .background)
     }
     
     @objc func appWillEnterForeground() {
-        currentState = .foreground
-        
-        emit()
+        updateState(state: .inactive)
     }
     
     @objc func appDidBecomeActive() {
-        currentState = .active
-        
-        emit()
+        updateState(state: .active)
     }
 }

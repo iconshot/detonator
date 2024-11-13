@@ -149,6 +149,14 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         view.textColor = color != nil ? ColorHelper.parseColor(color: color!) : nil
     }
     
+    func updateValue(value: String) {
+        let view = view as! InputView
+        
+        view.text = value
+        
+        view.sendActions(for: .editingChanged)
+    }
+    
     func textFieldShouldReturn(_ view: UITextField) -> Bool {
         view.resignFirstResponder()
 

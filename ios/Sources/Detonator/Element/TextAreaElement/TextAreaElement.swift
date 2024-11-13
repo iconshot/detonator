@@ -178,6 +178,14 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         view.textColor = color != nil ? ColorHelper.parseColor(color: color!) : nil
     }
     
+    public func updateValue(value: String) {
+        let view = view as! TextAreaView
+        
+        view.text = value
+        
+        textViewDidChange(view)
+    }
+    
     func textViewDidChange(_ textView: UITextView) {
         let data = OnChangeData(value: textView.text ?? "")
         

@@ -1,7 +1,8 @@
 package com.iconshot.detonator.request;
 
+import androidx.media3.common.Player;
+
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.element.videoelement.CustomVideoView;
 import com.iconshot.detonator.element.videoelement.VideoElement;
 import com.iconshot.detonator.tree.Edge;
 
@@ -17,9 +18,9 @@ public class VideoPauseRequest extends Request {
 
         VideoElement element = (VideoElement) videoEdge.element;
 
-        CustomVideoView videoView = (CustomVideoView) element.videoView;
+        Player player = (Player) element.player;
 
-        videoView.pause();
+        player.pause();
 
         end();
     }

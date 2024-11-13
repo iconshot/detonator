@@ -55,8 +55,10 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         addRequestClass(key: "com.iconshot.detonator/openUrl", requestClass: OpenUrlRequest.self)
         addRequestClass(key: "com.iconshot.detonator.input/focus", requestClass: InputFocusRequest.self)
         addRequestClass(key: "com.iconshot.detonator.input/blur", requestClass: InputBlurRequest.self)
+        addRequestClass(key: "com.iconshot.detonator.input/setValue", requestClass: InputSetValueRequest.self)
         addRequestClass(key: "com.iconshot.detonator.textarea/focus", requestClass: TextAreaFocusRequest.self)
         addRequestClass(key: "com.iconshot.detonator.textarea/blur", requestClass: TextAreaBlurRequest.self)
+        addRequestClass(key: "com.iconshot.detonator.textarea/setValue", requestClass: TextAreaSetValueRequest.self)
         addRequestClass(key: "com.iconshot.detonator.image/getSize", requestClass: ImageGetSizeRequest.self)
         addRequestClass(key: "com.iconshot.detonator.video/play", requestClass: VideoPlayRequest.self)
         addRequestClass(key: "com.iconshot.detonator.video/pause", requestClass: VideoPauseRequest.self)
@@ -64,6 +66,7 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         
         addModuleClass(key: "com.iconshot.detonator.appstate", moduleClass: AppStateModule.self)
         addModuleClass(key: "com.iconshot.detonator.storage", moduleClass: StorageModule.self)
+        addModuleClass(key: "com.iconshot.detonator.fullscreen", moduleClass: FullScreenModule.self)
                 
         initWebView()
         
@@ -479,14 +482,20 @@ public class Detonator: NSObject, WKScriptMessageHandler {
     private func unmountEdge(edge: Edge, target: Target?) {
         var tmpTarget = target
         
-        if edge.element != nil && target != nil {
-            target!.remove(child: edge.element!.view!)
+        if edge.element != nil {
+            edge.element!.remove()
             
-            tmpTarget = nil
+            if target != nil {
+                tmpTarget = nil
+            }
         }
         
         for child in edge.children {
             unmountEdge(edge: child, target: tmpTarget)
+        }
+        
+        if edge.element != nil && target != nil {
+            target!.remove(child: edge.element!.view!)
         }
         
         edges[edge.id] = nil

@@ -1,7 +1,8 @@
 package com.iconshot.detonator.request;
 
+import androidx.media3.common.Player;
+
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.element.videoelement.CustomVideoView;
 import com.iconshot.detonator.element.videoelement.VideoElement;
 import com.iconshot.detonator.tree.Edge;
 
@@ -11,7 +12,7 @@ public class VideoSeekRequest extends Request<Integer> {
     }
 
     public void run() {
-        Integer time = decode(Integer.class);
+        Integer position = decode(Integer.class);
 
         Edge edge = getComponentEdge();
 
@@ -19,9 +20,9 @@ public class VideoSeekRequest extends Request<Integer> {
 
         VideoElement element = (VideoElement) videoEdge.element;
 
-        CustomVideoView videoView = (CustomVideoView) element.videoView;
+        Player player = (Player) element.player;
 
-        videoView.seekTo(time);
+        player.seekTo(position);
 
         end();
     }

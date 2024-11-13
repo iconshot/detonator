@@ -1469,8 +1469,13 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         }
     }
 
+    public void remove() {
+        removeView();
+    }
+
     protected abstract K createView();
-    protected abstract void patchView();
+    protected void patchView() {}
+    protected void removeView() {}
 
     private void clearFocus(View view) {
         if (view instanceof ViewGroup) {

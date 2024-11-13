@@ -16,9 +16,9 @@ public class InputFocusRequest extends Request {
     public void run() {
         Edge edge = getComponentEdge();
 
-        Edge textEdge = edge.children.get(0);
+        Edge elementEdge = edge.children.get(0);
 
-        EditText view = (EditText) textEdge.element.view;
+        EditText view = (EditText) elementEdge.element.view;
 
         view.requestFocus();
 

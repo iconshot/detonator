@@ -1,14 +1,16 @@
 import UIKit
 
-class InputFocusRequest: Request {
+class InputSetValueRequest: Request {
     override public func run() {
+        let value: String = decode()!
+        
         let edge = getComponentEdge()!
         
         let elementEdge = edge.children[0]
         
-        let view = elementEdge.element!.view as! InputView
+        let element = elementEdge.element! as! InputElement
         
-        view.becomeFirstResponder()
+        element.updateValue(value: value)
         
         end()
     }

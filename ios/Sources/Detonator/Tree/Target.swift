@@ -10,6 +10,10 @@ class Target {
     }
     
     public func insert(child: UIView) {
+        if child == FullScreenModule.view {
+            return
+        }
+        
         let currentChild = index < view.subviews.count
             ? view.subviews[index]
             : nil

@@ -31,6 +31,13 @@ export class Input extends BaseView<InputProps> {
     this.value = value ?? "";
   }
 
+  public async setValue(value: string): Promise<void> {
+    await Detonator.request(
+      { name: "com.iconshot.detonator.input/setValue", data: value },
+      this
+    );
+  }
+
   public async focus(): Promise<void> {
     await Detonator.request(
       { name: "com.iconshot.detonator.input/focus" },
@@ -56,10 +63,10 @@ export class Input extends BaseView<InputProps> {
   };
 
   public render(): any {
-    const { children, ...tmpAttributes } = this.props;
+    const { children, ...attributes } = this.props;
 
-    const attributes = { ...tmpAttributes, onChange: this.onChange };
+    const tmpAttributes = { ...attributes, onChange: this.onChange };
 
-    return $("com.iconshot.detonator.input", attributes, children);
+    return $("com.iconshot.detonator.input", tmpAttributes, children);
   }
 }

@@ -27,6 +27,13 @@ export class TextArea extends BaseView<TextAreaProps> {
     this.value = value ?? "";
   }
 
+  public async setValue(value: string): Promise<void> {
+    await Detonator.request(
+      { name: "com.iconshot.detonator.textarea/setValue", data: value },
+      this
+    );
+  }
+
   public async focus(): Promise<void> {
     await Detonator.request(
       { name: "com.iconshot.detonator.textarea/focus" },
@@ -41,23 +48,21 @@ export class TextArea extends BaseView<TextAreaProps> {
     );
   }
 
+  private onChange = (event: TextAreaChangeEvent): void => {
+    const { onChange = null } = this.props;
+
+    this.value = event.value;
+
+    if (onChange !== null) {
+      onChange(event);
+    }
+  };
+
   public render(): any {
-    const {
-      children,
-      onChange: tmpOnChange = null,
-      ...tmpAttributes
-    } = this.props;
+    const { children, ...attributes } = this.props;
 
-    const onChange = (event: TextAreaChangeEvent) => {
-      this.value = event.value;
+    const tmpAttributes = { ...attributes, onChange: this.onChange };
 
-      if (tmpOnChange !== null) {
-        tmpOnChange(event);
-      }
-    };
-
-    const attributes = { ...tmpAttributes, onChange };
-
-    return $("com.iconshot.detonator.textarea", attributes, children);
+    return $("com.iconshot.detonator.textarea", tmpAttributes, children);
   }
 }

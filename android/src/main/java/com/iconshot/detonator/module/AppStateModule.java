@@ -9,10 +9,22 @@ import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ContextHelper;
 
 public class AppStateModule extends Module {
-    protected boolean foreground = false;
+    private boolean foreground = false;
 
     public AppStateModule(Detonator detonator) {
         super(detonator);
+    }
+
+    private void setForeground(boolean foreground) {
+        if (this.foreground == foreground) {
+            return;
+        }
+
+        this.foreground = foreground;
+
+        String currentState = foreground ? "active": "background";
+
+        detonator.emitEvent("com.iconshot.detonator.appstate/state", currentState);
     }
 
     @Override
@@ -24,20 +36,12 @@ public class AppStateModule extends Module {
         application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override
             public void onActivityResumed(Activity activity) {
-                if (foreground) {
-                    return;
-                }
-
-                foreground = true;
-
-                emit();
+                setForeground(true);
             }
 
             @Override
             public void onActivityPaused(Activity activity) {
-                foreground = false;
-
-                emit();
+                setForeground(false);
             }
 
             @Override
@@ -51,11 +55,5 @@ public class AppStateModule extends Module {
             @Override
             public void onActivityDestroyed(Activity activity) {}
         });
-    }
-
-    private void emit() {
-        String currentState = foreground ? "foreground": "background";
-
-        detonator.emitEvent("com.iconshot.detonator.appstate/state", currentState);
     }
 }
