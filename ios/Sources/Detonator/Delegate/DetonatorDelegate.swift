@@ -9,9 +9,7 @@ open class DetonatorDelegate: UIResponder, UIApplicationDelegate {
         
         let rootViewController = ViewLayoutController()
         
-        let navigationController = UINavigationController(rootViewController: rootViewController)
-        
-        window!.rootViewController = navigationController
+        window!.rootViewController = rootViewController
         window!.makeKeyAndVisible()
         
         let rootView = rootViewController.view as! ViewLayout
