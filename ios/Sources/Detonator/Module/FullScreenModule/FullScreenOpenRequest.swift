@@ -22,7 +22,7 @@ class FullScreenOpenRequest: Request {
             return
         }
         
-        let controller = FullScreenViewController()
+        let fullScreenViewController = FullScreenViewController()
         
         let tmpLayoutParams = LayoutParams()
         
@@ -80,17 +80,17 @@ class FullScreenOpenRequest: Request {
         layoutParams.positionRightPercent = nil
         layoutParams.margin = LayoutInsets.zero
         
-        controller.view.addSubview(view)
+        fullScreenViewController.view.addSubview(view)
         
-        controller.modalPresentationStyle = .fullScreen
+        fullScreenViewController.modalPresentationStyle = .fullScreen
         
-        rootViewController.present(controller, animated: false, completion: nil)
+        rootViewController.present(fullScreenViewController, animated: false, completion: nil)
         
         FullScreenModule.parent = parent
         FullScreenModule.view = view
         FullScreenModule.index = index
         FullScreenModule.layoutParams = tmpLayoutParams
-        FullScreenModule.fullScreenViewController = controller
+        FullScreenModule.fullScreenViewController = fullScreenViewController
         
         detonator.performLayout()
         
