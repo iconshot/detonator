@@ -90,7 +90,7 @@ class FullScreenOpenRequest: Request {
         FullScreenModule.view = view
         FullScreenModule.index = index
         FullScreenModule.layoutParams = tmpLayoutParams
-        FullScreenModule.controller = controller
+        FullScreenModule.fullScreenViewController = controller
         
         detonator.performLayout()
         

@@ -434,8 +434,8 @@ public class Detonator {
     public void performLayout() {
         rootView.performLayout();
 
-        if (FullScreenModule.view != null) {
-            FullScreenModule.view.performLayout();
+        if (FullScreenModule.fullScreenView != null) {
+            FullScreenModule.fullScreenView.performLayout();
         }
     }
 

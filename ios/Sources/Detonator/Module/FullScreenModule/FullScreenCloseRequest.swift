@@ -36,13 +36,13 @@ class FullScreenCloseRequest: Request {
         
         FullScreenModule.parent!.insertSubview(view, at: FullScreenModule.index!)
         
-        FullScreenModule.controller!.dismiss(animated: false)
+        FullScreenModule.fullScreenViewController!.dismiss(animated: false)
         
         FullScreenModule.parent = nil
         FullScreenModule.view = nil
         FullScreenModule.index = nil
         FullScreenModule.layoutParams = nil
-        FullScreenModule.controller = nil
+        FullScreenModule.fullScreenViewController = nil
         
         detonator.performLayout()
         

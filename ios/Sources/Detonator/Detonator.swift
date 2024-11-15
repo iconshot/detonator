@@ -402,7 +402,11 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         workItem = DispatchWorkItem { [weak self] in
             self?.rootView.performLayout()
             
-            FullScreenModule.view?.performLayout()
+            if let fullScreenViewController = FullScreenModule.fullScreenViewController {
+                let fullScreenView = fullScreenViewController.view as! ViewLayout
+                
+                fullScreenView.performLayout()
+            }
         }
         
         DispatchQueue.main.async(execute: workItem!)
