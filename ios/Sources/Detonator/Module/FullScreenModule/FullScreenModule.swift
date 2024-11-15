@@ -7,7 +7,7 @@ class FullScreenModule: Module {
     }
     
     static var parent: UIView? = nil
-    static var view: UIView? = nil
+    static var view: ViewLayout? = nil
     static var index: Int? = nil
     static var layoutParams: LayoutParams? = nil
     static var controller: FullScreenViewController? = nil

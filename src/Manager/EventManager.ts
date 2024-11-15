@@ -1,10 +1,10 @@
 import { Emitter } from "untrue";
 
-import { WindowEmitter } from "../Emitter";
+import { Detonator } from "../Detonator";
 
 export class EventManager {
-  static bind(name: string, emitter: Emitter): void {
-    WindowEmitter.on("event", (json: string): void => {
+  public static bind(name: string, emitter: Emitter): void {
+    Detonator.on("event", (json: string): void => {
       const { name: eventName, data }: { name: string; data: any } =
         JSON.parse(json);
 

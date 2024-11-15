@@ -37,7 +37,7 @@ public class VideoView: UIView {
     }
     
     private func setupTimer() {
-        timer = Timer.scheduledTimer(withTimeInterval: 0.25, repeats: true) { timer in
+        timer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { timer in
             let time = self.player?.currentTime() ?? CMTime.zero
             
             let position = Int(CMTimeGetSeconds(time) * 1000)

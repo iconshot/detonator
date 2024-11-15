@@ -1,4 +1,4 @@
-import { Slot, Component } from "untrue";
+import { Slot, Component, Emitter } from "untrue";
 
 import { TreeHub } from "./Tree/TreeHub";
 import { Tree } from "./Tree/Tree";
@@ -6,8 +6,9 @@ import { Tree } from "./Tree/Tree";
 import { View, Style } from "./Component/View";
 import { BaseView } from "./Component/BaseView";
 
+import { HandlerManager } from "./Manager/HandlerManager";
+
 import { Messenger } from "./Messenger";
-import { WindowEmitter } from "./Emitter";
 
 interface StyleItem {
   elementId: number;
@@ -15,28 +16,34 @@ interface StyleItem {
   keys: string[];
 }
 
-export class Detonator {
-  private static requestId: number = 0;
+type DetonatorKitSignatures = {
+  handler: (json: string) => any;
+  event: (json: string) => any;
+  response: (json: string) => any;
+};
 
-  private static tree: Tree = TreeHub.createTree();
+class DetonatorKit extends Emitter<DetonatorKitSignatures> {
+  private requestId: number = 0;
 
-  private static styleItems: StyleItem[] = [];
+  private tree: Tree = TreeHub.createTree();
 
-  private static styleTimeout: number | undefined;
+  private styleItems: StyleItem[] = [];
 
-  public static mount(slot: Slot): void {
+  private styleTimeout: number | undefined;
+
+  public mount(slot: Slot): void {
     this.tree.mount(slot);
   }
 
-  public static unmount(): void {
+  public unmount(): void {
     this.tree.unmount();
   }
 
-  public static createTree(view: View): Tree {
+  public createTree(view: View): Tree {
     return TreeHub.createTree(view);
   }
 
-  public static style(view: BaseView, style: Style): void {
+  public style(view: BaseView, style: Style): void {
     const componentId = TreeHub.getComponentId(view);
 
     if (componentId === null) {
@@ -89,7 +96,7 @@ export class Detonator {
     });
   }
 
-  public static async request(
+  public async request(
     {
       name,
       data = null,
@@ -134,20 +141,28 @@ export class Detonator {
           resolve(response.data);
         }
 
-        WindowEmitter.off("response", listener);
+        this.off("response", listener);
       };
 
-      WindowEmitter.on("response", listener);
+      this.on("response", listener);
 
       Messenger.request(request);
     });
   }
 
-  public static async openUrl(url: string): Promise<void> {
+  public async openUrl(url: string): Promise<void> {
     await this.request({ name: "com.iconshot.detonator/openUrl", data: url });
   }
 
-  public static log(...data: any[]): void {
+  public log(...data: any[]): void {
     Messenger.log(data);
   }
 }
+
+export const Detonator = new DetonatorKit();
+
+HandlerManager.listen();
+
+const windowAny = window as any;
+
+windowAny.Detonator = Detonator;

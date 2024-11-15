@@ -147,7 +147,7 @@ public class Detonator {
 
         webView.getSettings().setJavaScriptEnabled(true);
 
-        webView.addJavascriptInterface(this, "Detonator");
+        webView.addJavascriptInterface(this, "DetonatorBridge");
 
         evaluate("window.__detonator_platform = \"android\"");
 
@@ -186,7 +186,7 @@ public class Detonator {
                 .replaceAll("\\\\", "\\\\\\\\")
                 .replaceAll("\"", "\\\\\"");
 
-        String code = "window.emitter.emit(\"" + name + "\", \"" + escape + "\");";
+        String code = "window.Detonator.emit(\"" + name + "\", \"" + escape + "\");";
 
         evaluate(code);
     }
@@ -433,6 +433,10 @@ public class Detonator {
 
     public void performLayout() {
         rootView.performLayout();
+
+        if (FullScreenModule.view != null) {
+            FullScreenModule.view.performLayout();
+        }
     }
 
     private void renderEdge(Edge edge, Edge currentEdge, Target target) {

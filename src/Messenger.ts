@@ -4,13 +4,13 @@ export class Messenger {
 
     const windowAny = window as any;
 
-    if (windowAny.Detonator !== undefined) {
-      windowAny.Detonator.postMessage(message);
+    if (windowAny.DetonatorBridge !== undefined) {
+      windowAny.DetonatorBridge.postMessage(message);
 
       return;
     }
 
-    windowAny.webkit.messageHandlers.detonator.postMessage(message);
+    windowAny.webkit.messageHandlers.DetonatorBridge.postMessage(message);
   }
 
   static treeInit(data: any): void {

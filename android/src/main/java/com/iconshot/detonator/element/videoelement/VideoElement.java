@@ -191,7 +191,7 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
         progressRunnable = new Runnable() {
             @Override
             public void run() {
-                handler.postDelayed(this, 250);
+                handler.postDelayed(this, 1000 / 30);
 
                 int position = player != null ? (int) player.getCurrentPosition() : 0;
 

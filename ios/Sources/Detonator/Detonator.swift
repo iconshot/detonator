@@ -80,7 +80,7 @@ public class Detonator: NSObject, WKScriptMessageHandler {
     private func initWebView() {
         let contentController = WKUserContentController()
         
-        contentController.add(self, name: "detonator")
+        contentController.add(self, name: "DetonatorBridge")
         
         let config = WKWebViewConfiguration()
         
@@ -142,7 +142,7 @@ public class Detonator: NSObject, WKScriptMessageHandler {
                     .replacingOccurrences(of: "\\", with: "\\\\")
                     .replacingOccurrences(of: "\"", with: "\\\"")
                 
-                let code = "window.emitter.emit(\"\(name)\", \"\(escape)\");"
+                let code = "window.Detonator.emit(\"\(name)\", \"\(escape)\");"
                 
                 evaluate(code: code)
             }
@@ -187,7 +187,7 @@ public class Detonator: NSObject, WKScriptMessageHandler {
          */
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            if message.name == "detonator", let body = message.body as? String {
+            if message.name == "DetonatorBridge", let body = message.body as? String {
                 if let json = body.data(using: .utf8) {
                     let decoder = JSONDecoder()
                     
@@ -401,6 +401,8 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         
         workItem = DispatchWorkItem { [weak self] in
             self?.rootView.performLayout()
+            
+            FullScreenModule.view?.performLayout()
         }
         
         DispatchQueue.main.async(execute: workItem!)

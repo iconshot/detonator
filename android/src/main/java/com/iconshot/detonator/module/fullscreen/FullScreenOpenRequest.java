@@ -131,6 +131,8 @@ public class FullScreenOpenRequest extends Request {
 
         activity.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        detonator.performLayout();
+
         end();
     }
 }

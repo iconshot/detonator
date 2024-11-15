@@ -1,10 +1,10 @@
-import { WindowEmitter } from "../Emitter";
+import { Detonator } from "../Detonator";
 
 import { TreeHub } from "../Tree/TreeHub";
 
 export class HandlerManager {
-  static addHandlerListener() {
-    WindowEmitter.on("handler", (json: string): void => {
+  public static listen(): void {
+    Detonator.on("handler", (json: string): void => {
       const {
         name,
         edgeId,
@@ -32,13 +32,11 @@ export class HandlerManager {
     });
   }
 
-  static isHandlerName(name: string): boolean {
+  public static isHandlerName(name: string): boolean {
     return /^on[A-Z]/.test(name);
   }
 
-  static getEventName(name: string): string {
+  public static getEventName(name: string): string {
     return name.substring(2).toLocaleLowerCase();
   }
 }
-
-HandlerManager.addHandlerListener();
