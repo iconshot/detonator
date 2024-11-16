@@ -13,7 +13,7 @@ export class ActivityIndicator extends BaseView<ActivityIndicatorProps> {
   private viewRef: Ref<View> = new Ref();
 
   public style(style: Style): void {
-    const view = this.viewRef.current!;
+    const view = this.viewRef.value!;
 
     view.style(style);
   }

@@ -302,11 +302,11 @@ export class Tree {
     const currentRef = currentSlot?.getRef() ?? null;
 
     if (currentRef instanceof Ref && currentRef !== ref) {
-      currentRef.current = null;
+      currentRef.value = null;
     }
 
     if (ref instanceof Ref && ref !== currentRef) {
-      ref.current = component;
+      ref.value = component;
     }
 
     const children = component.render();
@@ -329,6 +329,8 @@ export class Tree {
   ): void {
     const slot: Slot = edge.slot;
 
+    const currentSlot: Slot | null = currentEdge?.slot ?? null;
+
     const contentType = slot.getContentType();
     const props = slot.getProps();
 
@@ -336,6 +338,8 @@ export class Tree {
 
     if (hookster === null) {
       hookster = new Hookster();
+    } else {
+      hookster.performUpdate();
     }
 
     edge.hookster = hookster;
@@ -344,9 +348,11 @@ export class Tree {
 
     hookster.activate();
 
+    const currentProps = currentSlot?.getProps() ?? null;
+
     const ComponentFunction = contentType as FunctionComponent;
 
-    const children = ComponentFunction(props);
+    const children = ComponentFunction(props, currentProps);
 
     hookster.deactivate();
 
@@ -355,7 +361,7 @@ export class Tree {
     this.renderChildren(edge, currentEdge, target);
 
     queueMicrotask((): void => {
-      hookster.hook((): void => {
+      hookster.triggerRender((): void => {
         this.queue(edge, target.element);
       });
     });
@@ -417,7 +423,7 @@ export class Tree {
     const ref = slot instanceof Slot ? slot.getRef() : null;
 
     if (ref instanceof Ref) {
-      ref.current = null;
+      ref.value = null;
     }
 
     for (const child of children) {
@@ -438,7 +444,7 @@ export class Tree {
       this.unqueue(edge);
 
       queueMicrotask((): void => {
-        hookster.unhook();
+        hookster.triggerUnmount();
       });
     }
 

@@ -1,4 +1,4 @@
-import $, { Animation, Hook } from "untrue";
+import $, { Hook } from "untrue";
 
 import { View, Text, Color } from "detonator";
 
@@ -9,10 +9,10 @@ function App() {
 
   const textRef = Hook.useRef<Text>();
 
-  const animation = Hook.useMemo(() => new Animation(0));
+  const animation = Hook.useAnimation(0);
 
-  Hook.useAnimation(animation, () => {
-    const text = textRef.current!;
+  animation.use(() => {
+    const text = textRef.value!;
 
     text.style({
       opacity: animation.interpolate([0, 1], [1, 0]),
