@@ -1,3 +1,5 @@
+import AVFoundation
+
 class VideoSeekRequest: Request {
     override public func run() {
         let position: Int = decode()!
@@ -6,9 +8,13 @@ class VideoSeekRequest: Request {
         
         let videoEdge = edge.children[0]
         
-        let videoView = videoEdge.element!.view as! VideoView
+        let element = videoEdge.element as! VideoElement
         
-        videoView.seek(to: position)
+        let seconds = Double(position) / 1000
+    
+        let time = CMTime(seconds: seconds, preferredTimescale: 600)
+        
+        element.player?.seek(to: time)
         
         end()
     }

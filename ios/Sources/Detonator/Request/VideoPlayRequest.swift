@@ -4,9 +4,9 @@ class VideoPlayRequest: Request {
         
         let videoEdge = edge.children[0]
         
-        let videoView = videoEdge.element!.view as! VideoView
+        let element = videoEdge.element as! VideoElement
         
-        videoView.play()
+        element.player?.play()
         
         end()
     }

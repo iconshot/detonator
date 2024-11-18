@@ -20,7 +20,9 @@ public class VideoPauseRequest extends Request {
 
         Player player = (Player) element.player;
 
-        player.pause();
+        if (player != null) {
+            player.pause();
+        }
 
         end();
     }

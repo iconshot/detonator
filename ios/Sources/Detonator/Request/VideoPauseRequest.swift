@@ -4,9 +4,9 @@ class VideoPauseRequest: Request {
         
         let videoEdge = edge.children[0]
         
-        let videoView = videoEdge.element!.view as! VideoView
+        let element = videoEdge.element as! VideoElement
         
-        videoView.pause()
+        element.player?.pause()
         
         end()
     }

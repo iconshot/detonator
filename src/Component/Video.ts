@@ -22,6 +22,7 @@ export interface VideoEndEvent extends Event {}
 
 interface VideoProps extends ViewProps {
   url?: string | null;
+  muted?: boolean | null;
   onPlay?: ((event: VideoPlayEvent) => void) | null;
   onPause?: ((event: VideoPauseEvent) => void) | null;
   onSeek?: ((event: VideoSeekEvent) => void) | null;

@@ -22,7 +22,9 @@ public class VideoSeekRequest extends Request<Integer> {
 
         Player player = (Player) element.player;
 
-        player.seekTo(position);
+        if (player != null) {
+            player.seekTo(position);
+        }
 
         end();
     }

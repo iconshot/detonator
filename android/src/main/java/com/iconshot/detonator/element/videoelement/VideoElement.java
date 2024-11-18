@@ -44,19 +44,13 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
         playerView.setUseController(false);
 
-        startTrackingProgress(position -> {
-            OnProgressData data = new OnProgressData();
-
-            data.position = position;
-
-            detonator.emitHandler("onProgress", edge.id, data);
-        });
-
         playerView.setOnClickListener((View v) -> {
             view.callOnClick();
         });
 
         view.addView(playerView);
+
+        startTrackingProgress();
 
         return view;
     }
@@ -70,50 +64,70 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
         boolean patchUrl = forcePatch || !CompareHelper.compareObjects(url, currentUrl);
 
         if (patchUrl) {
-            playerView.setAlpha(0);
+            patchUrl(url);
+        }
 
+        Boolean muted = attributes.muted;
+
+        Boolean currentMuted = currentAttributes != null ? currentAttributes.muted : null;
+
+        boolean patchMuted = forcePatch || !CompareHelper.compareObjects(muted, currentMuted);
+
+        if (patchMuted || patchUrl) {
             if (player != null) {
-                player.release();
+                if (muted != null && muted) {
+                    player.setVolume(0);
+                } else {
+                    player.setVolume(1);
+                }
             }
+        }
+    }
 
-            if (url != null) {
-                player = new ExoPlayer.Builder(ContextHelper.context).build();
+    private void patchUrl(String url) {
+        playerView.setAlpha(0);
 
-                player.addListener(new ExoPlayer.Listener() {
-                    @Override
-                    public void onPlaybackStateChanged(int playbackState) {
-                        switch (playbackState) {
-                            case ExoPlayer.STATE_READY: {
-                                playerView.setAlpha(1);
+        if (player != null) {
+            player.release();
+        }
 
-                                break;
-                            }
+        if (url != null) {
+            player = new ExoPlayer.Builder(ContextHelper.context).build();
 
-                            case ExoPlayer.STATE_ENDED: {
-                                detonator.emitHandler("onEnd", edge.id);
+            player.addListener(new ExoPlayer.Listener() {
+                @Override
+                public void onPlaybackStateChanged(int playbackState) {
+                    switch (playbackState) {
+                        case ExoPlayer.STATE_READY: {
+                            playerView.setAlpha(1);
 
-                                break;
-                            }
-
-
+                            break;
                         }
+
+                        case ExoPlayer.STATE_ENDED: {
+                            detonator.emitHandler("onEnd", edge.id);
+
+                            break;
+                        }
+
+
                     }
-                });
+                }
+            });
 
-                playerView.setPlayer(player);
+            playerView.setPlayer(player);
 
-                Uri uri = Uri.parse(url);
+            Uri uri = Uri.parse(url);
 
-                MediaItem mediaItem = MediaItem.fromUri(uri);
+            MediaItem mediaItem = MediaItem.fromUri(uri);
 
-                player.setMediaItem(mediaItem);
+            player.setMediaItem(mediaItem);
 
-                player.prepare();
-            } else {
-                player = null;
+            player.prepare();
+        } else {
+            player = null;
 
-                playerView.setPlayer(null);
-            }
+            playerView.setPlayer(null);
         }
     }
 
@@ -187,7 +201,7 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
         }
     }
 
-    private void startTrackingProgress(OnProgressListener listener) {
+    private void startTrackingProgress() {
         progressRunnable = new Runnable() {
             @Override
             public void run() {
@@ -201,7 +215,11 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
                 currentPosition = position;
 
-                listener.onProgress(position);
+                OnProgressData data = new OnProgressData();
+
+                data.position = position;
+
+                detonator.emitHandler("onProgress", edge.id, data);
             }
         };
 
@@ -212,11 +230,8 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
         int position;
     }
 
-    interface OnProgressListener {
-        void onProgress(int position);
-    }
-
     protected static class Attributes extends Element.Attributes {
         String url;
+        Boolean muted;
     }
 }

@@ -20,7 +20,9 @@ public class VideoPlayRequest extends Request {
 
         Player player = (Player) element.player;
 
-        player.play();
+        if (player != null) {
+            player.play();
+        }
 
         end();
     }
