@@ -46,6 +46,7 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         addElementClass(key: "com.iconshot.detonator.textarea", elementClass: TextAreaElement.self)
         addElementClass(key: "com.iconshot.detonator.image", elementClass: ImageElement.self)
         addElementClass(key: "com.iconshot.detonator.video", elementClass: VideoElement.self)
+        addElementClass(key: "com.iconshot.detonator.audio", elementClass: AudioElement.self)
         addElementClass(key: "com.iconshot.detonator.verticalscrollview", elementClass: VerticalScrollViewElement.self)
         addElementClass(key: "com.iconshot.detonator.horizontalscrollview", elementClass: HorizontalScrollViewElement.self)
         addElementClass(key: "com.iconshot.detonator.safeareaview", elementClass: SafeAreaViewElement.self)
@@ -63,6 +64,9 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         addRequestClass(key: "com.iconshot.detonator.video/play", requestClass: VideoPlayRequest.self)
         addRequestClass(key: "com.iconshot.detonator.video/pause", requestClass: VideoPauseRequest.self)
         addRequestClass(key: "com.iconshot.detonator.video/seek", requestClass: VideoSeekRequest.self)
+        addRequestClass(key: "com.iconshot.detonator.audio/play", requestClass: AudioPlayRequest.self)
+        addRequestClass(key: "com.iconshot.detonator.audio/pause", requestClass: AudioPauseRequest.self)
+        addRequestClass(key: "com.iconshot.detonator.audio/seek", requestClass: AudioSeekRequest.self)
         
         addModuleClass(key: "com.iconshot.detonator.appstate", moduleClass: AppStateModule.self)
         addModuleClass(key: "com.iconshot.detonator.storage", moduleClass: StorageModule.self)

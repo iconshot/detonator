@@ -2,23 +2,19 @@ import UIKit
 import AVKit
 import AVFoundation
 
-class VideoElement: Element {
+class AudioElement: Element {
     public var player: AVPlayer?
-    
-    private let playerLayer: AVPlayerLayer = AVPlayerLayer()
     
     private var timer: Timer?
     
     private var currentPosition: Int = 0
     
-    override public func decodeAttributes(edge: Edge) -> VideoAttributes? {
+    override public func decodeAttributes(edge: Edge) -> AudioAttributes? {
         return super.decodeAttributes(edge: edge)
     }
     
-    override public func createView() -> VideoView {
-        let view = VideoView()
-        
-        view.playerLayer = playerLayer
+    override public func createView() -> UIView {
+        let view = UIView()
         
         startTrackingProgress()
         
@@ -26,8 +22,8 @@ class VideoElement: Element {
     }
     
     override public func patchView() {
-        let attributes = attributes as! VideoAttributes
-        let currentAttributes = currentAttributes as! VideoAttributes?
+        let attributes = attributes as! AudioAttributes
+        let currentAttributes = currentAttributes as! AudioAttributes?
         
         let url = attributes.url
         let currentUrl = currentAttributes?.url
@@ -74,8 +70,6 @@ class VideoElement: Element {
             
             player = AVPlayer(url: playerUrl)
             
-            playerLayer.player = player
-            
             NotificationCenter.default.addObserver(
                 self,
                 selector: #selector(playerDidEnd),
@@ -95,38 +89,12 @@ class VideoElement: Element {
         player?.pause()
         
         player = nil
-        
-        playerLayer.player = nil
     }
     
     override public func removeView() {
         deinitPlayer()
         
         timer?.invalidate()
-    }
-    
-    override func patchObjectFit(objectFit: String?) {
-        switch objectFit {
-        case "cover":
-            playerLayer.videoGravity = .resizeAspectFill
-            
-            break
-            
-        case "contain":
-            playerLayer.videoGravity = .resizeAspect
-            
-            break
-            
-        case "fill":
-            playerLayer.videoGravity = .resize
-            
-            break
-            
-        default:
-            playerLayer.videoGravity = .resizeAspectFill
-            
-            break
-        }
     }
     
     private func startTrackingProgress() {
@@ -155,7 +123,7 @@ class VideoElement: Element {
         let position: Int
     }
     
-    class VideoAttributes: Attributes {
+    class AudioAttributes: Attributes {
         var url: String?
         var muted: Bool?
         

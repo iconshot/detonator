@@ -11,6 +11,7 @@ export * from "./Component/Input";
 export * from "./Component/TextArea";
 export * from "./Component/Image";
 export * from "./Component/Video";
+export * from "./Component/Audio";
 export * from "./Component/ScrollView";
 export * from "./Component/SafeAreaView";
 export * from "./Component/Icon";

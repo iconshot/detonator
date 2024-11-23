@@ -5,8 +5,6 @@ import android.os.Handler;
 import android.view.View;
 
 import androidx.media3.common.MediaItem;
-import androidx.media3.common.MediaMetadata;
-import androidx.media3.common.Player;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.ui.AspectRatioFrameLayout;
 import androidx.media3.ui.PlayerView;
@@ -109,8 +107,6 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
                             break;
                         }
-
-
                     }
                 }
             });

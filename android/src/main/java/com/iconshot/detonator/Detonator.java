@@ -27,6 +27,7 @@ import com.iconshot.detonator.element.imageelement.ImageElement;
 import com.iconshot.detonator.element.InputElement;
 import com.iconshot.detonator.element.TextAreaElement;
 import com.iconshot.detonator.element.TextElement;
+import com.iconshot.detonator.element.AudioElement;
 import com.iconshot.detonator.element.videoelement.VideoElement;
 import com.iconshot.detonator.element.viewelement.ViewElement;
 import com.iconshot.detonator.element.Style;
@@ -47,6 +48,9 @@ import com.iconshot.detonator.request.ToastShowRequest;
 import com.iconshot.detonator.request.VideoPauseRequest;
 import com.iconshot.detonator.request.VideoPlayRequest;
 import com.iconshot.detonator.request.VideoSeekRequest;
+import com.iconshot.detonator.request.AudioPauseRequest;
+import com.iconshot.detonator.request.AudioPlayRequest;
+import com.iconshot.detonator.request.AudioSeekRequest;
 
 import com.iconshot.detonator.module.Module;
 import com.iconshot.detonator.module.AppStateModule;
@@ -112,6 +116,7 @@ public class Detonator {
         addElementClass("com.iconshot.detonator.textarea", TextAreaElement.class);
         addElementClass("com.iconshot.detonator.image", ImageElement.class);
         addElementClass("com.iconshot.detonator.video", VideoElement.class);
+        addElementClass("com.iconshot.detonator.audio", AudioElement.class);
         addElementClass("com.iconshot.detonator.verticalscrollview", VerticalScrollViewElement.class);
         addElementClass("com.iconshot.detonator.horizontalscrollview", HorizontalScrollViewElement.class);
         addElementClass("com.iconshot.detonator.safeareaview", SafeAreaViewElement.class);
@@ -129,6 +134,9 @@ public class Detonator {
         addRequestClass("com.iconshot.detonator.video/play", VideoPlayRequest.class);
         addRequestClass("com.iconshot.detonator.video/pause", VideoPauseRequest.class);
         addRequestClass("com.iconshot.detonator.video/seek", VideoSeekRequest.class);
+        addRequestClass("com.iconshot.detonator.audio/play", AudioPlayRequest.class);
+        addRequestClass("com.iconshot.detonator.audio/pause", AudioPauseRequest.class);
+        addRequestClass("com.iconshot.detonator.audio/seek", AudioSeekRequest.class);
         addRequestClass("com.iconshot.detonator.toast/show", ToastShowRequest.class);
 
         addModuleClass("com.iconshot.detonator.appstate", AppStateModule.class);
