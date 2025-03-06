@@ -57,9 +57,9 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
     public void patchView() {
         String url = attributes.url;
 
-        String currentUrl = currentAttributes != null ? currentAttributes.url : null;
+        String prevUrl = prevAttributes != null ? prevAttributes.url : null;
 
-        boolean patchUrl = forcePatch || !CompareHelper.compareObjects(url, currentUrl);
+        boolean patchUrl = forcePatch || !CompareHelper.compareObjects(url, prevUrl);
 
         if (patchUrl) {
             patchUrl(url);
@@ -67,9 +67,9 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
         Boolean muted = attributes.muted;
 
-        Boolean currentMuted = currentAttributes != null ? currentAttributes.muted : null;
+        Boolean prevMuted = prevAttributes != null ? prevAttributes.muted : null;
 
-        boolean patchMuted = forcePatch || !CompareHelper.compareObjects(muted, currentMuted);
+        boolean patchMuted = forcePatch || !CompareHelper.compareObjects(muted, prevMuted);
 
         if (patchMuted || patchUrl) {
             if (player != null) {

@@ -35,9 +35,9 @@ public class IconElement extends Element<TextView, IconElement.Attributes> {
     @Override
     protected void patchView() {
         String name = attributes.name;
-        String currentName = currentAttributes != null ? currentAttributes.name : null;
+        String prevName = prevAttributes != null ? prevAttributes.name : null;
 
-        boolean patchName = forcePatch || !CompareHelper.compareObjects(name, currentName);
+        boolean patchName = forcePatch || !CompareHelper.compareObjects(name, prevName);
 
         if (patchName) {
             String font = IconHelper.getFont(name);

@@ -51,9 +51,9 @@ public class TextElement extends Element<TextView, TextElement.Attributes> {
 
         Integer maxLines = attributes.maxLines;
 
-        Integer currentMaxLines = currentAttributes != null ? currentAttributes.maxLines : null;
+        Integer prevMaxLines = prevAttributes != null ? prevAttributes.maxLines : null;
 
-        boolean patchMaxLines = forcePatch || !CompareHelper.compareObjects(maxLines, currentMaxLines);
+        boolean patchMaxLines = forcePatch || !CompareHelper.compareObjects(maxLines, prevMaxLines);
 
         if (patchMaxLines) {
             int value = maxLines != null && maxLines > 0 ? maxLines : Integer.MAX_VALUE;

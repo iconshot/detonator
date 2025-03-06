@@ -7,13 +7,13 @@ class SafeAreaViewElement: ViewElement {
         super.patchView()
         
         let attributes = attributes as! SafeAreaViewAttributes
-        let currentAttributes = currentAttributes as! SafeAreaViewAttributes?
+        let prevAttributes = prevAttributes as! SafeAreaViewAttributes?
         
         let edges = attributes.edges
         
-        let currentEdges = currentAttributes?.edges
+        let prevEdges = prevAttributes?.edges
         
-        let patchEdgesBool = forcePatch || !CompareHelper.compareArrays(edges, currentEdges)
+        let patchEdgesBool = forcePatch || !CompareHelper.compareArrays(edges, prevEdges)
         
         if patchEdgesBool {
             patchEdges(edges: edges)

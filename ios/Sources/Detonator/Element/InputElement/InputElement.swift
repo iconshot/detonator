@@ -23,17 +23,17 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         let view = view as! InputView
         
         let attributes = attributes as! InputAttributes
-        let currentAttributes = currentAttributes as! InputAttributes?
+        let prevAttributes = prevAttributes as! InputAttributes?
         
         let placeholder = attributes.placeholder
-        let currentPlaceholder = currentAttributes?.placeholder
+        let prevPlaceholder = prevAttributes?.placeholder
         
-        let patchPlaceholderBool = forcePatch || placeholder != currentPlaceholder
+        let patchPlaceholderBool = forcePatch || placeholder != prevPlaceholder
         
         let placeholderColor = attributes.placeholderColor
-        let currentPlaceholderColor = currentAttributes?.placeholderColor
+        let prevPlaceholderColor = prevAttributes?.placeholderColor
         
-        let patchPlaceholderColorBool = forcePatch || !CompareHelper.compareStyleColors(placeholderColor, currentPlaceholderColor)
+        let patchPlaceholderColorBool = forcePatch || !CompareHelper.compareStyleColors(placeholderColor, prevPlaceholderColor)
         
         if patchPlaceholderBool || patchPlaceholderColorBool {
             if placeholder != nil {
@@ -60,14 +60,14 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         }
         
         let inputType = attributes.inputType
-        let currentInputType = currentAttributes?.inputType
+        let prevInputType = prevAttributes?.inputType
         
-        let patchInputTypeBool = forcePatch || inputType != currentInputType
+        let patchInputTypeBool = forcePatch || inputType != prevInputType
         
         let autoCapitalize = attributes.autoCapitalize
-        let currentAutoCapitalize = currentAttributes?.autoCapitalize
+        let prevAutoCapitalize = prevAttributes?.autoCapitalize
         
-        let patchAutoCapitalizeBool = forcePatch || autoCapitalize != currentAutoCapitalize
+        let patchAutoCapitalizeBool = forcePatch || autoCapitalize != prevAutoCapitalize
         
         if patchInputTypeBool || patchAutoCapitalizeBool {
             patchInputType(inputType: inputType, autoCapitalize: autoCapitalize)

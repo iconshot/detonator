@@ -61,9 +61,9 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
     protected void patchView() {
         String placeholder = attributes.placeholder;
 
-        String currentPlaceholder = currentAttributes != null ? currentAttributes.placeholder : null;
+        String prevPlaceholder = prevAttributes != null ? prevAttributes.placeholder : null;
 
-        boolean patchPlaceholder = forcePatch || !CompareHelper.compareObjects(placeholder, currentPlaceholder);
+        boolean patchPlaceholder = forcePatch || !CompareHelper.compareObjects(placeholder, prevPlaceholder);
 
         if (patchPlaceholder) {
             view.setHint(placeholder != null ? placeholder : "");
@@ -71,9 +71,9 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
 
         Object placeholderColor = attributes.placeholderColor;
 
-        Object currentPlaceholderColor = currentAttributes != null ? currentAttributes.placeholderColor : null;
+        Object prevPlaceholderColor = prevAttributes != null ? prevAttributes.placeholderColor : null;
 
-        boolean patchPlaceholderColor = forcePatch || !CompareHelper.compareColors(placeholderColor, currentPlaceholderColor);
+        boolean patchPlaceholderColor = forcePatch || !CompareHelper.compareColors(placeholderColor, prevPlaceholderColor);
 
         if (patchPlaceholderColor) {
             Integer tmpColor = ColorHelper.parseColor(placeholderColor);
@@ -91,9 +91,9 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
 
         String autoCapitalize = attributes.autoCapitalize;
 
-        String currentAutoCapitalize = currentAttributes != null ? currentAttributes.autoCapitalize : null;
+        String prevAutoCapitalize = prevAttributes != null ? prevAttributes.autoCapitalize : null;
 
-        boolean patchAutoCapitalize = forcePatch || !CompareHelper.compareObjects(autoCapitalize, currentAutoCapitalize);
+        boolean patchAutoCapitalize = forcePatch || !CompareHelper.compareObjects(autoCapitalize, prevAutoCapitalize);
 
         if (patchAutoCapitalize) {
             patchInputType(autoCapitalize);

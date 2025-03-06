@@ -17,7 +17,7 @@ class TextElement: Element {
         let view = view as! TextView
         
         let attributes = attributes as! TextAttributes
-        let currentAttributes = currentAttributes as! TextAttributes?
+        let prevAttributes = prevAttributes as! TextAttributes?
         
         let stringBuilder = NSMutableString()
         
@@ -34,9 +34,9 @@ class TextElement: Element {
         }
         
         let maxLines = attributes.maxLines
-        let currentMaxLines = currentAttributes?.maxLines
+        let prevMaxLines = prevAttributes?.maxLines
         
-        let patchMaxLinesBool = forcePatch || maxLines != currentMaxLines
+        let patchMaxLinesBool = forcePatch || maxLines != prevMaxLines
         
         if patchMaxLinesBool {
             let value = maxLines ?? 0

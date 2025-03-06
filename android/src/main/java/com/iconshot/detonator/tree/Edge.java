@@ -11,7 +11,11 @@ public class Edge {
     public String attributes;
     public List<Edge> children;
     public String text;
+    public boolean skipped;
+
     public Element element;
+
+    public int targetViewsCount;
 
     public Edge clone() {
         Edge edge = new Edge();
@@ -28,6 +32,8 @@ public class Edge {
         attributes = edge.attributes;
         children = edge.children;
         text = edge.text;
+        skipped = edge.skipped;
         element = edge.element;
+        targetViewsCount = edge.targetViewsCount;
     }
 }

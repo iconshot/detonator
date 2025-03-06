@@ -2,7 +2,7 @@ import UIKit
 
 class Target {
     public final let view: UIView
-    private var index: Int
+    public var index: Int
     
     init(view: UIView, index: Int) {
         self.view = view

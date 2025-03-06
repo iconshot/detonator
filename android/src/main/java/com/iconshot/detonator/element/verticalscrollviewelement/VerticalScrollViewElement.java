@@ -49,9 +49,9 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
 
         Boolean paginated = attributes.paginated;
 
-        Boolean currentPaginated = currentAttributes != null ? currentAttributes.paginated : null;
+        Boolean prevPaginated = prevAttributes != null ? prevAttributes.paginated : null;
 
-        boolean patchPaginated = forcePatch || !CompareHelper.compareObjects(paginated, currentPaginated);
+        boolean patchPaginated = forcePatch || !CompareHelper.compareObjects(paginated, prevPaginated);
 
         if (patchPaginated) {
             boolean tmpPaginated = paginated != null ? paginated : false;
@@ -61,9 +61,9 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
 
         Boolean inverted = attributes.inverted;
 
-        Boolean currentInverted = currentAttributes != null ? currentAttributes.inverted : null;
+        Boolean prevInverted = prevAttributes != null ? prevAttributes.inverted : null;
 
-        boolean patchInverted = forcePatch || !CompareHelper.compareObjects(currentInverted, inverted);
+        boolean patchInverted = forcePatch || !CompareHelper.compareObjects(prevInverted, inverted);
 
         if (patchInverted) {
             boolean tmpInverted = inverted != null ? inverted : false;
@@ -73,9 +73,9 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
 
         Boolean showsIndicator = attributes.showsIndicator;
 
-        Boolean currentShowsIndicator = currentAttributes != null ? currentAttributes.showsIndicator : null;
+        Boolean prevShowsIndicator = prevAttributes != null ? prevAttributes.showsIndicator : null;
 
-        boolean patchShowsIndicator = forcePatch || !CompareHelper.compareObjects(showsIndicator, currentShowsIndicator);
+        boolean patchShowsIndicator = forcePatch || !CompareHelper.compareObjects(showsIndicator, prevShowsIndicator);
 
         if (patchShowsIndicator) {
             boolean value = showsIndicator != null && showsIndicator;

@@ -297,8 +297,8 @@ public class Detonator: NSObject, WKScriptMessageHandler {
                 
                 tree.edge = data.edge
                 
-                renderEdge(edge: &tree.edge!, currentEdge: nil, target: target)
-                                
+                renderEdge(edge: &tree.edge!, prevEdge: nil, target: target)
+                
                 performLayout()
             } catch {}
         }
@@ -336,21 +336,19 @@ public class Detonator: NSObject, WKScriptMessageHandler {
                 for tmpEdge in data.edges {
                     var edge = edges[tmpEdge.id]!
                     
-                    var view = findTargetView(edge: edge)
+                    let target = createTarget(edge: edge, tree: tree)
                     
-                    if view == nil {
-                        view = tree.view
-                    }
-                    
-                    let index = findTargetIndex(edge: edge, targetView: view!)
-                    
-                    let target = Target(view: view!, index: index)
-                    
-                    let currentEdge = edge.clone()
+                    let prevEdge = edge.clone()
                     
                     edge.copyFrom(edge: tmpEdge)
                     
-                    renderEdge(edge: &edge, currentEdge: currentEdge, target: target)
+                    renderEdge(edge: &edge, prevEdge: prevEdge, target: target)
+                    
+                    let difference = edge.targetViewsCount - prevEdge.targetViewsCount
+                    
+                    if difference != 0 {
+                        propagateTargetViewsCountDifference(edge: edge, difference: difference)
+                    }
                 }
                 
                 performLayout()
@@ -416,8 +414,23 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         DispatchQueue.main.async(execute: workItem!)
     }
     
-    private func renderEdge(edge: inout Edge, currentEdge: Edge?, target: Target) {
-        var element = currentEdge?.element
+    private func renderEdge(edge: inout Edge, prevEdge: Edge?, target: Target) {
+        edges[edge.id] = edge
+        
+        if edge.skipped {
+            
+            target.index += prevEdge!.targetViewsCount
+            
+            edge.targetViewsCount = prevEdge!.targetViewsCount
+            
+            edge.children = prevEdge!.children
+            
+            return
+        }
+        
+        let initialTargetIndex = target.index
+        
+        var element = prevEdge?.element
         
         if element == nil {
             element = createElement(edge: edge)
@@ -427,9 +440,11 @@ public class Detonator: NSObject, WKScriptMessageHandler {
             }
         }
         
+        edge.element = element
+        
         if element != nil {
             element!.edge = edge
-            element!.currentEdge = currentEdge
+            element!.prevEdge = prevEdge
         }
         
         var tmpTarget: Target = target
@@ -442,27 +457,27 @@ public class Detonator: NSObject, WKScriptMessageHandler {
             }
         }
         
-        edge.element = element
-        
-        renderChildren(edge: &edge, currentEdge: currentEdge, target: tmpTarget)
+        renderChildren(edge: &edge, prevEdge: prevEdge, target: tmpTarget)
         
         if element != nil {
             target.insert(child: element!.view!)
         }
         
-        edges[edge.id] = edge
+        let targetViewsCount = target.index - initialTargetIndex
+        
+        edge.targetViewsCount = targetViewsCount
     }
     
-    private func renderChildren(edge: inout Edge, currentEdge: Edge?, target: Target) {
+    private func renderChildren(edge: inout Edge, prevEdge: Edge?, target: Target) {
         let children = edge.children;
         
-        let currentChildren = currentEdge?.children ?? []
+        let prevChildren = prevEdge?.children ?? []
                 
-        for currentChild in currentChildren {
+        for prevChild in prevChildren {
             var child: Edge?
             
             for tmpChild in children {
-                if currentChild.id == tmpChild.id {
+                if prevChild.id == tmpChild.id {
                     child = tmpChild
                     
                     break
@@ -470,26 +485,28 @@ public class Detonator: NSObject, WKScriptMessageHandler {
             }
                         
             if child == nil {
-                unmountEdge(edge: currentChild, target: target)
+                unmountEdge(edge: prevChild, target: target)
             }
         }
         
         for var child in children {
-            var currentChild: Edge?
+            var prevChild: Edge?
             
-            for tmpChild in currentChildren {
+            for tmpChild in prevChildren {
                 if child.id == tmpChild.id {
-                    currentChild = tmpChild
+                    prevChild = tmpChild
                     
                     break
                 }
             }
             
-            renderEdge(edge: &child, currentEdge: currentChild, target: target)
+            renderEdge(edge: &child, prevEdge: prevChild, target: target)
         }
     }
     
     private func unmountEdge(edge: Edge, target: Target?) {
+        edges[edge.id] = nil
+        
         var tmpTarget = target
         
         if edge.element != nil {
@@ -507,8 +524,6 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         if edge.element != nil && target != nil {
             target!.remove(child: edge.element!.view!)
         }
-        
-        edges[edge.id] = nil
     }
     
     private func createElement(edge: Edge) -> Element? {
@@ -579,6 +594,52 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         }
         
         return nil
+    }
+    
+    private func createTarget(edge: Edge, tree: Tree) -> Target {
+        var targetIndex = 0
+        
+        return createTarget(edge: edge, tree: tree, targetIndex: &targetIndex)
+    }
+    
+    private func createTarget(edge: Edge, tree: Tree, targetIndex: inout Int) -> Target {
+        if edge.parent == nil {
+            return Target(view: tree.view, index: targetIndex)
+        }
+        
+        let parent = edges[edge.parent!]!
+        
+        let index = parent.children.firstIndex{ $0 === edge }!
+        
+        for i in stride(from: index - 1, through: 0, by: -1) {
+            let child = parent.children[i]
+            
+            targetIndex += child.targetViewsCount
+        }
+        
+        if parent.element != nil {
+            return Target(view: parent.element!.view, index: targetIndex)
+        }
+        
+        return createTarget(edge: parent, tree: tree, targetIndex: &targetIndex)
+    }
+    
+    private func propagateTargetViewsCountDifference(edge: Edge, difference: Int) -> Void {
+        if edge.parent == nil {
+            return
+        }
+        
+        let parent = edges[edge.parent!]!
+        
+        let element = parent.element
+        
+        if element != nil {
+            return
+        }
+        
+        parent.targetViewsCount += difference
+        
+        propagateTargetViewsCountDifference(edge: parent, difference: difference)
     }
     
     struct Message: Decodable {

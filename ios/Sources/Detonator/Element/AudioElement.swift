@@ -23,21 +23,21 @@ class AudioElement: Element {
     
     override public func patchView() {
         let attributes = attributes as! AudioAttributes
-        let currentAttributes = currentAttributes as! AudioAttributes?
+        let prevAttributes = prevAttributes as! AudioAttributes?
         
         let url = attributes.url
-        let currentUrl = currentAttributes?.url
+        let prevUrl = prevAttributes?.url
         
-        let patchUrlBool = forcePatch || url != currentUrl
+        let patchUrlBool = forcePatch || url != prevUrl
         
         if patchUrlBool {
             patchUrl(url: url)
         }
         
         let muted = attributes.muted
-        let currentMuted = currentAttributes?.muted
+        let prevMuted = prevAttributes?.muted
         
-        let patchMutedBool = forcePatch || muted != currentMuted
+        let patchMutedBool = forcePatch || muted != prevMuted
         
         if patchMutedBool || patchUrlBool {
             if let player = player {

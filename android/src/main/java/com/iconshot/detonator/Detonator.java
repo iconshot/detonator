@@ -374,21 +374,19 @@ public class Detonator {
         for (Edge tmpEdge : data.edges) {
             Edge edge = edges.get(tmpEdge.id);
 
-            ViewLayout view = findTargetView(edge);
+            Target target = createTarget(edge, tree);
 
-            if (view == null) {
-                view = tree.view;
-            }
-
-            int index = findTargetIndex(edge, view);
-
-            Target target = new Target(view, index);
-
-            Edge currentEdge = edge.clone();
+            Edge prevEdge = edge.clone();
 
             edge.copyFrom(tmpEdge);
 
-            renderEdge(edge, currentEdge, target);
+            renderEdge(edge, prevEdge, target);
+
+            int difference = edge.targetViewsCount - prevEdge.targetViewsCount;
+
+            if (difference != 0) {
+                propagateTargetViewsCountDifference(edge, difference);
+            }
         }
 
         performLayout();
@@ -447,8 +445,22 @@ public class Detonator {
         }
     }
 
-    private void renderEdge(Edge edge, Edge currentEdge, Target target) {
-        Element element = currentEdge != null ? currentEdge.element : null;
+    private void renderEdge(Edge edge, Edge prevEdge, Target target) {
+        edges.put(edge.id, edge);
+
+        if (edge.skipped) {
+            target.index += prevEdge.targetViewsCount;
+
+            edge.targetViewsCount = prevEdge.targetViewsCount;
+
+            edge.children = prevEdge.children;
+
+            return;
+        }
+
+        int initialTargetIndex = target.index;
+
+        Element element = prevEdge != null ? prevEdge.element : null;
 
         if (element == null) {
             element = createElement(edge);
@@ -458,9 +470,11 @@ public class Detonator {
             }
         }
 
+        edge.element = element;
+
         if (element != null) {
             element.edge = edge;
-            element.currentEdge = currentEdge;
+            element.prevEdge = prevEdge;
         }
 
         Target tmpTarget = target;
@@ -473,27 +487,27 @@ public class Detonator {
             }
         }
 
-        edge.element = element;
-
-        renderChildren(edge, currentEdge, tmpTarget);
+        renderChildren(edge, prevEdge, tmpTarget);
 
         if (element != null) {
             target.insert(element.view);
         }
 
-        edges.put(edge.id, edge);
+        int targetViewsCount = target.index - initialTargetIndex;
+
+        edge.targetViewsCount = targetViewsCount;
     }
 
-    private void renderChildren(Edge edge, Edge currentEdge, Target target) {
+    private void renderChildren(Edge edge, Edge prevEdge, Target target) {
         List<Edge> children = edge.children;
 
-        List<Edge> currentChildren = currentEdge != null ? currentEdge.children : new ArrayList<>();
+        List<Edge> prevChildren = prevEdge != null ? prevEdge.children : new ArrayList<>();
 
-        for (Edge currentChild: currentChildren) {
+        for (Edge prevChild: prevChildren) {
             Edge child = null;
 
             for (Edge tmpChild : children) {
-                if (currentChild.id == tmpChild.id) {
+                if (prevChild.id == tmpChild.id) {
                     child = tmpChild;
 
                     break;
@@ -501,26 +515,28 @@ public class Detonator {
             }
 
             if (child == null) {
-                unmountEdge(currentChild, target);
+                unmountEdge(prevChild, target);
             }
         }
 
         for (Edge child : children) {
-            Edge currentChild = null;
+            Edge prevChild = null;
 
-            for (Edge tmpChild : currentChildren) {
+            for (Edge tmpChild : prevChildren) {
                 if (child.id == tmpChild.id) {
-                    currentChild = tmpChild;
+                    prevChild = tmpChild;
 
                     break;
                 }
             }
 
-            renderEdge(child, currentChild, target);
+            renderEdge(child, prevChild, target);
         }
     }
 
     private void unmountEdge(Edge edge, Target target) {
+        edges.remove(edge.id);
+
         Target tmpTarget = target;
 
         if (edge.element != null) {
@@ -538,8 +554,6 @@ public class Detonator {
         if (edge.element != null && target != null) {
             target.remove(edge.element.view);
         }
-
-        edges.remove(edge.id);
     }
 
     private Element createElement(Edge edge) {
@@ -620,6 +634,49 @@ public class Detonator {
         }
 
         return null;
+    }
+
+    private Target createTarget(Edge edge, Tree tree) {
+        return createTarget(edge, tree, 0);
+    }
+
+    private Target createTarget(Edge edge, Tree tree, int targetIndex) {
+        if (edge.parent == null) {
+            return new Target(tree.view, targetIndex);
+        }
+
+        Edge parent = edges.get(edge.parent);
+
+        int index = parent.children.indexOf(edge);
+
+        for (int i = index - 1; i >= 0; i--) {
+            Edge child = parent.children.get(i);
+
+            targetIndex += child.targetViewsCount;
+        }
+
+        if (parent.element != null) {
+            return new Target((ViewLayout) parent.element.view, targetIndex);
+        }
+
+        return createTarget(parent, tree, targetIndex);
+    }
+
+    private void propagateTargetViewsCountDifference(Edge edge, int difference) {
+        if (edge.parent == null) {
+            return;
+        }
+
+        Edge parent = edges.get(edge.parent);
+
+        Element element = parent.element;
+
+        if (element != null) {
+            return;
+        }
+        parent.targetViewsCount += difference;
+
+        propagateTargetViewsCountDifference(parent, difference);
     }
 
     private static class Message {

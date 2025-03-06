@@ -7,16 +7,22 @@ public class Edge: Decodable {
     var attributes: String?
     var children: [Edge]
     var text: String?
+    var skipped: Bool
+    
     var element: Element?
     
-    init(id: Int, parent: Int?, contentType: String?, attributes: String?, children: [Edge], text: String?, element: Element?) {
+    var targetViewsCount: Int = 0
+    
+    init(id: Int, parent: Int?, contentType: String?, attributes: String?, children: [Edge], text: String?, skipped: Bool, element: Element?, targetViewsCount: Int) {
         self.id = id
         self.parent = parent
         self.contentType = contentType
         self.attributes = attributes
         self.children = children
         self.text = text
+        self.skipped = skipped
         self.element = element
+        self.targetViewsCount = targetViewsCount
     }
     
     public func clone() -> Edge {
@@ -27,7 +33,9 @@ public class Edge: Decodable {
             attributes: attributes,
             children: children,
             text: text,
-            element: element
+            skipped: skipped,
+            element: element,
+            targetViewsCount: targetViewsCount
         )
     }
     
@@ -38,7 +46,9 @@ public class Edge: Decodable {
         attributes = edge.attributes
         children = edge.children
         text = edge.text
+        skipped = edge.skipped
         element = edge.element
+        targetViewsCount = edge.targetViewsCount
     }
     
     private enum CodingKeys: String, CodingKey {
@@ -48,5 +58,6 @@ public class Edge: Decodable {
         case attributes
         case children
         case text
+        case skipped
     }
 }

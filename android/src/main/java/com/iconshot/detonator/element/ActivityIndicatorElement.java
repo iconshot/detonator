@@ -30,9 +30,9 @@ public class ActivityIndicatorElement extends Element<ProgressBar, ActivityIndic
 
         String size = attributes.size;
 
-        String currentSize = currentAttributes != null ? currentAttributes.size : null;
+        String prevSize = prevAttributes != null ? prevAttributes.size : null;
 
-        boolean patchSize = forcePatch || !CompareHelper.compareObjects(size, currentSize);
+        boolean patchSize = forcePatch || !CompareHelper.compareObjects(size, prevSize);
 
         if (patchSize) {
             String tmpSize = size != null ? size : "medium";

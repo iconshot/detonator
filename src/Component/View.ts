@@ -1,7 +1,6 @@
 import $, { Props } from "untrue";
 
 import { BaseView } from "./BaseView";
-import { Detonator } from "../Detonator";
 
 export type StyleColor =
   | string

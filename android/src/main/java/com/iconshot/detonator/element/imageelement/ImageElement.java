@@ -30,9 +30,9 @@ public class ImageElement extends Element<CustomImageView, ImageElement.Attribut
     public void patchView() {
         String url = attributes.url;
 
-        String currentUrl = currentAttributes != null ? currentAttributes.url : null;
+        String prevUrl = prevAttributes != null ? prevAttributes.url : null;
 
-        boolean patchUrl = forcePatch || !CompareHelper.compareObjects(url, currentUrl);
+        boolean patchUrl = forcePatch || !CompareHelper.compareObjects(url, prevUrl);
 
         if (patchUrl) {
             patchUrl(url);

@@ -54,7 +54,7 @@ class DetonatorKit extends Emitter<DetonatorKitSignatures> {
 
     const elementEdge = componentEdge.children[0]!;
 
-    const elementId = elementEdge.id!;
+    const elementId = elementEdge.id;
 
     const keys = Object.keys(style);
 

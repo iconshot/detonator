@@ -1,4 +1,11 @@
-import { Slot, Ref, Hookster, ClassComponent, FunctionComponent } from "untrue";
+import {
+  Slot,
+  Ref,
+  Hookster,
+  ClassComponent,
+  FunctionComponent,
+  Comparer,
+} from "untrue";
 
 import { Messenger } from "../Messenger";
 
@@ -7,18 +14,18 @@ import { ErrorHandler } from "../ErrorHandler";
 import { HandlerManager } from "../Manager/HandlerManager";
 
 import { Edge } from "./Edge";
-import { StackItem } from "./StackItem";
 import { Target } from "./Target";
 
 import { TreeHub } from "./TreeHub";
 
-interface SerializedEdge {
+interface SanitizedEdge {
   id: number;
   parent: number | null;
   contentType: string | null;
   attributes: string | null;
-  children: SerializedEdge[];
+  children: SanitizedEdge[];
   text: string | null;
+  skipped: boolean;
 }
 
 export class Tree {
@@ -26,11 +33,13 @@ export class Tree {
 
   private edge: Edge | null = null;
 
-  private stack: StackItem[] = [];
+  private stack: Edge[] = [];
 
   private timeout: number | undefined;
 
   private deinitialized: boolean = false;
+
+  private skippedIds: number[] = [];
 
   constructor(private treeId: number, elementEdge: Edge | null) {
     this.element = elementEdge?.element! ?? document.createElement("root");
@@ -63,13 +72,13 @@ export class Tree {
 
     const target = new Target(this.element);
 
-    this.edge = new Edge(slot);
+    this.edge = new Edge(TreeHub.edgeId++, slot);
 
     this.renderEdge(this.edge, null, target);
 
-    const serializedEdge = this.serializeEdge(this.edge);
+    const sanitizedEdge = this.sanitizeEdge(this.edge);
 
-    Messenger.mount({ treeId: this.treeId, edge: serializedEdge });
+    Messenger.mount({ treeId: this.treeId, edge: sanitizedEdge });
   }
 
   public unmount(): void {
@@ -94,199 +103,198 @@ export class Tree {
     Messenger.unmount({ treeId: this.treeId });
   }
 
-  private queue(edge: Edge, element: Element): void {
-    const item = new StackItem(edge, element);
+  private renderChildren(
+    edge: Edge,
+    prevEdge: Edge | null,
+    target: Target
+  ): void {
+    const children: Edge[] = [];
+    const prevChildren: (Edge | null)[] = [];
 
-    this.stack.push(item);
+    const toMoveChildren: Edge[] = [];
 
-    clearTimeout(this.timeout);
+    const slot: Slot = edge.slot;
 
-    this.timeout = setTimeout((): void => {
-      this.rerender();
-    });
-  }
+    const slots = slot.getChildren();
 
-  private unqueue(edge: Edge): void {
-    this.stack = this.stack.filter((item): boolean => {
-      if (edge.component !== null) {
-        return item.edge.component !== edge.component;
+    const prevSlots = prevEdge?.children.map((child): any => child.slot) ?? [];
+
+    for (let i = 0; i < slots.length; i++) {
+      const slot = slots[i];
+
+      let child: Edge | null = null;
+      let prevChild: Edge | null = null;
+
+      if (slot instanceof Slot && slot.getKey() !== null) {
+        // set child as equal previous child (based on type and key)
+
+        for (let j = 0; j < prevSlots.length; j++) {
+          const prevSlot = prevSlots[j];
+
+          if (this.isEqual(slot, prevSlot)) {
+            child = prevEdge!.children[j];
+
+            if (j !== i) {
+              toMoveChildren.push(child);
+            }
+
+            break;
+          }
+        }
+      } else if (i < prevSlots.length) {
+        // set child as same index previous child (only if they're equal)
+
+        const prevSlot = prevSlots[i];
+
+        if (this.isEqual(slot, prevSlot)) {
+          child = prevEdge!.children[i];
+        }
       }
 
-      if (edge.hookster !== null) {
-        return item.edge.hookster !== edge.hookster;
+      // prepare child
+
+      if (child === null) {
+        child = new Edge(TreeHub.edgeId++, slot, edge.depth + 1, edge);
+      } else {
+        prevChild = child.clone();
+
+        child.slot = slot;
       }
 
-      return true;
-    });
+      children.push(child);
+      prevChildren.push(prevChild);
+    }
+
+    edge.children = children;
+
+    // unmount loop
+
+    if (prevEdge !== null) {
+      for (const prevChild of prevEdge.children) {
+        const shouldBeUnmounted = !children.includes(prevChild);
+
+        if (shouldBeUnmounted) {
+          this.unmountEdge(prevChild, target);
+        }
+      }
+    }
+
+    // render loop
+
+    for (let i = 0; i < children.length; i++) {
+      const child = children[i];
+      const prevChild = prevChildren[i];
+
+      const shouldBeMoved = toMoveChildren.includes(child);
+
+      if (shouldBeMoved) {
+        const tmpTarget = new Target(target.element, target.index);
+
+        this.moveEdge(child, tmpTarget);
+      }
+
+      this.renderEdge(child, prevChild, target);
+    }
   }
 
-  private rerender(serializedEdges: SerializedEdge[] = []): void {
-    if (this.stack.length === 0) {
-      Messenger.rerender({ treeId: this.treeId, edges: serializedEdges });
+  private moveEdge(edge: Edge, target: Target): void {
+    const element = edge.element;
+    const children = edge.children;
+
+    if (element !== null) {
+      target.insert(element);
 
       return;
     }
 
-    this.stack.sort((a, b): number => a.edge.depth - b.edge.depth);
-
-    const item = this.stack[0];
-
-    const edge = item.edge;
-    const element = item.element;
-
-    const currentEdge = edge.clone();
-
-    const index = this.findTargetIndex(edge, element);
-
-    const target = new Target(element, index);
-
-    this.renderEdge(edge, currentEdge, target);
-
-    const serializedEdge = this.serializeEdge(edge);
-
-    serializedEdges.push(serializedEdge);
-
-    this.rerender(serializedEdges);
+    for (const child of children) {
+      this.moveEdge(child, target);
+    }
   }
 
-  private createChildren(edge: Edge): void {
+  private renderEdge(edge: Edge, prevEdge: Edge | null, target: Target): void {
+    TreeHub.edges.set(edge.id, edge);
+
+    if (edge.component !== null || edge.hookster !== null) {
+      this.unqueue(edge);
+    }
+
+    if (prevEdge !== null && edge.slot instanceof Slot) {
+      const slot: Slot = edge.slot;
+      const prevSlot: Slot = prevEdge.slot;
+
+      if (slot.isClass() || slot.isFunction()) {
+        let equal = false;
+
+        if (slot.isClass()) {
+          equal = !edge.component!.needsUpdate();
+        }
+
+        if (slot.isFunction()) {
+          equal = !edge.hookster!.needsUpdate();
+        }
+
+        if (equal) {
+          equal = Comparer.compare(slot, prevSlot);
+        }
+
+        if (equal) {
+          target.index += edge.targetNodesCount;
+
+          this.skippedIds.push(edge.id);
+
+          return;
+        }
+      }
+    }
+
     const slot = edge.slot;
 
-    const children = slot instanceof Slot ? slot.getChildren() : [];
-
-    const edges = children.map(
-      (child): Edge => new Edge(child, edge, edge.depth + 1)
-    );
-
-    edge.children = edges;
-  }
-
-  private renderChildren(
-    edge: Edge,
-    currentEdge: Edge | null,
-    target: Target
-  ): void {
-    this.createChildren(edge);
-
-    const children = edge.children;
-
-    const currentChildren = currentEdge?.children ?? [];
-
-    for (let i = 0; i < currentChildren.length; i++) {
-      const currentChild = currentChildren[i];
-
-      let child: Edge | null = null;
-
-      const currentSlot = currentChild.slot;
-
-      if (currentSlot instanceof Slot && currentSlot.getKey() !== null) {
-        for (const tmpChild of children) {
-          if (this.isEqual(currentChild, tmpChild)) {
-            child = tmpChild;
-
-            break;
-          }
-        }
-      }
-
-      if (child === null && i < children.length) {
-        const tmpChild = children[i];
-
-        if (this.isEqual(currentChild, tmpChild)) {
-          child = tmpChild;
-        }
-      }
-
-      if (child === null) {
-        this.unmountEdge(currentChild, target);
-      }
-    }
-
-    for (let i = 0; i < children.length; i++) {
-      const child = children[i];
-
-      let currentChild: Edge | null = null;
-
-      const slot = child.slot;
-
-      if (slot instanceof Slot && slot.getKey() !== null) {
-        for (const tmpChild of currentChildren) {
-          if (this.isEqual(child, tmpChild)) {
-            currentChild = tmpChild;
-
-            break;
-          }
-        }
-      }
-
-      if (currentChild === null && i < currentChildren.length) {
-        const tmpChild = currentChildren[i];
-
-        if (this.isEqual(child, tmpChild)) {
-          currentChild = tmpChild;
-        }
-      }
-
-      this.renderEdge(child, currentChild, target);
-    }
-  }
-
-  private renderEdge(
-    edge: Edge,
-    currentEdge: Edge | null,
-    target: Target
-  ): void {
-    const slot = edge.slot;
-
-    if (currentEdge !== null) {
-      edge.children = currentEdge.children;
-
-      edge.id = currentEdge.id;
-    } else {
-      edge.id = TreeHub.edgeId++;
-    }
+    const initialTargetIndex = target.index;
 
     try {
       if (slot instanceof Slot) {
         if (slot.isClass()) {
-          this.renderClass(edge, currentEdge, target);
+          this.renderClass(edge, prevEdge, target);
         } else if (slot.isFunction()) {
-          this.renderFunction(edge, currentEdge, target);
+          this.renderFunction(edge, prevEdge, target);
         } else if (slot.isElement()) {
-          this.renderElement(edge, currentEdge, target);
+          this.renderElement(edge, prevEdge, target);
         } else if (slot.isNull()) {
-          this.renderNull(edge, currentEdge, target);
+          this.renderNull(edge, prevEdge, target);
         }
       } else if (slot !== null && slot !== undefined && slot !== false) {
-        this.renderText(edge, currentEdge, target);
+        this.renderText(edge, prevEdge, target);
       }
+
+      const targetNodesCount = target.index - initialTargetIndex;
+
+      edge.targetNodesCount = targetNodesCount;
     } catch (error) {
+      target.index += edge.targetNodesCount;
+
       ErrorHandler.handle(error);
     }
-
-    TreeHub.edges.set(edge.id!, edge);
   }
 
-  private renderClass(
-    edge: Edge,
-    currentEdge: Edge | null,
-    target: Target
-  ): void {
+  private renderClass(edge: Edge, prevEdge: Edge | null, target: Target): void {
     const slot: Slot = edge.slot;
 
-    const currentSlot: Slot | null = currentEdge?.slot ?? null;
+    const prevSlot: Slot | null = prevEdge?.slot ?? null;
 
     const contentType = slot.getContentType();
     const props = slot.getProps();
 
-    let component = currentEdge?.component ?? null;
+    let component = edge.component;
 
     if (component === null) {
       const ComponentClass = contentType as ClassComponent;
 
       component = new ComponentClass(props);
 
-      component.init();
+      component.initialize((): void => {
+        this.queue(edge);
+      });
     } else {
       component.updateProps(props);
     }
@@ -295,84 +303,76 @@ export class Tree {
 
     TreeHub.components.set(component, edge);
 
-    this.unqueue(edge);
-
     const ref = slot.getRef();
 
-    const currentRef = currentSlot?.getRef() ?? null;
+    const prevRef = prevSlot?.getRef() ?? null;
 
-    if (currentRef instanceof Ref && currentRef !== ref) {
-      currentRef.value = null;
+    if (prevRef instanceof Ref && prevRef !== ref) {
+      prevRef.value = null;
     }
 
-    if (ref instanceof Ref && ref !== currentRef) {
+    if (ref instanceof Ref && ref !== prevRef) {
       ref.value = component;
     }
 
-    const children = component.render();
+    const children = component.render() ?? [];
 
     slot.setChildren(children);
 
-    this.renderChildren(edge, currentEdge, target);
+    this.renderChildren(edge, prevEdge, target);
 
-    queueMicrotask((): void => {
-      component.triggerRender((): void => {
-        this.queue(edge, target.element);
-      });
-    });
+    component.finishRender();
   }
 
   private renderFunction(
     edge: Edge,
-    currentEdge: Edge | null,
+    prevEdge: Edge | null,
     target: Target
   ): void {
     const slot: Slot = edge.slot;
 
-    const currentSlot: Slot | null = currentEdge?.slot ?? null;
+    const prevSlot: Slot | null = prevEdge?.slot ?? null;
 
     const contentType = slot.getContentType();
     const props = slot.getProps();
 
-    let hookster = currentEdge?.hookster ?? null;
+    let hookster = edge.hookster;
 
     if (hookster === null) {
       hookster = new Hookster();
+
+      hookster.initialize((): void => {
+        this.queue(edge);
+      });
     } else {
       hookster.performUpdate();
     }
 
     edge.hookster = hookster;
 
-    this.unqueue(edge);
-
     hookster.activate();
 
-    const currentProps = currentSlot?.getProps() ?? null;
+    const prevProps = prevSlot?.getProps() ?? null;
 
     const ComponentFunction = contentType as FunctionComponent;
 
-    const children = ComponentFunction(props, currentProps);
+    const children = ComponentFunction(props, prevProps) ?? [];
 
     hookster.deactivate();
 
     slot.setChildren(children);
 
-    this.renderChildren(edge, currentEdge, target);
+    this.renderChildren(edge, prevEdge, target);
 
-    queueMicrotask((): void => {
-      hookster.triggerRender((): void => {
-        this.queue(edge, target.element);
-      });
-    });
+    hookster.finishRender();
   }
 
   private renderElement(
     edge: Edge,
-    currentEdge: Edge | null,
+    prevEdge: Edge | null,
     target: Target
   ): void {
-    let element = currentEdge?.element ?? null;
+    let element = edge.element;
 
     if (element === null) {
       element = this.createElement(edge);
@@ -380,30 +380,24 @@ export class Tree {
 
     edge.element = element;
 
-    this.patchElement(edge, currentEdge);
+    this.patchElement(edge, prevEdge);
 
     const tmpTarget = new Target(element);
 
-    this.renderChildren(edge, currentEdge, tmpTarget);
+    this.renderChildren(edge, prevEdge, tmpTarget);
 
     target.insert(element);
   }
 
-  private renderText(
-    edge: Edge,
-    currentEdge: Edge | null,
-    target: Target
-  ): void {}
+  private renderText(edge: Edge, prevEdge: Edge | null, target: Target): void {}
 
-  private renderNull(
-    edge: Edge,
-    currentEdge: Edge | null,
-    target: Target
-  ): void {
-    this.renderChildren(edge, currentEdge, target);
+  private renderNull(edge: Edge, prevEdge: Edge | null, target: Target): void {
+    this.renderChildren(edge, prevEdge, target);
   }
 
   private unmountEdge(edge: Edge, target: Target): void {
+    TreeHub.edges.delete(edge.id);
+
     const slot = edge.slot;
     const element = edge.element;
     const component = edge.component;
@@ -435,58 +429,51 @@ export class Tree {
 
       this.unqueue(edge);
 
-      queueMicrotask((): void => {
-        component.triggerUnmount();
-      });
+      component.finishUnmount();
     }
 
     if (hookster !== null) {
       this.unqueue(edge);
 
-      queueMicrotask((): void => {
-        hookster.triggerUnmount();
-      });
+      hookster.finishUnmount();
     }
-
-    TreeHub.edges.delete(edge.id!);
   }
 
-  private isEqual(edge: Edge, currentEdge: Edge): boolean {
-    const slot = edge.slot;
-    const currentSlot = currentEdge.slot;
+  private isEqual(slot: any, prevSlot: any): boolean {
+    //  check slots based on type and key
 
     if (slot instanceof Slot) {
-      if (!(currentSlot instanceof Slot)) {
+      if (!(prevSlot instanceof Slot)) {
         return false;
       }
 
       const contentType = slot.getContentType();
       const key = slot.getKey();
 
-      const currentContentType = currentSlot.getContentType();
-      const currentKey = currentSlot.getKey();
+      const prevContentType = prevSlot.getContentType();
+      const prevKey = prevSlot.getKey();
 
-      return contentType === currentContentType && key === currentKey;
+      return contentType === prevContentType && key === prevKey;
     }
+
+    // null, undefined and false are special cases since they will be ignored by renderEdge
 
     if (slot === null || slot === undefined || slot === false) {
-      return (
-        currentSlot === null ||
-        currentSlot === undefined ||
-        currentSlot === false
-      );
+      return prevSlot === null || prevSlot === undefined || prevSlot === false;
     }
 
+    // check if both slots are texts
+
     return (
-      currentSlot !== null &&
-      currentSlot !== undefined &&
-      currentSlot !== false &&
-      !(currentSlot instanceof Slot)
+      prevSlot !== null &&
+      prevSlot !== undefined &&
+      prevSlot !== false &&
+      !(prevSlot instanceof Slot)
     );
   }
 
   private createElement(edge: Edge): Element {
-    const slot = edge.slot as Slot;
+    const slot: Slot = edge.slot;
 
     const contentType = slot.getContentType();
 
@@ -495,15 +482,15 @@ export class Tree {
     return document.createElement(tagName);
   }
 
-  private patchElement(edge: Edge, currentEdge: Edge | null): void {
-    const slot = edge.slot as Slot;
+  private patchElement(edge: Edge, prevEdge: Edge | null): void {
+    const slot: Slot = edge.slot;
     const element = edge.element!;
 
-    const currentSlot = (currentEdge?.slot ?? null) as Slot | null;
+    const prevSlot: Slot | null = prevEdge?.slot ?? null;
 
     const attributes = slot.getAttributes() ?? {};
 
-    const currentAttributes = currentSlot?.getAttributes() ?? {};
+    const prevAttributes = prevSlot?.getAttributes() ?? {};
 
     for (const key in attributes) {
       const isHandlerName = HandlerManager.isHandlerName(key);
@@ -513,29 +500,29 @@ export class Tree {
       }
 
       const value = attributes[key] ?? null;
-      const currentValue = currentAttributes[key] ?? null;
+      const prevValue = prevAttributes[key] ?? null;
 
       const isValueHandler = typeof value === "function";
-      const isCurrentValueHandler = typeof currentValue === "function";
+      const isPrevValueHandler = typeof prevValue === "function";
 
       const eventName = HandlerManager.getEventName(key);
 
       if (value !== null) {
-        if (isValueHandler && value !== currentValue) {
-          if (currentValue !== null && isCurrentValueHandler) {
-            element.removeEventListener(eventName, currentValue);
+        if (isValueHandler && value !== prevValue) {
+          if (prevValue !== null && isPrevValueHandler) {
+            element.removeEventListener(eventName, prevValue);
           }
 
           element.addEventListener(eventName, value);
         }
       } else {
-        if (currentValue !== null && isCurrentValueHandler) {
-          element.removeEventListener(eventName, currentValue);
+        if (prevValue !== null && isPrevValueHandler) {
+          element.removeEventListener(eventName, prevValue);
         }
       }
     }
 
-    for (const key in currentAttributes) {
+    for (const key in prevAttributes) {
       const found = key in attributes;
 
       if (found) {
@@ -548,23 +535,67 @@ export class Tree {
         continue;
       }
 
-      const currentValue = currentAttributes[key];
+      const prevValue = prevAttributes[key];
 
-      const isCurrentValueHandler = typeof currentValue === "function";
+      const isPrevValueHandler = typeof prevValue === "function";
 
       const eventName = HandlerManager.getEventName(key);
 
-      if (currentValue !== null && isCurrentValueHandler) {
-        element.removeEventListener(eventName, currentValue);
+      if (prevValue !== null && isPrevValueHandler) {
+        element.removeEventListener(eventName, prevValue);
       }
     }
   }
 
-  private findTargetIndex(edge: Edge, targetElement: Element): number {
+  private queue(edge: Edge): void {
+    this.stack.push(edge);
+
+    clearTimeout(this.timeout);
+
+    this.timeout = setTimeout((): void => {
+      this.rerender();
+    });
+  }
+
+  private unqueue(edge: Edge): void {
+    this.stack = this.stack.filter((tmpEdge): boolean => tmpEdge !== edge);
+  }
+
+  private rerender(): void {
+    const sanitizedEdges: SanitizedEdge[] = [];
+
+    this.stack.sort((a, b): number => a.depth - b.depth);
+
+    while (this.stack.length > 0) {
+      const edge = this.stack[0];
+
+      const target = this.createTarget(edge);
+
+      const prevEdge = edge.clone();
+
+      this.renderEdge(edge, prevEdge, target);
+
+      const difference = edge.targetNodesCount - prevEdge.targetNodesCount;
+
+      if (difference !== 0) {
+        this.propagateTargetNodesCountDifference(edge, difference);
+      }
+
+      const sanitizedEdge = this.sanitizeEdge(edge);
+
+      sanitizedEdges.push(sanitizedEdge);
+    }
+
+    Messenger.rerender({ treeId: this.treeId, edges: sanitizedEdges });
+
+    this.skippedIds = [];
+  }
+
+  private createTarget(edge: Edge, targetIndex: number = 0): Target {
     const parent = edge.parent;
 
     if (parent === null) {
-      return 0;
+      return new Target(this.element, targetIndex);
     }
 
     const element = parent.element;
@@ -575,98 +606,102 @@ export class Tree {
     for (let i = index - 1; i >= 0; i--) {
       const child = children[i];
 
-      const j = this.findElementIndex(child, targetElement);
-
-      if (j !== null) {
-        return j + 1;
-      }
+      targetIndex += child.targetNodesCount;
     }
-
-    if (element === targetElement) {
-      return 0;
-    }
-
-    return this.findTargetIndex(parent, targetElement);
-  }
-
-  private findElementIndex(edge: Edge, targetElement: Element): number | null {
-    const element = edge.element;
-    const children = edge.children;
 
     if (element !== null) {
-      const childNodes = [...targetElement.childNodes];
-
-      return childNodes.indexOf(element as ChildNode);
+      return new Target(element, targetIndex);
     }
 
-    for (let i = children.length - 1; i >= 0; i--) {
-      const child = children[i];
-
-      const index = this.findElementIndex(child, targetElement);
-
-      if (index !== null) {
-        return index;
-      }
-    }
-
-    return null;
+    return this.createTarget(parent, targetIndex);
   }
 
-  private serializeEdge(
+  private propagateTargetNodesCountDifference(
     edge: Edge,
-    parent: SerializedEdge | null = null
-  ): SerializedEdge {
+    difference: number
+  ): void {
+    const parent = edge.parent;
+
+    if (parent === null) {
+      return;
+    }
+
+    const element = parent.element;
+
+    if (element !== null) {
+      return;
+    }
+
+    parent.targetNodesCount += difference;
+
+    this.propagateTargetNodesCountDifference(parent, difference);
+  }
+
+  private sanitizeEdge(
+    edge: Edge,
+    sanitizedParent: SanitizedEdge | null = null
+  ): SanitizedEdge {
+    const edgeId = edge.id;
+
     const slot = edge.slot;
     const children = edge.children;
 
-    let object: SerializedEdge | null = null;
+    let sanitizedEdge: SanitizedEdge | null = null;
 
     if (slot instanceof Slot) {
       if (slot.isClass()) {
-        object = this.serializeClass(edge);
+        sanitizedEdge = this.sanitizeClass(edge);
       } else if (slot.isFunction()) {
-        object = this.serializeFunction(edge);
+        sanitizedEdge = this.sanitizeFunction(edge);
       } else if (slot.isElement()) {
-        object = this.serializeElement(edge);
+        sanitizedEdge = this.sanitizeElement(edge);
       } else if (slot.isNull()) {
-        object = this.serializeNull(edge);
+        sanitizedEdge = this.sanitizeNull(edge);
       }
     } else if (slot !== null && slot !== undefined && slot !== false) {
-      object = this.serializeText(edge);
+      sanitizedEdge = this.sanitizeText(edge);
     } else {
-      object = this.serializeEmpty(edge);
+      sanitizedEdge = this.sanitizeEmpty(edge);
     }
 
-    for (const child of children) {
-      this.serializeEdge(child, object!);
+    sanitizedEdge = sanitizedEdge!;
+
+    const skipped = this.skippedIds.includes(edgeId);
+
+    if (skipped) {
+      sanitizedEdge.skipped = true;
+    } else {
+      for (const child of children) {
+        this.sanitizeEdge(child, sanitizedEdge);
+      }
     }
 
-    if (parent !== null) {
-      parent.children.push(object!);
+    if (sanitizedParent !== null) {
+      sanitizedParent.children.push(sanitizedEdge);
     }
 
-    return object!;
+    return sanitizedEdge;
   }
 
-  private serializeClass(edge: Edge): SerializedEdge {
-    const id = edge.id!;
+  private sanitizeClass(edge: Edge): SanitizedEdge {
+    const id = edge.id;
 
     const parent = edge.parent?.id ?? null;
 
-    return this.serializeSlot({ id, parent });
+    return this.sanitizeSlot({ id, parent });
   }
 
-  private serializeFunction(edge: Edge): SerializedEdge {
-    const id = edge.id!;
+  private sanitizeFunction(edge: Edge): SanitizedEdge {
+    const id = edge.id;
 
     const parent = edge.parent?.id ?? null;
 
-    return this.serializeSlot({ id, parent });
+    return this.sanitizeSlot({ id, parent });
   }
 
-  private serializeElement(edge: Edge): SerializedEdge {
-    const id = edge.id!;
-    const slot = edge.slot as Slot;
+  private sanitizeElement(edge: Edge): SanitizedEdge {
+    const id = edge.id;
+    const slot: Slot = edge.slot;
 
     const parent = edge.parent?.id ?? null;
 
@@ -674,48 +709,48 @@ export class Tree {
 
     const { children, ...props } = slot.getProps();
 
-    return this.serializeSlot({ id, parent, contentType, attributes: props });
+    return this.sanitizeSlot({ id, parent, contentType, attributes: props });
   }
 
-  private serializeText(edge: Edge): SerializedEdge {
-    const id = edge.id!;
+  private sanitizeText(edge: Edge): SanitizedEdge {
+    const id = edge.id;
     const slot = edge.slot;
 
     const parent = edge.parent?.id ?? null;
 
     const text = `${slot}`;
 
-    return this.serializeSlot({ id, parent, text });
+    return this.sanitizeSlot({ id, parent, text });
   }
 
-  private serializeNull(edge: Edge): SerializedEdge {
-    const id = edge.id!;
+  private sanitizeNull(edge: Edge): SanitizedEdge {
+    const id = edge.id;
 
     const parent = edge.parent?.id ?? null;
 
-    return this.serializeSlot({ id, parent });
+    return this.sanitizeSlot({ id, parent });
   }
 
-  private serializeEmpty(edge: Edge): SerializedEdge {
-    const id = edge.id!;
+  private sanitizeEmpty(edge: Edge): SanitizedEdge {
+    const id = edge.id;
 
     const parent = edge.parent?.id ?? null;
 
-    return this.serializeSlot({ id, parent });
+    return this.sanitizeSlot({ id, parent });
   }
 
-  private serializeSlot({
+  private sanitizeSlot({
     id,
     parent,
     contentType = null,
     attributes = null,
     children = [],
     text = null,
-  }: { id: SerializedEdge["id"]; parent: SerializedEdge["parent"] } & Partial<
-    Omit<SerializedEdge, "id" | "attributes"> & {
+  }: { id: SanitizedEdge["id"]; parent: SanitizedEdge["parent"] } & Partial<
+    Omit<SanitizedEdge, "id" | "attributes" | "skipped"> & {
       attributes: { [key: string]: any } | null;
     }
-  >): SerializedEdge {
+  >): SanitizedEdge {
     let tmpAttributes: string | null = null;
 
     if (attributes !== null) {
@@ -737,6 +772,7 @@ export class Tree {
       attributes: tmpAttributes,
       children,
       text,
+      skipped: false,
     };
   }
 }

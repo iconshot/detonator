@@ -28,21 +28,21 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         let view = view as! TextAreaView
         
         let attributes = attributes as! TextAreaAttributes
-        let currentAttributes = currentAttributes as! TextAreaAttributes?
+        let prevAttributes = prevAttributes as! TextAreaAttributes?
         
         let placeholder = attributes.placeholder
-        let currentPlaceholder = currentAttributes?.placeholder
+        let prevPlaceholder = prevAttributes?.placeholder
         
-        let patchPlaceholderBool = forcePatch || placeholder != currentPlaceholder
+        let patchPlaceholderBool = forcePatch || placeholder != prevPlaceholder
         
         if patchPlaceholderBool {
             view.placeholder.text = placeholder
         }
         
         let placeholderColor = attributes.placeholderColor
-        let currentPlaceholderColor = currentAttributes?.placeholderColor
+        let prevPlaceholderColor = prevAttributes?.placeholderColor
         
-        let patchPlaceholderColorBool = forcePatch || CompareHelper.compareStyleColors(placeholderColor, currentPlaceholderColor)
+        let patchPlaceholderColorBool = forcePatch || CompareHelper.compareStyleColors(placeholderColor, prevPlaceholderColor)
         
         if patchPlaceholderColorBool {
             view.placeholder.textColor = placeholderColor != nil ? ColorHelper.parseColor(color: placeholderColor!) : defaultPlaceholderColor
@@ -57,9 +57,9 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         }
         
         let autoCapitalize = attributes.autoCapitalize
-        let currentAutoCapitalize = currentAttributes?.autoCapitalize
+        let prevAutoCapitalize = prevAttributes?.autoCapitalize
         
-        let patchAutoCapitalizeBool = forcePatch || autoCapitalize != currentAutoCapitalize
+        let patchAutoCapitalizeBool = forcePatch || autoCapitalize != prevAutoCapitalize
         
         if patchAutoCapitalizeBool {
             patchInputType(autoCapitalize: autoCapitalize)

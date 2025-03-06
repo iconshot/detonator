@@ -39,30 +39,30 @@ class VerticalScrollViewElement: Element {
         let layoutParams = view.layoutParams
         
         let attributes = attributes as! VerticalScrollViewAttributes
-        let currentAttributes = currentAttributes as! VerticalScrollViewAttributes?
+        let prevAttributes = prevAttributes as! VerticalScrollViewAttributes?
         
         let paginated = attributes.paginated
-        let currentPaginated = currentAttributes?.paginated
+        let prevPaginated = prevAttributes?.paginated
         
-        let patchPaginatedBool = forcePatch || paginated != currentPaginated
+        let patchPaginatedBool = forcePatch || paginated != prevPaginated
         
         if patchPaginatedBool {
             view.isPagingEnabled = paginated == true
         }
         
         let inverted = attributes.inverted
-        let currentInverted = currentAttributes?.inverted
+        let prevInverted = prevAttributes?.inverted
         
-        let patchInvertedBool = forcePatch || inverted != currentInverted
+        let patchInvertedBool = forcePatch || inverted != prevInverted
         
         if patchInvertedBool {
             view.inverted = inverted == true
         }
         
         let showsIndicator = attributes.showsIndicator
-        let currentShowsIndicator = currentAttributes?.showsIndicator
+        let prevShowsIndicator = prevAttributes?.showsIndicator
         
-        let patchShowsIndicatorBool = forcePatch || showsIndicator != currentShowsIndicator
+        let patchShowsIndicatorBool = forcePatch || showsIndicator != prevShowsIndicator
         
         if patchShowsIndicatorBool {
             view.showsVerticalScrollIndicator = showsIndicator == true

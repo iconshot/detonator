@@ -18,15 +18,15 @@ open class Element: NSObject {
     public let detonator: Detonator
     
     public var edge: Edge!
-    public var currentEdge: Edge?
+    public var prevEdge: Edge?
     
     public var view: UIView!
     
     public var attributes: Attributes!
-    public var currentAttributes: Attributes?
+    public var prevAttributes: Attributes?
     
     var styler: Styler!
-    var currentStyler: Styler!
+    var prevStyler: Styler!
     
     public var forcePatch: Bool = true
     
@@ -72,12 +72,12 @@ open class Element: NSObject {
     public func patch() {
         attributes = decodeAttributes(edge: edge)
         
-        currentAttributes = currentEdge != nil ? decodeAttributes(edge: currentEdge!) : nil
+        prevAttributes = prevEdge != nil ? decodeAttributes(edge: prevEdge!) : nil
         
-        forcePatch = currentAttributes == nil
+        forcePatch = prevAttributes == nil
         
         styler = Styler(style: attributes.style)
-        currentStyler = Styler(style: currentAttributes?.style)
+        prevStyler = Styler(style: prevAttributes?.style)
         
         let flex = styler.getFlex()
         let flexDirection = styler.getFlexDirection()
@@ -144,135 +144,135 @@ open class Element: NSObject {
         let borderRightColor = styler.getBorderRightColor()
         let transform = styler.getTransform()
         
-        let currentFlex = currentStyler.getFlex()
-        let currentFlexDirection = currentStyler.getFlexDirection()
-        let currentJustifyContent = currentStyler.getJustifyContent()
-        let currentAlignItems = currentStyler.getAlignItems()
-        let currentAlignSelf = currentStyler.getAlignSelf()
-        let currentBackgroundColor = currentStyler.getBackgroundColor()
-        let currentWidth = currentStyler.getWidth()
-        let currentHeight = currentStyler.getHeight()
-        let currentMinWidth = currentStyler.getMinWidth()
-        let currentMinHeight = currentStyler.getMinHeight()
-        let currentMaxWidth = currentStyler.getMaxWidth()
-        let currentMaxHeight = currentStyler.getMaxHeight()
-        let currentPadding = currentStyler.getPadding()
-        let currentPaddingHorizontal = currentStyler.getPaddingHorizontal()
-        let currentPaddingVertical = currentStyler.getPaddingVertical()
-        let currentPaddingTop = currentStyler.getPaddingTop()
-        let currentPaddingLeft = currentStyler.getPaddingLeft()
-        let currentPaddingBottom = currentStyler.getPaddingBottom()
-        let currentPaddingRight = currentStyler.getPaddingRight()
-        let currentMargin = currentStyler.getMargin()
-        let currentMarginHorizontal = currentStyler.getMarginHorizontal()
-        let currentMarginVertical = currentStyler.getMarginVertical()
-        let currentMarginTop = currentStyler.getMarginTop()
-        let currentMarginLeft = currentStyler.getMarginLeft()
-        let currentMarginBottom = currentStyler.getMarginBottom()
-        let currentMarginRight = currentStyler.getMarginRight()
-        let currentFontSize = currentStyler.getFontSize()
-        let currentLineHeight = currentStyler.getLineHeight()
-        let currentFontWeight = currentStyler.getFontWeight()
-        let currentColor = currentStyler.getColor()
-        let currentTextAlign = currentStyler.getTextAlign()
-        let currentTextDecoration = currentStyler.getTextDecoration()
-        let currentTextTransform = currentStyler.getTextTransform()
-        let currentTextOverflow = currentStyler.getTextOverflow()
-        let currentOverflowWrap = currentStyler.getOverflowWrap()
-        let currentWordBreak = currentStyler.getWordBreak()
-        let currentPosition = currentStyler.getPosition()
-        let currentTop = currentStyler.getTop()
-        let currentLeft = currentStyler.getLeft()
-        let currentBottom = currentStyler.getBottom()
-        let currentRight = currentStyler.getRight()
-        let currentZIndex = currentStyler.getZIndex()
-        let currentDisplay = currentStyler.getDisplay()
-        let currentPointerEvents = currentStyler.getPointerEvents()
-        let currentObjectFit = currentStyler.getObjectFit()
-        let currentOverflow = currentStyler.getOverflow()
-        let currentOpacity = currentStyler.getOpacity()
-        let currentAspectRatio = currentStyler.getAspectRatio()
-        let currentBorderRadius = currentStyler.getBorderRadius()
-        let currentBorderRadiusTopLeft = currentStyler.getBorderRadiusTopLeft()
-        let currentBorderRadiusTopRight = currentStyler.getBorderRadiusTopRight()
-        let currentBorderRadiusBottomLeft = currentStyler.getBorderRadiusBottomLeft()
-        let currentBorderRadiusBottomRight = currentStyler.getBorderRadiusBottomRight()
-        let currentBorderWidth = currentStyler.getBorderWidth()
-        let currentBorderColor = currentStyler.getBorderColor()
-        let currentBorderTopWidth = currentStyler.getBorderTopWidth()
-        let currentBorderTopColor = currentStyler.getBorderTopColor()
-        let currentBorderLeftWidth = currentStyler.getBorderLeftWidth()
-        let currentBorderLeftColor = currentStyler.getBorderLeftColor()
-        let currentBorderBottomWidth = currentStyler.getBorderBottomWidth()
-        let currentBorderBottomColor = currentStyler.getBorderBottomColor()
-        let currentBorderRightWidth = currentStyler.getBorderRightWidth()
-        let currentBorderRightColor = currentStyler.getBorderRightColor()
-        let currentTransform = currentStyler.getTransform()
+        let prevFlex = prevStyler.getFlex()
+        let prevFlexDirection = prevStyler.getFlexDirection()
+        let prevJustifyContent = prevStyler.getJustifyContent()
+        let prevAlignItems = prevStyler.getAlignItems()
+        let prevAlignSelf = prevStyler.getAlignSelf()
+        let prevBackgroundColor = prevStyler.getBackgroundColor()
+        let prevWidth = prevStyler.getWidth()
+        let prevHeight = prevStyler.getHeight()
+        let prevMinWidth = prevStyler.getMinWidth()
+        let prevMinHeight = prevStyler.getMinHeight()
+        let prevMaxWidth = prevStyler.getMaxWidth()
+        let prevMaxHeight = prevStyler.getMaxHeight()
+        let prevPadding = prevStyler.getPadding()
+        let prevPaddingHorizontal = prevStyler.getPaddingHorizontal()
+        let prevPaddingVertical = prevStyler.getPaddingVertical()
+        let prevPaddingTop = prevStyler.getPaddingTop()
+        let prevPaddingLeft = prevStyler.getPaddingLeft()
+        let prevPaddingBottom = prevStyler.getPaddingBottom()
+        let prevPaddingRight = prevStyler.getPaddingRight()
+        let prevMargin = prevStyler.getMargin()
+        let prevMarginHorizontal = prevStyler.getMarginHorizontal()
+        let prevMarginVertical = prevStyler.getMarginVertical()
+        let prevMarginTop = prevStyler.getMarginTop()
+        let prevMarginLeft = prevStyler.getMarginLeft()
+        let prevMarginBottom = prevStyler.getMarginBottom()
+        let prevMarginRight = prevStyler.getMarginRight()
+        let prevFontSize = prevStyler.getFontSize()
+        let prevLineHeight = prevStyler.getLineHeight()
+        let prevFontWeight = prevStyler.getFontWeight()
+        let prevColor = prevStyler.getColor()
+        let prevTextAlign = prevStyler.getTextAlign()
+        let prevTextDecoration = prevStyler.getTextDecoration()
+        let prevTextTransform = prevStyler.getTextTransform()
+        let prevTextOverflow = prevStyler.getTextOverflow()
+        let prevOverflowWrap = prevStyler.getOverflowWrap()
+        let prevWordBreak = prevStyler.getWordBreak()
+        let prevPosition = prevStyler.getPosition()
+        let prevTop = prevStyler.getTop()
+        let prevLeft = prevStyler.getLeft()
+        let prevBottom = prevStyler.getBottom()
+        let prevRight = prevStyler.getRight()
+        let prevZIndex = prevStyler.getZIndex()
+        let prevDisplay = prevStyler.getDisplay()
+        let prevPointerEvents = prevStyler.getPointerEvents()
+        let prevObjectFit = prevStyler.getObjectFit()
+        let prevOverflow = prevStyler.getOverflow()
+        let prevOpacity = prevStyler.getOpacity()
+        let prevAspectRatio = prevStyler.getAspectRatio()
+        let prevBorderRadius = prevStyler.getBorderRadius()
+        let prevBorderRadiusTopLeft = prevStyler.getBorderRadiusTopLeft()
+        let prevBorderRadiusTopRight = prevStyler.getBorderRadiusTopRight()
+        let prevBorderRadiusBottomLeft = prevStyler.getBorderRadiusBottomLeft()
+        let prevBorderRadiusBottomRight = prevStyler.getBorderRadiusBottomRight()
+        let prevBorderWidth = prevStyler.getBorderWidth()
+        let prevBorderColor = prevStyler.getBorderColor()
+        let prevBorderTopWidth = prevStyler.getBorderTopWidth()
+        let prevBorderTopColor = prevStyler.getBorderTopColor()
+        let prevBorderLeftWidth = prevStyler.getBorderLeftWidth()
+        let prevBorderLeftColor = prevStyler.getBorderLeftColor()
+        let prevBorderBottomWidth = prevStyler.getBorderBottomWidth()
+        let prevBorderBottomColor = prevStyler.getBorderBottomColor()
+        let prevBorderRightWidth = prevStyler.getBorderRightWidth()
+        let prevBorderRightColor = prevStyler.getBorderRightColor()
+        let prevTransform = prevStyler.getTransform()
         
-        let patchFlexBool = forcePatch || flex != currentFlex
-        let patchFlexDirectionBool = forcePatch || flexDirection != currentFlexDirection
-        let patchJustifyContentBool = forcePatch || justifyContent != currentJustifyContent
-        let patchAlignItemsBool = forcePatch || alignItems != currentAlignItems
-        let patchAlignSelfBool = forcePatch || alignSelf != currentAlignSelf
-        let patchBackgroundColorBool = forcePatch || !CompareHelper.compareStyleColors(backgroundColor, currentBackgroundColor)
-        let patchWidthBool = forcePatch || !CompareHelper.compareStyleSizes(width, currentWidth)
-        let patchHeightBool = forcePatch || !CompareHelper.compareStyleSizes(height, currentHeight)
-        let patchMinWidthBool = forcePatch || !CompareHelper.compareStyleSizes(minWidth, currentMinWidth)
-        let patchMinHeightBool = forcePatch || !CompareHelper.compareStyleSizes(minHeight, currentMinHeight)
-        let patchMaxWidthBool = forcePatch || !CompareHelper.compareStyleSizes(maxWidth, currentMaxWidth)
-        let patchMaxHeightBool = forcePatch || !CompareHelper.compareStyleSizes(maxHeight, currentMaxHeight)
-        let patchPaddingBool = forcePatch || padding != currentPadding
-        let patchPaddingHorizontalBool = forcePatch || paddingHorizontal != currentPaddingHorizontal
-        let patchPaddingVerticalBool = forcePatch || paddingVertical != currentPaddingVertical
-        let patchPaddingTopBool = forcePatch || paddingTop != currentPaddingTop
-        let patchPaddingLeftBool = forcePatch || paddingLeft != currentPaddingLeft
-        let patchPaddingBottomBool = forcePatch || paddingBottom != currentPaddingBottom
-        let patchPaddingRightBool = forcePatch || paddingRight != currentPaddingRight
-        let patchMarginBool = forcePatch || margin != currentMargin
-        let patchMarginHorizontalBool = forcePatch || marginHorizontal != currentMarginHorizontal
-        let patchMarginVerticalBool = forcePatch || marginVertical != currentMarginVertical
-        let patchMarginTopBool = forcePatch || marginTop != currentMarginTop
-        let patchMarginLeftBool = forcePatch || marginLeft != currentMarginLeft
-        let patchMarginBottomBool = forcePatch || marginBottom != currentMarginBottom
-        let patchMarginRightBool = forcePatch || marginRight != currentMarginRight
-        let patchFontSizeBool = forcePatch || fontSize != currentFontSize
-        let patchLineHeightBool = forcePatch || lineHeight != currentLineHeight
-        let patchFontWeightBool = forcePatch || fontWeight != currentFontWeight
-        let patchColorBool = forcePatch || !CompareHelper.compareStyleColors(color, currentColor)
-        let patchTextAlignBool = forcePatch || textAlign != currentTextAlign
-        let patchTextDecorationBool = forcePatch || textDecoration != currentTextDecoration
-        let patchTextTransformBool = forcePatch || textTransform != currentTextTransform
-        let patchTextOverflowBool = forcePatch || textOverflow != currentTextOverflow
-        let patchOverflowWrapBool = forcePatch || overflowWrap != currentOverflowWrap
-        let patchWordBreakBool = forcePatch || wordBreak != currentWordBreak
-        let patchPositionBool = forcePatch || position != currentPosition
-        let patchTopBool = forcePatch || !CompareHelper.compareStyleSizes(top, currentTop)
-        let patchLeftBool = forcePatch || !CompareHelper.compareStyleSizes(left, currentLeft)
-        let patchBottomBool = forcePatch || !CompareHelper.compareStyleSizes(bottom, currentBottom)
-        let patchRightBool = forcePatch || !CompareHelper.compareStyleSizes(right, currentRight)
-        let patchZIndexBool = forcePatch || zIndex != currentZIndex
-        let patchDisplayBool = forcePatch || display != currentDisplay
-        let patchPointerEventsBool = forcePatch || pointerEvents != currentPointerEvents
-        let patchObjectFitBool = forcePatch || objectFit != currentObjectFit
-        let patchOverflowBool = forcePatch || overflow != currentOverflow
-        let patchOpacityBool = forcePatch || opacity != currentOpacity
-        let patchAspectRatioBool = forcePatch || aspectRatio != currentAspectRatio
-        let patchBorderRadiusBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadius, currentBorderRadius)
-        let patchBorderRadiusTopLeftBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadiusTopLeft, currentBorderRadiusTopLeft)
-        let patchBorderRadiusTopRightBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadiusTopRight, currentBorderRadiusTopRight)
-        let patchBorderRadiusBottomLeftBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadiusBottomLeft, currentBorderRadiusBottomLeft)
-        let patchBorderRadiusBottomRightBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadiusBottomRight, currentBorderRadiusBottomRight)
-        let patchBorderWidthBool = forcePatch || borderWidth != currentBorderWidth
-        let patchBorderColorBool = forcePatch || !CompareHelper.compareStyleColors(borderColor, currentBorderColor)
-        let patchBorderTopWidthBool = forcePatch || borderTopWidth != currentBorderTopWidth
-        let patchBorderTopColorBool = forcePatch || !CompareHelper.compareStyleColors(borderTopColor, currentBorderTopColor)
-        let patchBorderLeftWidthBool = forcePatch || borderLeftWidth != currentBorderLeftWidth
-        let patchBorderLeftColorBool = forcePatch || !CompareHelper.compareStyleColors(borderLeftColor, currentBorderLeftColor)
-        let patchBorderBottomWidthBool = forcePatch || borderBottomWidth != currentBorderBottomWidth
-        let patchBorderBottomColorBool = forcePatch || !CompareHelper.compareStyleColors(borderBottomColor, currentBorderBottomColor)
-        let patchBorderRightWidthBool = forcePatch || borderRightWidth != currentBorderRightWidth
-        let patchBorderRightColorBool = forcePatch || !CompareHelper.compareStyleColors(borderRightColor, currentBorderRightColor)
-        let patchTransformBool = forcePatch || !CompareHelper.compareStyleTransforms(transform, currentTransform)
+        let patchFlexBool = forcePatch || flex != prevFlex
+        let patchFlexDirectionBool = forcePatch || flexDirection != prevFlexDirection
+        let patchJustifyContentBool = forcePatch || justifyContent != prevJustifyContent
+        let patchAlignItemsBool = forcePatch || alignItems != prevAlignItems
+        let patchAlignSelfBool = forcePatch || alignSelf != prevAlignSelf
+        let patchBackgroundColorBool = forcePatch || !CompareHelper.compareStyleColors(backgroundColor, prevBackgroundColor)
+        let patchWidthBool = forcePatch || !CompareHelper.compareStyleSizes(width, prevWidth)
+        let patchHeightBool = forcePatch || !CompareHelper.compareStyleSizes(height, prevHeight)
+        let patchMinWidthBool = forcePatch || !CompareHelper.compareStyleSizes(minWidth, prevMinWidth)
+        let patchMinHeightBool = forcePatch || !CompareHelper.compareStyleSizes(minHeight, prevMinHeight)
+        let patchMaxWidthBool = forcePatch || !CompareHelper.compareStyleSizes(maxWidth, prevMaxWidth)
+        let patchMaxHeightBool = forcePatch || !CompareHelper.compareStyleSizes(maxHeight, prevMaxHeight)
+        let patchPaddingBool = forcePatch || padding != prevPadding
+        let patchPaddingHorizontalBool = forcePatch || paddingHorizontal != prevPaddingHorizontal
+        let patchPaddingVerticalBool = forcePatch || paddingVertical != prevPaddingVertical
+        let patchPaddingTopBool = forcePatch || paddingTop != prevPaddingTop
+        let patchPaddingLeftBool = forcePatch || paddingLeft != prevPaddingLeft
+        let patchPaddingBottomBool = forcePatch || paddingBottom != prevPaddingBottom
+        let patchPaddingRightBool = forcePatch || paddingRight != prevPaddingRight
+        let patchMarginBool = forcePatch || margin != prevMargin
+        let patchMarginHorizontalBool = forcePatch || marginHorizontal != prevMarginHorizontal
+        let patchMarginVerticalBool = forcePatch || marginVertical != prevMarginVertical
+        let patchMarginTopBool = forcePatch || marginTop != prevMarginTop
+        let patchMarginLeftBool = forcePatch || marginLeft != prevMarginLeft
+        let patchMarginBottomBool = forcePatch || marginBottom != prevMarginBottom
+        let patchMarginRightBool = forcePatch || marginRight != prevMarginRight
+        let patchFontSizeBool = forcePatch || fontSize != prevFontSize
+        let patchLineHeightBool = forcePatch || lineHeight != prevLineHeight
+        let patchFontWeightBool = forcePatch || fontWeight != prevFontWeight
+        let patchColorBool = forcePatch || !CompareHelper.compareStyleColors(color, prevColor)
+        let patchTextAlignBool = forcePatch || textAlign != prevTextAlign
+        let patchTextDecorationBool = forcePatch || textDecoration != prevTextDecoration
+        let patchTextTransformBool = forcePatch || textTransform != prevTextTransform
+        let patchTextOverflowBool = forcePatch || textOverflow != prevTextOverflow
+        let patchOverflowWrapBool = forcePatch || overflowWrap != prevOverflowWrap
+        let patchWordBreakBool = forcePatch || wordBreak != prevWordBreak
+        let patchPositionBool = forcePatch || position != prevPosition
+        let patchTopBool = forcePatch || !CompareHelper.compareStyleSizes(top, prevTop)
+        let patchLeftBool = forcePatch || !CompareHelper.compareStyleSizes(left, prevLeft)
+        let patchBottomBool = forcePatch || !CompareHelper.compareStyleSizes(bottom, prevBottom)
+        let patchRightBool = forcePatch || !CompareHelper.compareStyleSizes(right, prevRight)
+        let patchZIndexBool = forcePatch || zIndex != prevZIndex
+        let patchDisplayBool = forcePatch || display != prevDisplay
+        let patchPointerEventsBool = forcePatch || pointerEvents != prevPointerEvents
+        let patchObjectFitBool = forcePatch || objectFit != prevObjectFit
+        let patchOverflowBool = forcePatch || overflow != prevOverflow
+        let patchOpacityBool = forcePatch || opacity != prevOpacity
+        let patchAspectRatioBool = forcePatch || aspectRatio != prevAspectRatio
+        let patchBorderRadiusBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadius, prevBorderRadius)
+        let patchBorderRadiusTopLeftBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadiusTopLeft, prevBorderRadiusTopLeft)
+        let patchBorderRadiusTopRightBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadiusTopRight, prevBorderRadiusTopRight)
+        let patchBorderRadiusBottomLeftBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadiusBottomLeft, prevBorderRadiusBottomLeft)
+        let patchBorderRadiusBottomRightBool = forcePatch || !CompareHelper.compareStyleSizes(borderRadiusBottomRight, prevBorderRadiusBottomRight)
+        let patchBorderWidthBool = forcePatch || borderWidth != prevBorderWidth
+        let patchBorderColorBool = forcePatch || !CompareHelper.compareStyleColors(borderColor, prevBorderColor)
+        let patchBorderTopWidthBool = forcePatch || borderTopWidth != prevBorderTopWidth
+        let patchBorderTopColorBool = forcePatch || !CompareHelper.compareStyleColors(borderTopColor, prevBorderTopColor)
+        let patchBorderLeftWidthBool = forcePatch || borderLeftWidth != prevBorderLeftWidth
+        let patchBorderLeftColorBool = forcePatch || !CompareHelper.compareStyleColors(borderLeftColor, prevBorderLeftColor)
+        let patchBorderBottomWidthBool = forcePatch || borderBottomWidth != prevBorderBottomWidth
+        let patchBorderBottomColorBool = forcePatch || !CompareHelper.compareStyleColors(borderBottomColor, prevBorderBottomColor)
+        let patchBorderRightWidthBool = forcePatch || borderRightWidth != prevBorderRightWidth
+        let patchBorderRightColorBool = forcePatch || !CompareHelper.compareStyleColors(borderRightColor, prevBorderRightColor)
+        let patchTransformBool = forcePatch || !CompareHelper.compareStyleTransforms(transform, prevTransform)
         
         if patchFlexBool {
             patchFlex(flex: flex)

@@ -81,9 +81,9 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
     protected void patchView() {
         String placeholder = attributes.placeholder;
 
-        String currentPlaceholder = currentAttributes != null ? currentAttributes.placeholder : null;
+        String prevPlaceholder = prevAttributes != null ? prevAttributes.placeholder : null;
 
-        boolean patchPlaceholder = forcePatch || !CompareHelper.compareObjects(placeholder, currentPlaceholder);
+        boolean patchPlaceholder = forcePatch || !CompareHelper.compareObjects(placeholder, prevPlaceholder);
 
         if (patchPlaceholder) {
             view.setHint(placeholder != null ? placeholder : "");
@@ -91,9 +91,9 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
         Object placeholderColor = attributes.placeholderColor;
 
-        Object currentPlaceholderColor = currentAttributes != null ? currentAttributes.placeholderColor : null;
+        Object prevPlaceholderColor = prevAttributes != null ? prevAttributes.placeholderColor : null;
 
-        boolean patchPlaceholderColor = forcePatch || !CompareHelper.compareColors(placeholderColor, currentPlaceholderColor);
+        boolean patchPlaceholderColor = forcePatch || !CompareHelper.compareColors(placeholderColor, prevPlaceholderColor);
 
         if (patchPlaceholderColor) {
             Integer tmpColor = ColorHelper.parseColor(placeholderColor);
@@ -111,15 +111,15 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
         String inputType = attributes.inputType;
 
-        String currentInputType = currentAttributes != null ? currentAttributes.inputType : null;
+        String prevInputType = prevAttributes != null ? prevAttributes.inputType : null;
 
-        boolean patchInputType = forcePatch || !CompareHelper.compareObjects(inputType, currentInputType);
+        boolean patchInputType = forcePatch || !CompareHelper.compareObjects(inputType, prevInputType);
 
         String autoCapitalize = attributes.autoCapitalize;
 
-        String currentAutoCapitalize = currentAttributes != null ? currentAttributes.autoCapitalize : null;
+        String prevAutoCapitalize = prevAttributes != null ? prevAttributes.autoCapitalize : null;
 
-        boolean patchAutoCapitalize = forcePatch || !CompareHelper.compareObjects(autoCapitalize, currentAutoCapitalize);
+        boolean patchAutoCapitalize = forcePatch || !CompareHelper.compareObjects(autoCapitalize, prevAutoCapitalize);
 
         if (patchInputType || patchAutoCapitalize) {
             patchInputType(inputType, autoCapitalize);

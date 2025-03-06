@@ -17,12 +17,12 @@ class IconElement: Element {
         let view = view as! TextView
         
         let attributes = attributes as! IconAttributes
-        let currentAttributes = currentAttributes as! IconAttributes?
+        let prevAttributes = prevAttributes as! IconAttributes?
         
         let name = attributes.name
-        let currentName = currentAttributes?.name
+        let prevName = prevAttributes?.name
         
-        let patchNameBool = forcePatch || name != currentName
+        let patchNameBool = forcePatch || name != prevName
         
         if patchNameBool {
             let font = IconHelper.getFont(name: name)

@@ -15,12 +15,12 @@ class ImageElement: Element {
     
     override public func patchView() {
         let attributes = attributes as! ImageAttributes
-        let currentAttributes = currentAttributes as! ImageAttributes?
+        let prevAttributes = prevAttributes as! ImageAttributes?
         
         let url = attributes.url
-        let currentUrl = currentAttributes?.url
+        let prevUrl = prevAttributes?.url
         
-        if forcePatch || url != currentUrl {
+        if forcePatch || url != prevUrl {
             patchUrl(urlString: url)
         }
     }

@@ -17,12 +17,12 @@ class ActivityIndicatorElement: Element {
         let view = view as! UIActivityIndicatorView
         
         let attributes = attributes as! ActivityIndicatorAttributes
-        let currentAttributes = currentAttributes as! ActivityIndicatorAttributes?
+        let prevAttributes = prevAttributes as! ActivityIndicatorAttributes?
         
         let size = attributes.size
-        let currentSize = currentAttributes?.size
+        let prevSize = prevAttributes?.size
         
-        let patchSizeBool = forcePatch || size != currentSize
+        let patchSizeBool = forcePatch || size != prevSize
         
         if patchSizeBool {
             switch size {

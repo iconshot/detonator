@@ -8,7 +8,7 @@ import com.iconshot.detonator.module.fullscreen.FullScreenModule;
 
 public class Target {
     private final ViewGroup view;
-    private int index;
+    public int index;
 
     public Target(ViewGroup view, int index) {
         this.view = view;
