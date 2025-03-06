@@ -29,7 +29,11 @@ async function replacePackageJson() {
 
   const json = await fse.readJson(filePath);
 
-  json.dependencies.detonator = package.version;
+  const detonatorVersion = package.version;
+  const untrueVersion = package.peerDependencies.untrue.replace("^", "");
+
+  json.dependencies.detonator = detonatorVersion;
+  json.dependencies.untrue = untrueVersion;
 
   await fse.writeJson(filePath, json, { spaces: 2 });
 }
