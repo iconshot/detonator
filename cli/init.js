@@ -40,7 +40,7 @@ async function init(appName, appId) {
     await replacePath(iosPath, iosReplaceObject);
 
     const androidRenameObject = {
-      "com/example/helloworldapp": appId.replace(".", "/"),
+      "com/example/helloworldapp": appId.replaceAll(".", "/"),
     };
 
     const iosRenameObject = {
@@ -50,6 +50,13 @@ async function init(appName, appId) {
 
     await renamePath(androidPath, androidRenameObject);
     await renamePath(iosPath, iosRenameObject);
+
+    await removeDirIfEmpty(androidPath, "app/src/main/java/com/example");
+    await removeDirIfEmpty(androidPath, "app/src/main/java/com");
+    await removeDirIfEmpty(androidPath, "app/src/test/java/com/example");
+    await removeDirIfEmpty(androidPath, "app/src/test/java/com");
+    await removeDirIfEmpty(androidPath, "app/src/androidTest/java/com/example");
+    await removeDirIfEmpty(androidPath, "app/src/androidTest/java/com");
   }
 
   {
@@ -118,6 +125,10 @@ async function renamePath(targetPath, object) {
   }
 
   if (targetPath !== finalTargetPath) {
+    const dir = path.dirname(finalTargetPath);
+
+    await fsp.mkdir(dir, { recursive: true });
+
     await fsp.rename(targetPath, finalTargetPath);
   }
 
@@ -131,6 +142,16 @@ async function renamePath(targetPath, object) {
     });
 
     await Promise.all(promises);
+  }
+}
+
+async function removeDirIfEmpty(targetPath, subDir) {
+  const dir = path.join(targetPath, subDir);
+
+  const files = await fsp.readdir(dir);
+
+  if (files.length === 0) {
+    await fsp.rmdir(dir);
   }
 }
 
