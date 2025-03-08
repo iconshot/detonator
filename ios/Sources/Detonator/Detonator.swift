@@ -414,11 +414,46 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         DispatchQueue.main.async(execute: workItem!)
     }
     
+    private func renderChildren(edge: inout Edge, prevEdge: Edge?, target: Target) {
+        let children = edge.children;
+        
+        let prevChildren = prevEdge?.children ?? []
+                
+        for prevChild in prevChildren {
+            var child: Edge?
+            
+            for tmpChild in children {
+                if prevChild.id == tmpChild.id {
+                    child = tmpChild
+                    
+                    break
+                }
+            }
+            
+            if child == nil {
+                unmountEdge(edge: prevChild, target: target)
+            }
+        }
+        
+        for var child in children {
+            var prevChild: Edge?
+            
+            for tmpChild in prevChildren {
+                if child.id == tmpChild.id {
+                    prevChild = tmpChild
+                    
+                    break
+                }
+            }
+            
+            renderEdge(edge: &child, prevEdge: prevChild, target: target)
+        }
+    }
+    
     private func renderEdge(edge: inout Edge, prevEdge: Edge?, target: Target) {
         edges[edge.id] = edge
         
         if edge.skipped {
-            
             target.index += prevEdge!.targetViewsCount
             
             edge.targetViewsCount = prevEdge!.targetViewsCount
@@ -468,42 +503,6 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         edge.targetViewsCount = targetViewsCount
     }
     
-    private func renderChildren(edge: inout Edge, prevEdge: Edge?, target: Target) {
-        let children = edge.children;
-        
-        let prevChildren = prevEdge?.children ?? []
-                
-        for prevChild in prevChildren {
-            var child: Edge?
-            
-            for tmpChild in children {
-                if prevChild.id == tmpChild.id {
-                    child = tmpChild
-                    
-                    break
-                }
-            }
-                        
-            if child == nil {
-                unmountEdge(edge: prevChild, target: target)
-            }
-        }
-        
-        for var child in children {
-            var prevChild: Edge?
-            
-            for tmpChild in prevChildren {
-                if child.id == tmpChild.id {
-                    prevChild = tmpChild
-                    
-                    break
-                }
-            }
-            
-            renderEdge(edge: &child, prevEdge: prevChild, target: target)
-        }
-    }
-    
     private func unmountEdge(edge: Edge, target: Target?) {
         edges[edge.id] = nil
         
@@ -536,64 +535,6 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         }
         
         return elementClass.init(self)
-    }
-    
-    private func findTargetView(edge: Edge) -> ViewLayout? {
-        let parent = edge.parent != nil ? edges[edge.parent!] : nil
-        
-        if parent == nil {
-            return nil
-        }
-        
-        if parent!.element != nil {
-            return parent!.element!.view! as? ViewLayout
-        }
-        
-        return findTargetView(edge: parent!)
-    }
-    
-    private func findTargetIndex(edge: Edge, targetView: ViewLayout) -> Int {
-        let parent = edge.parent != nil ? edges[edge.parent!] : nil
-        
-        guard let parent = parent else {
-            return 0
-        }
-        
-        let index = parent.children.firstIndex(where: { $0.id == edge.id })
-        
-        for i in stride(from: index! - 1, through: 0, by: -1) {
-            let child = parent.children[i]
-            
-            let j = findViewIndex(edge: child, targetView: targetView)
-            
-            if j != nil {
-                return j! + 1
-            }
-        }
-        
-        if parent.element != nil && parent.element!.view == targetView {
-            return 0
-        }
-        
-        return findTargetIndex(edge: parent, targetView: targetView)
-    }
-    
-    private func findViewIndex(edge: Edge, targetView: ViewLayout) -> Int? {
-        if edge.element != nil {
-            return targetView.subviews.firstIndex(of: edge.element!.view!)
-        }
-        
-        for i in stride(from: edge.children.count - 1, through: 0, by: -1) {
-            let child = edge.children[i]
-            
-            let index = findViewIndex(edge: child, targetView: targetView)
-            
-            if index != nil {
-                return index
-            }
-        }
-        
-        return nil
     }
     
     private func createTarget(edge: Edge, tree: Tree) -> Target {

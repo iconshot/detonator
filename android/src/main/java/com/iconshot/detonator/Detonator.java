@@ -445,6 +445,42 @@ public class Detonator {
         }
     }
 
+    private void renderChildren(Edge edge, Edge prevEdge, Target target) {
+        List<Edge> children = edge.children;
+
+        List<Edge> prevChildren = prevEdge != null ? prevEdge.children : new ArrayList<>();
+
+        for (Edge prevChild: prevChildren) {
+            Edge child = null;
+
+            for (Edge tmpChild : children) {
+                if (prevChild.id == tmpChild.id) {
+                    child = tmpChild;
+
+                    break;
+                }
+            }
+
+            if (child == null) {
+                unmountEdge(prevChild, target);
+            }
+        }
+
+        for (Edge child : children) {
+            Edge prevChild = null;
+
+            for (Edge tmpChild : prevChildren) {
+                if (child.id == tmpChild.id) {
+                    prevChild = tmpChild;
+
+                    break;
+                }
+            }
+
+            renderEdge(child, prevChild, target);
+        }
+    }
+
     private void renderEdge(Edge edge, Edge prevEdge, Target target) {
         edges.put(edge.id, edge);
 
@@ -498,42 +534,6 @@ public class Detonator {
         edge.targetViewsCount = targetViewsCount;
     }
 
-    private void renderChildren(Edge edge, Edge prevEdge, Target target) {
-        List<Edge> children = edge.children;
-
-        List<Edge> prevChildren = prevEdge != null ? prevEdge.children : new ArrayList<>();
-
-        for (Edge prevChild: prevChildren) {
-            Edge child = null;
-
-            for (Edge tmpChild : children) {
-                if (prevChild.id == tmpChild.id) {
-                    child = tmpChild;
-
-                    break;
-                }
-            }
-
-            if (child == null) {
-                unmountEdge(prevChild, target);
-            }
-        }
-
-        for (Edge child : children) {
-            Edge prevChild = null;
-
-            for (Edge tmpChild : prevChildren) {
-                if (child.id == tmpChild.id) {
-                    prevChild = tmpChild;
-
-                    break;
-                }
-            }
-
-            renderEdge(child, prevChild, target);
-        }
-    }
-
     private void unmountEdge(Edge edge, Target target) {
         edges.remove(edge.id);
 
@@ -578,64 +578,6 @@ public class Detonator {
         }
     }
 
-    private ViewLayout findTargetView(Edge edge) {
-        Edge parent = edge.parent != null ? edges.get(edge.parent) : null;
-
-        if (parent == null) {
-            return null;
-        }
-
-        if (parent.element != null) {
-            return (ViewLayout) parent.element.view;
-        }
-
-        return findTargetView(parent);
-    }
-
-    private int findTargetIndex(Edge edge, ViewLayout targetView) {
-        Edge parent = edge.parent != null ? edges.get(edge.parent) : null;
-
-        if (parent == null) {
-            return 0;
-        }
-
-        int index = parent.children.indexOf(edge);
-
-        for (int i = index - 1; i >= 0; i--) {
-            Edge child = parent.children.get(i);
-
-            Integer j = findViewIndex(child, targetView);
-
-            if (j != null) {
-                return j + 1;
-            }
-        }
-
-        if (parent.element != null && parent.element.view == targetView) {
-            return 0;
-        }
-
-        return findTargetIndex(parent, targetView);
-    }
-
-    private Integer findViewIndex(Edge edge, ViewLayout targetView) {
-        if (edge.element != null) {
-            return targetView.indexOfChild(edge.element.view);
-        }
-
-        for (int i = edge.children.size() - 1; i >= 0; i--) {
-            Edge child = edge.children.get(i);
-
-            Integer index = findViewIndex(child, targetView);
-
-            if (index != null) {
-                return index;
-            }
-        }
-
-        return null;
-    }
-
     private Target createTarget(Edge edge, Tree tree) {
         return createTarget(edge, tree, 0);
     }
@@ -674,6 +616,7 @@ public class Detonator {
         if (element != null) {
             return;
         }
+
         parent.targetViewsCount += difference;
 
         propagateTargetViewsCountDifference(parent, difference);
