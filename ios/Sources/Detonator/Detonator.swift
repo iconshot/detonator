@@ -446,6 +446,12 @@ public class Detonator: NSObject, WKScriptMessageHandler {
                 }
             }
             
+            if child.moved {
+                let tmpTarget = Target(view: target.view, index: target.index)
+                
+                moveEdge(edge: prevChild!, target: tmpTarget)
+            }
+            
             renderEdge(edge: &child, prevEdge: prevChild, target: target)
         }
     }
@@ -581,6 +587,18 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         parent.targetViewsCount += difference
         
         propagateTargetViewsCountDifference(edge: parent, difference: difference)
+    }
+    
+    private func moveEdge(edge: Edge, target: Target) -> Void {
+        if edge.element != nil {
+            target.insert(child: edge.element!.view)
+            
+            return
+        }
+        
+        for child in edge.children {
+            moveEdge(edge: child, target: target)
+        }
     }
     
     struct Message: Decodable {

@@ -12,6 +12,7 @@ public class Edge {
     public List<Edge> children;
     public String text;
     public boolean skipped;
+    public boolean moved;
 
     public Element element;
 
@@ -33,6 +34,7 @@ public class Edge {
         children = edge.children;
         text = edge.text;
         skipped = edge.skipped;
+        moved = edge.moved;
         element = edge.element;
         targetViewsCount = edge.targetViewsCount;
     }

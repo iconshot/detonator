@@ -8,12 +8,24 @@ public class Edge: Decodable {
     var children: [Edge]
     var text: String?
     var skipped: Bool
+    var moved: Bool
     
     var element: Element?
     
     var targetViewsCount: Int = 0
     
-    init(id: Int, parent: Int?, contentType: String?, attributes: String?, children: [Edge], text: String?, skipped: Bool, element: Element?, targetViewsCount: Int) {
+    init(
+        id: Int,
+        parent: Int?,
+        contentType: String?,
+        attributes: String?,
+        children: [Edge],
+        text: String?,
+        skipped: Bool,
+        moved: Bool,
+        element: Element?,
+        targetViewsCount: Int
+    ) {
         self.id = id
         self.parent = parent
         self.contentType = contentType
@@ -21,6 +33,7 @@ public class Edge: Decodable {
         self.children = children
         self.text = text
         self.skipped = skipped
+        self.moved = moved
         self.element = element
         self.targetViewsCount = targetViewsCount
     }
@@ -34,6 +47,7 @@ public class Edge: Decodable {
             children: children,
             text: text,
             skipped: skipped,
+            moved: moved,
             element: element,
             targetViewsCount: targetViewsCount
         )
@@ -47,6 +61,7 @@ public class Edge: Decodable {
         children = edge.children
         text = edge.text
         skipped = edge.skipped
+        moved = edge.moved
         element = edge.element
         targetViewsCount = edge.targetViewsCount
     }
@@ -59,5 +74,6 @@ public class Edge: Decodable {
         case children
         case text
         case skipped
+        case moved
     }
 }

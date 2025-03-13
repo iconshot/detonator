@@ -477,6 +477,12 @@ public class Detonator {
                 }
             }
 
+            if (child.moved) {
+                Target tmpTarget = new Target(target.view, target.index);
+
+                moveEdge(prevChild, tmpTarget);
+            }
+
             renderEdge(child, prevChild, target);
         }
     }
@@ -620,6 +626,18 @@ public class Detonator {
         parent.targetViewsCount += difference;
 
         propagateTargetViewsCountDifference(parent, difference);
+    }
+
+    private void moveEdge(Edge edge, Target target) {
+        if (edge.element != null) {
+            target.insert(edge.element.view);
+
+            return;
+        }
+
+        for (Edge child: edge.children) {
+            moveEdge(child, target);
+        }
     }
 
     private static class Message {

@@ -26,6 +26,7 @@ interface SanitizedEdge {
   children: SanitizedEdge[];
   text: string | null;
   skipped: boolean;
+  moved: boolean;
 }
 
 export class Tree {
@@ -40,6 +41,7 @@ export class Tree {
   private deinitialized: boolean = false;
 
   private skippedIds: number[] = [];
+  private movedIds: number[] = [];
 
   constructor(private treeId: number, elementEdge: Edge | null) {
     this.element = elementEdge?.element! ?? document.createElement("root");
@@ -191,6 +193,8 @@ export class Tree {
         const tmpTarget = new Target(target.element, target.index);
 
         this.moveEdge(child, tmpTarget);
+
+        this.movedIds.push(child.id);
       }
 
       this.renderEdge(child, prevChild, target);
@@ -589,6 +593,7 @@ export class Tree {
     Messenger.rerender({ treeId: this.treeId, edges: sanitizedEdges });
 
     this.skippedIds = [];
+    this.movedIds = [];
   }
 
   private createTarget(edge: Edge, targetIndex: number = 0): Target {
@@ -667,6 +672,7 @@ export class Tree {
     sanitizedEdge = sanitizedEdge!;
 
     const skipped = this.skippedIds.includes(edgeId);
+    const moved = this.movedIds.includes(edgeId);
 
     if (skipped) {
       sanitizedEdge.skipped = true;
@@ -675,6 +681,8 @@ export class Tree {
         this.sanitizeEdge(child, sanitizedEdge);
       }
     }
+
+    sanitizedEdge.moved = moved;
 
     if (sanitizedParent !== null) {
       sanitizedParent.children.push(sanitizedEdge);
@@ -773,6 +781,7 @@ export class Tree {
       children,
       text,
       skipped: false,
+      moved: false,
     };
   }
 }
