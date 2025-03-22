@@ -39,19 +39,16 @@ function App() {
         backgroundColor: "black",
         justifyContent: "center",
         alignItems: "center",
+        gap: 30,
       },
     },
     [
-      $(
-        Text,
-        { style: { color: "white", fontSize: 30, marginBottom: 30 } },
-        "Hello, world."
-      ),
+      $(Text, { style: { color: "white", fontSize: 30 } }, "Hello, world."),
       $(
         Text,
         {
           ref: textRef,
-          style: { color: "white", fontSize: 24, marginBottom: 30 },
+          style: { color: "white", fontSize: 24 },
         },
         counter
       ),

@@ -59,13 +59,14 @@ public struct StyleTransform: Decodable {
 }
 
 public struct Style: Decodable {
-    // layout
+    // flex
     
     var flex: Int?
     var flexDirection: String?
     var justifyContent: String?
     var alignItems: String?
     var alignSelf: String?
+    var gap: Float?
     
     // bg
     
@@ -167,6 +168,8 @@ public struct Style: Decodable {
         flexDirection = try container.decodeIfPresent(String.self, forKey: .flexDirection)
         justifyContent = try container.decodeIfPresent(String.self, forKey: .justifyContent)
         alignItems = try container.decodeIfPresent(String.self, forKey: .alignItems)
+        alignSelf = try container.decodeIfPresent(String.self, forKey: .alignSelf)
+        gap = try container.decodeIfPresent(Float.self, forKey: .gap)
         backgroundColor = try container.decodeIfPresent(StyleColor.self, forKey: .backgroundColor)
         width = try container.decodeIfPresent(StyleSize.self, forKey: .width)
         height = try container.decodeIfPresent(StyleSize.self, forKey: .height)
@@ -233,6 +236,8 @@ public struct Style: Decodable {
         case flexDirection
         case justifyContent
         case alignItems
+        case alignSelf
+        case gap
         case backgroundColor
         case width
         case height

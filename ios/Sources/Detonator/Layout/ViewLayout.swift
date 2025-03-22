@@ -10,6 +10,8 @@ class ViewLayout: UIView {
     public var justifyContent: LayoutParams.JustifyContent = .flexStart
     public var alignItems: LayoutParams.AlignItems = .flexStart
     
+    public var gap: Float = 0
+    
     public var onSafeAreaInsetsChange: (() -> Void)?
     
     override init(frame: CGRect) {
@@ -108,6 +110,8 @@ class ViewLayout: UIView {
         var flexCount: Int = 0
         var totalFlex: Int = 0
         
+        var relativeChildCount: Int = 0
+        
         // relative non-flex non-expandable
         
         for child in subviews {
@@ -123,6 +127,8 @@ class ViewLayout: UIView {
             if isAbsolute {
                 continue
             }
+            
+            relativeChildCount += 1
             
             let marginTop = layoutParams.margin.top
             let marginLeft = layoutParams.margin.left
@@ -305,6 +311,10 @@ class ViewLayout: UIView {
             
             availableSize -= isHorizontal() ? childWidth : childHeight
         }
+        
+        let totalGap = gap * Float(relativeChildCount - 1)
+        
+        availableSize -= totalGap
         
         // relative expandable
         
@@ -713,11 +723,17 @@ class ViewLayout: UIView {
             }
         }
         
-        contentWidth += paddingX
-        contentHeight += paddingY
+        if isHorizontal() {
+            contentWidth += totalGap
+        } else {
+            contentHeight += totalGap
+        }
         
-        let resolvedWidth = resolveSize(size: CGFloat(contentWidth), specSize: specWidth, specSizeMode: specWidthMode)
-        let resolvedHeight = resolveSize(size: CGFloat(contentHeight), specSize: specHeight, specSizeMode: specHeightMode)
+        let paddedContentWidth = contentWidth + paddingX
+        let paddedContentHeight = contentHeight + paddingY
+        
+        let resolvedWidth = resolveSize(size: CGFloat(paddedContentWidth), specSize: specWidth, specSizeMode: specWidthMode)
+        let resolvedHeight = resolveSize(size: CGFloat(paddedContentHeight), specSize: specHeight, specSizeMode: specHeightMode)
         
         frame.size.width = resolvedWidth
         frame.size.height = resolvedHeight
@@ -971,7 +987,7 @@ class ViewLayout: UIView {
         var top: Float = 0
         var left: Float = 0
         
-        var relativeChildCount = 0
+        var relativeChildCount: Int = 0
         
         for child in subviews {
             let layoutParams = child.layoutParams
@@ -1012,6 +1028,14 @@ class ViewLayout: UIView {
                 
                 contentHeight += outerHeight
             }
+        }
+        
+        let totalGap = gap * Float(relativeChildCount - 1)
+        
+        if isHorizontal() {
+            contentWidth += totalGap
+        } else {
+            contentHeight += totalGap
         }
         
         var spaceDistribution: Float = 0
@@ -1268,9 +1292,9 @@ class ViewLayout: UIView {
             layoutChild(view: child, x: x, y: y)
             
             if isHorizontal() {
-                left += outerWidth + spaceDistribution
+                left += outerWidth + gap + spaceDistribution
             } else {
-                top += outerHeight + spaceDistribution
+                top += outerHeight + gap + spaceDistribution
             }
         }
         

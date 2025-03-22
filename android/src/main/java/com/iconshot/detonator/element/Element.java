@@ -99,6 +99,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         String justifyContent = styler.getJustifyContent();
         String alignItems = styler.getAlignItems();
         String alignSelf = styler.getAlignSelf();
+        Float gap = styler.getGap();
         Object backgroundColor = styler.getBackgroundColor();
         Object width = styler.getWidth();
         Object height = styler.getHeight();
@@ -164,6 +165,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         String prevJustifyContent = prevStyler.getJustifyContent();
         String prevAlignItems = prevStyler.getAlignItems();
         String prevAlignSelf = prevStyler.getAlignSelf();
+        Float prevGap = prevStyler.getGap();
         Object prevBackgroundColor = prevStyler.getBackgroundColor();
         Object prevWidth = prevStyler.getWidth();
         Object prevHeight = prevStyler.getHeight();
@@ -229,6 +231,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         boolean patchJustifyContent = forcePatch || !CompareHelper.compareObjects(justifyContent, prevJustifyContent);
         boolean patchAlignItems = forcePatch || !CompareHelper.compareObjects(alignItems, prevAlignItems);
         boolean patchAlignSelf = forcePatch || !CompareHelper.compareObjects(alignSelf, prevAlignSelf);
+        boolean patchGap = forcePatch || !CompareHelper.compareObjects(gap, prevGap);
         boolean patchBackgroundColor = forcePatch || !CompareHelper.compareColors(backgroundColor, prevBackgroundColor);
         boolean patchWidth = forcePatch || !CompareHelper.compareObjects(width, prevWidth);
         boolean patchHeight = forcePatch || !CompareHelper.compareObjects(height, prevHeight);
@@ -297,6 +300,10 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (patchAlignSelf) {
             patchAlignSelf(alignSelf);
+        }
+
+        if (patchGap) {
+            patchGap(gap);
         }
 
         if (
@@ -531,6 +538,9 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         }
 
         layoutParams.alignSelf = tmpAlignSelf;
+    }
+
+    protected void patchGap(Float gap) {
     }
 
     protected void patchBackgroundColor(
@@ -1109,6 +1119,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         String justifyContent = styler.getJustifyContent();
         String alignItems = styler.getAlignItems();
         String alignSelf = styler.getAlignSelf();
+        Float gap = styler.getGap();
         Object backgroundColor = styler.getBackgroundColor();
         Object width = styler.getWidth();
         Object height = styler.getHeight();
@@ -1174,6 +1185,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         boolean patchJustifyContent = keys.contains("justifyContent");
         boolean patchAlignItems = keys.contains("alignItems");
         boolean patchAlignSelf = keys.contains("alignSelf");
+        boolean patchGap = keys.contains("gap");
         boolean patchBackgroundColor = keys.contains("backgroundColor");
         boolean patchWidth = keys.contains("width");
         boolean patchHeight = keys.contains("height");
@@ -1252,6 +1264,10 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (patchAlignSelf) {
             patchAlignSelf(alignSelf);
+        }
+
+        if (patchGap) {
+            patchGap(gap);
         }
 
         if (

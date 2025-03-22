@@ -1,10 +1,10 @@
 import { Emitter } from "untrue";
 
-import { Messenger } from "./Messenger";
+import { Detonator } from "./Detonator";
 
 export class ErrorHandler {
   static handle(error: any): void {
-    Messenger.log(`[ErrorHandler] ${error.message}`);
+    Detonator.log(`[ErrorHandler] ${error.message}`);
   }
 }
 

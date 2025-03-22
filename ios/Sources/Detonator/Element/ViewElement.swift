@@ -148,5 +148,11 @@ class ViewElement: Element {
         }
     }
     
+    override func patchGap(gap: Float?) {
+        let view = view as! ViewLayout
+        
+        view.gap = gap ?? 0
+    }
+    
     class ViewAttributes: Attributes {}
 }

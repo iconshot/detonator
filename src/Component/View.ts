@@ -32,6 +32,7 @@ export interface Style {
     | null;
   alignItems?: "flex-start" | "flex-end" | "start" | "end" | "center" | null;
   alignSelf?: "flex-start" | "flex-end" | "start" | "end" | "center" | null;
+  gap?: number | null;
 
   backgroundColor?: StyleColor | null;
 

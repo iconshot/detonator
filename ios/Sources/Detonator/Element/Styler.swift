@@ -25,6 +25,10 @@ class Styler {
         return style?.alignSelf
     }
     
+    public func getGap() -> Float? {
+        return style?.gap
+    }
+    
     public func getBackgroundColor() -> StyleColor? {
         return style?.backgroundColor
     }

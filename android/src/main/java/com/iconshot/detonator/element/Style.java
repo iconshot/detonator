@@ -8,6 +8,7 @@ public class Style {
     public String justifyContent;
     public String alignItems;
     public String alignSelf;
+    public Float gap;
 
     // bg
 

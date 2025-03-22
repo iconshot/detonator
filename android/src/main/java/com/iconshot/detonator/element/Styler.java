@@ -29,6 +29,10 @@ public class Styler {
         return style != null ? style.alignSelf : null;
     }
 
+    public Float getGap() {
+        return style != null ? style.gap : null;
+    }
+
     public Object getBackgroundColor() {
         return style != null ? style.backgroundColor : null;
     }

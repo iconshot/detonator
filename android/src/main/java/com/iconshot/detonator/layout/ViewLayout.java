@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.RectF;
+import android.icu.util.Measure;
 import android.view.View;
 import android.view.ViewGroup;
 import android.util.AttributeSet;
@@ -28,6 +29,8 @@ public class ViewLayout extends ViewGroup {
 
     private int justifyContent = LayoutParams.JUSTIFY_CONTENT_FLEX_START;
     private int alignItems = LayoutParams.ALIGN_ITEMS_FLEX_START;
+
+    private int gap;
 
     private float[] radii;
 
@@ -120,6 +123,16 @@ public class ViewLayout extends ViewGroup {
         requestLayout();
     }
 
+    public void setGap(int gap) {
+        if (this.gap == gap) {
+            return;
+        }
+
+        this.gap = gap;
+
+        requestLayout();
+    }
+
     public void setRadii(float[] radii) {
         this.radii = radii;
 
@@ -191,6 +204,8 @@ public class ViewLayout extends ViewGroup {
         int flexCount = 0;
         int totalFlex = 0;
 
+        int relativeChildCount = 0;
+
         // measure relative non-flex non-expandable items and gather totalFlex
 
         for (int i = 0; i < getChildCount(); i++) {
@@ -208,6 +223,8 @@ public class ViewLayout extends ViewGroup {
             if (isAbsolute) {
                 continue;
             }
+
+            relativeChildCount++;
 
             int marginTop = layoutParams.topMargin;
             int marginLeft = layoutParams.leftMargin;
@@ -403,7 +420,11 @@ public class ViewLayout extends ViewGroup {
             availableSize -= isHorizontal() ? childWidth : childHeight;
         }
 
-        // measure relative expandable items
+        int totalGap = gap * (relativeChildCount - 1);
+
+        availableSize -= totalGap;
+
+        // measure expandable items
 
         for (int i = 0; i < getChildCount(); i++) {
             View child = getChildAt(i);
@@ -844,11 +865,17 @@ public class ViewLayout extends ViewGroup {
             }
         }
 
-        contentWidth += paddingX;
-        contentHeight += paddingY;
+        if (isHorizontal()) {
+            contentWidth += totalGap;
+        } else {
+            contentHeight += totalGap;
+        }
 
-        int resolvedWidth = resolveSizeAndState(contentWidth, widthSpec, 0);
-        int resolvedHeight = resolveSizeAndState(contentHeight, heightSpec, 0);
+        int paddedContentWidth = contentWidth + paddingX;
+        int paddedContentHeight = contentHeight + paddingY;
+
+        int resolvedWidth = resolveSizeAndState(paddedContentWidth, widthSpec, 0);
+        int resolvedHeight = resolveSizeAndState(paddedContentHeight, heightSpec, 0);
 
         setMeasuredDimension(resolvedWidth, resolvedHeight);
 
@@ -1176,6 +1203,14 @@ public class ViewLayout extends ViewGroup {
             }
         }
 
+        int totalGap = gap * (relativeChildCount - 1);
+
+        if (isHorizontal()) {
+            contentWidth += totalGap;
+        } else {
+            contentHeight += totalGap;
+        }
+
         int spaceDistribution = 0;
         int spaceRemainder = 0;
 
@@ -1483,9 +1518,9 @@ public class ViewLayout extends ViewGroup {
             layoutChild(child, x, y, x + childWidth, y + childHeight);
 
             if (isHorizontal()) {
-                left += outerWidth + spaceDistribution;
+                left += outerWidth + gap + spaceDistribution;
             } else {
-                top += outerHeight + spaceDistribution;
+                top += outerHeight + gap + spaceDistribution;
             }
 
             if (spaceRemainder > 0) {

@@ -84,6 +84,7 @@ open class Element: NSObject {
         let justifyContent = styler.getJustifyContent()
         let alignItems = styler.getAlignItems()
         let alignSelf = styler.getAlignSelf()
+        let gap = styler.getGap()
         let backgroundColor = styler.getBackgroundColor()
         let width = styler.getWidth()
         let height = styler.getHeight()
@@ -149,6 +150,7 @@ open class Element: NSObject {
         let prevJustifyContent = prevStyler.getJustifyContent()
         let prevAlignItems = prevStyler.getAlignItems()
         let prevAlignSelf = prevStyler.getAlignSelf()
+        let prevGap = prevStyler.getGap()
         let prevBackgroundColor = prevStyler.getBackgroundColor()
         let prevWidth = prevStyler.getWidth()
         let prevHeight = prevStyler.getHeight()
@@ -214,6 +216,7 @@ open class Element: NSObject {
         let patchJustifyContentBool = forcePatch || justifyContent != prevJustifyContent
         let patchAlignItemsBool = forcePatch || alignItems != prevAlignItems
         let patchAlignSelfBool = forcePatch || alignSelf != prevAlignSelf
+        let patchGapBool = forcePatch || gap != prevGap
         let patchBackgroundColorBool = forcePatch || !CompareHelper.compareStyleColors(backgroundColor, prevBackgroundColor)
         let patchWidthBool = forcePatch || !CompareHelper.compareStyleSizes(width, prevWidth)
         let patchHeightBool = forcePatch || !CompareHelper.compareStyleSizes(height, prevHeight)
@@ -292,6 +295,10 @@ open class Element: NSObject {
 
         if patchAlignSelfBool {
             patchAlignSelf(alignSelf: alignSelf)
+        }
+        
+        if patchGapBool {
+            patchGap(gap: gap)
         }
 
         if patchBackgroundColorBool {
@@ -557,6 +564,9 @@ open class Element: NSObject {
             
             break
         }
+    }
+    
+    open func patchGap(gap: Float?) {
     }
 
     open func patchBackgroundColor(backgroundColor: StyleColor?) {
