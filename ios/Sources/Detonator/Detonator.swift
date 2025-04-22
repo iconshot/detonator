@@ -260,7 +260,7 @@ public class Detonator: NSObject, WKScriptMessageHandler {
                 if (data.elementId != nil) {
                     let elementEdge = edges[data.elementId!]
                     
-                    view = elementEdge!.element!.view! as! ViewLayout
+                    view = elementEdge!.element!.view as! ViewLayout
                 } else {
                     view = rootView
                 }
@@ -459,18 +459,6 @@ public class Detonator: NSObject, WKScriptMessageHandler {
     private func renderEdge(edge: inout Edge, prevEdge: Edge?, target: Target) {
         edges[edge.id] = edge
         
-        if edge.skipped {
-            target.index += prevEdge!.targetViewsCount
-            
-            edge.targetViewsCount = prevEdge!.targetViewsCount
-            
-            edge.children = prevEdge!.children
-            
-            return
-        }
-        
-        let initialTargetIndex = target.index
-        
         var element = prevEdge?.element
         
         if element == nil {
@@ -485,23 +473,40 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         
         if element != nil {
             element!.edge = edge
-            element!.prevEdge = prevEdge
         }
         
-        var tmpTarget: Target = target
-        
-        if element != nil {
-            element!.patch()
+        if edge.skipped {
+            target.index += prevEdge!.targetViewsCount
             
-            if element!.view!.isViewGroup {
-                tmpTarget = Target(view: element!.view!, index: 0)
-            }
+            edge.parent = prevEdge!.parent
+            
+            edge.contentType = prevEdge!.contentType
+            
+            edge.attributes = prevEdge!.attributes
+            
+            edge.children = prevEdge!.children
+            
+            edge.text = prevEdge!.text
+            
+            edge.targetViewsCount = prevEdge!.targetViewsCount
+            
+            return
+        }
+        
+        let initialTargetIndex = target.index
+        
+        var tmpTarget = target
+        
+        if element != nil && element!.view.isViewGroup {
+            tmpTarget = Target(view: element!.view, index: 0)
         }
         
         renderChildren(edge: &edge, prevEdge: prevEdge, target: tmpTarget)
         
         if element != nil {
-            target.insert(child: element!.view!)
+            element!.patch()
+            
+            target.insert(child: element!.view)
         }
         
         let targetViewsCount = target.index - initialTargetIndex
@@ -514,20 +519,20 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         
         var tmpTarget = target
         
-        if edge.element != nil {
-            edge.element!.remove()
-            
-            if target != nil {
-                tmpTarget = nil
-            }
+        if edge.element != nil && target != nil {
+            tmpTarget = nil
         }
         
         for child in edge.children {
             unmountEdge(edge: child, target: tmpTarget)
         }
         
-        if edge.element != nil && target != nil {
-            target!.remove(child: edge.element!.view!)
+        if edge.element != nil {
+            edge.element!.remove()
+            
+            if target != nil {
+                target!.remove(child: edge.element!.view)
+            }
         }
     }
     

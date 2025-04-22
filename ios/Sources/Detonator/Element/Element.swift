@@ -18,7 +18,6 @@ open class Element: NSObject {
     public let detonator: Detonator
     
     public var edge: Edge!
-    public var prevEdge: Edge?
     
     public var view: UIView!
     
@@ -70,14 +69,15 @@ open class Element: NSObject {
     }
     
     public func patch() {
+        prevAttributes = attributes
+        
         attributes = decodeAttributes(edge: edge)
+                
+        let style = attributes.style
+        let prevStyle = prevAttributes?.style
         
-        prevAttributes = prevEdge != nil ? decodeAttributes(edge: prevEdge!) : nil
-        
-        forcePatch = prevAttributes == nil
-        
-        styler = Styler(style: attributes.style)
-        prevStyler = Styler(style: prevAttributes?.style)
+        styler = Styler(style: style)
+        prevStyler = Styler(style: prevStyle)
         
         let flex = styler.getFlex()
         let flexDirection = styler.getFlexDirection()
@@ -304,7 +304,7 @@ open class Element: NSObject {
         if patchBackgroundColorBool {
             patchBackgroundColor(backgroundColor: backgroundColor)
         }
-
+        
         if patchWidthBool {
             patchWidth(width: width)
         }
@@ -513,6 +513,8 @@ open class Element: NSObject {
         }
         
         patchView()
+        
+        forcePatch = false
     }
     
     open func patchFlex(flex: Int?) {
@@ -1367,7 +1369,7 @@ open class Element: NSObject {
         let patchBorderRightWidthBool = keys.contains("borderRightWidth")
         let patchBorderRightColorBool = keys.contains("borderRightColor")
         let patchTransformBool = keys.contains("transform")
-
+        
         if patchFlexBool {
             patchFlex(flex: flex)
         }

@@ -490,18 +490,6 @@ public class Detonator {
     private void renderEdge(Edge edge, Edge prevEdge, Target target) {
         edges.put(edge.id, edge);
 
-        if (edge.skipped) {
-            target.index += prevEdge.targetViewsCount;
-
-            edge.targetViewsCount = prevEdge.targetViewsCount;
-
-            edge.children = prevEdge.children;
-
-            return;
-        }
-
-        int initialTargetIndex = target.index;
-
         Element element = prevEdge != null ? prevEdge.element : null;
 
         if (element == null) {
@@ -516,22 +504,51 @@ public class Detonator {
 
         if (element != null) {
             element.edge = edge;
-            element.prevEdge = prevEdge;
         }
+
+        if (edge.skipped) {
+            target.index += prevEdge.targetViewsCount;
+
+            edge.parent = prevEdge.parent;
+
+            edge.contentType = prevEdge.contentType;
+
+            edge.attributes = prevEdge.attributes;
+
+            edge.children = prevEdge.children;
+
+            edge.text = prevEdge.text;
+
+            edge.targetViewsCount = prevEdge.targetViewsCount;
+
+            return;
+        }
+
+        int initialTargetIndex = target.index;
 
         Target tmpTarget = target;
 
-        if (element != null) {
-            element.patch();
-
-            if (element.view instanceof ViewGroup) {
-                tmpTarget = new Target((ViewGroup) element.view, 0);
-            }
+        if (element != null && element.view instanceof ViewGroup) {
+            tmpTarget = new Target((ViewGroup) element.view, 0);
         }
 
         renderChildren(edge, prevEdge, tmpTarget);
 
         if (element != null) {
+            /*
+              In JavaScript, patch() is executed before renderChildren.
+              However, here we need to execute it **after** because:
+
+              - Elements like `TextElement` interact with their children inside `patchView()`.
+              - Sometimes, child edges have a `null` `text` value (when they are skipped).
+              - We rely on `renderChildren` to propagate the `text` from `prevEdge`.
+
+              By running patch() after renderChildren, we ensure that all child elements
+              have the correct `text` values before patching occurs.
+            */
+
+            element.patch();
+
             target.insert(element.view);
         }
 
@@ -545,20 +562,20 @@ public class Detonator {
 
         Target tmpTarget = target;
 
-        if (edge.element != null) {
-            edge.element.remove();
-
-            if (target != null) {
-                tmpTarget = null;
-            }
+        if (edge.element != null && target != null) {
+            tmpTarget = null;
         }
 
         for (Edge child : edge.children) {
             unmountEdge(child, tmpTarget);
         }
 
-        if (edge.element != null && target != null) {
-            target.remove(edge.element.view);
+        if (edge.element != null) {
+            edge.element.remove();
+
+            if (target != null) {
+                target.remove(edge.element.view);
+            }
         }
     }
 

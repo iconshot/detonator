@@ -40,8 +40,8 @@ export class Tree {
 
   private deinitialized: boolean = false;
 
-  private skippedIds: number[] = [];
-  private movedIds: number[] = [];
+  private skippedIds: Set<number> = new Set();
+  private movedIds: Set<number> = new Set();
 
   constructor(private treeId: number, elementEdge: Edge | null) {
     this.element = elementEdge?.element! ?? document.createElement("root");
@@ -133,7 +133,9 @@ export class Tree {
         for (let j = 0; j < prevSlots.length; j++) {
           const prevSlot = prevSlots[j];
 
-          if (this.isEqual(slot, prevSlot)) {
+          const equal = this.compareSlots(slot, prevSlot);
+
+          if (equal) {
             child = prevEdge!.children[j];
 
             if (j !== i) {
@@ -148,7 +150,9 @@ export class Tree {
 
         const prevSlot = prevSlots[i];
 
-        if (this.isEqual(slot, prevSlot)) {
+        const equal = this.compareSlots(slot, prevSlot);
+
+        if (equal) {
           child = prevEdge!.children[i];
         }
       }
@@ -194,7 +198,7 @@ export class Tree {
 
         this.moveEdge(child, tmpTarget);
 
-        this.movedIds.push(child.id);
+        this.movedIds.add(child.id);
       }
 
       this.renderEdge(child, prevChild, target);
@@ -217,42 +221,32 @@ export class Tree {
   }
 
   private renderEdge(edge: Edge, prevEdge: Edge | null, target: Target): void {
-    TreeHub.edges.set(edge.id, edge);
+    const id = edge.id;
+    const slot = edge.slot;
+    const component = edge.component;
+    const hookster = edge.hookster;
 
-    if (edge.component !== null || edge.hookster !== null) {
+    TreeHub.edges.set(id, edge);
+
+    if (component !== null) {
       this.unqueue(edge);
     }
 
-    if (prevEdge !== null && edge.slot instanceof Slot) {
-      const slot: Slot = edge.slot;
-      const prevSlot: Slot = prevEdge.slot;
-
-      if (slot.isClass() || slot.isFunction()) {
-        let equal = false;
-
-        if (slot.isClass()) {
-          equal = !edge.component!.needsUpdate();
-        }
-
-        if (slot.isFunction()) {
-          equal = !edge.hookster!.needsUpdate();
-        }
-
-        if (equal) {
-          equal = Comparer.compare(slot, prevSlot);
-        }
-
-        if (equal) {
-          target.index += edge.targetNodesCount;
-
-          this.skippedIds.push(edge.id);
-
-          return;
-        }
-      }
+    if (hookster !== null) {
+      this.unqueue(edge);
     }
 
-    const slot = edge.slot;
+    if (prevEdge !== null) {
+      const equal = this.compareEdges(edge, prevEdge);
+
+      if (equal) {
+        target.index += edge.targetNodesCount;
+
+        this.skippedIds.add(id);
+
+        return;
+      }
+    }
 
     const initialTargetIndex = target.index;
 
@@ -400,13 +394,14 @@ export class Tree {
   }
 
   private unmountEdge(edge: Edge, target: Target): void {
-    TreeHub.edges.delete(edge.id);
-
+    const id = edge.id;
     const slot = edge.slot;
     const element = edge.element;
     const component = edge.component;
     const hookster = edge.hookster;
     const children = edge.children;
+
+    TreeHub.edges.delete(id);
 
     let tmpTarget = target;
 
@@ -443,9 +438,9 @@ export class Tree {
     }
   }
 
-  private isEqual(slot: any, prevSlot: any): boolean {
-    //  check slots based on type and key
+  //  check slots based on contentType and key
 
+  private compareSlots(slot: any, prevSlot: any): boolean {
     if (slot instanceof Slot) {
       if (!(prevSlot instanceof Slot)) {
         return false;
@@ -474,6 +469,33 @@ export class Tree {
       prevSlot !== false &&
       !(prevSlot instanceof Slot)
     );
+  }
+
+  // check edges in case they may be skipped
+
+  private compareEdges(edge: Edge, prevEdge: Edge): boolean {
+    if (edge.slot instanceof Slot) {
+      const slot: Slot = edge.slot;
+      const prevSlot: Slot = prevEdge.slot;
+
+      let equal = true;
+
+      if (slot.isClass()) {
+        equal = !edge.component!.needsUpdate();
+      }
+
+      if (slot.isFunction()) {
+        equal = !edge.hookster!.needsUpdate();
+      }
+
+      if (equal) {
+        equal = Comparer.compare(slot, prevSlot);
+      }
+
+      return equal;
+    }
+
+    return edge.slot === prevEdge.slot;
   }
 
   private createElement(edge: Edge): Element {
@@ -592,8 +614,8 @@ export class Tree {
 
     Messenger.rerender({ treeId: this.treeId, edges: sanitizedEdges });
 
-    this.skippedIds = [];
-    this.movedIds = [];
+    this.skippedIds.clear();
+    this.movedIds.clear();
   }
 
   private createTarget(edge: Edge, targetIndex: number = 0): Target {
@@ -646,8 +668,7 @@ export class Tree {
     edge: Edge,
     sanitizedParent: SanitizedEdge | null = null
   ): SanitizedEdge {
-    const edgeId = edge.id;
-
+    const id = edge.id;
     const slot = edge.slot;
     const children = edge.children;
 
@@ -655,34 +676,33 @@ export class Tree {
 
     if (slot instanceof Slot) {
       if (slot.isClass()) {
-        sanitizedEdge = this.sanitizeClass(edge);
+        sanitizedEdge = this.sanitizeGeneric(edge);
       } else if (slot.isFunction()) {
-        sanitizedEdge = this.sanitizeFunction(edge);
+        sanitizedEdge = this.sanitizeGeneric(edge);
       } else if (slot.isElement()) {
         sanitizedEdge = this.sanitizeElement(edge);
       } else if (slot.isNull()) {
-        sanitizedEdge = this.sanitizeNull(edge);
+        sanitizedEdge = this.sanitizeGeneric(edge);
       }
     } else if (slot !== null && slot !== undefined && slot !== false) {
       sanitizedEdge = this.sanitizeText(edge);
     } else {
-      sanitizedEdge = this.sanitizeEmpty(edge);
+      sanitizedEdge = this.sanitizeGeneric(edge);
     }
 
     sanitizedEdge = sanitizedEdge!;
 
-    const skipped = this.skippedIds.includes(edgeId);
-    const moved = this.movedIds.includes(edgeId);
+    const skipped = this.skippedIds.has(id);
+    const moved = this.movedIds.has(id);
 
-    if (skipped) {
-      sanitizedEdge.skipped = true;
-    } else {
+    sanitizedEdge.skipped = skipped;
+    sanitizedEdge.moved = moved;
+
+    if (!skipped) {
       for (const child of children) {
         this.sanitizeEdge(child, sanitizedEdge);
       }
     }
-
-    sanitizedEdge.moved = moved;
 
     if (sanitizedParent !== null) {
       sanitizedParent.children.push(sanitizedEdge);
@@ -691,15 +711,7 @@ export class Tree {
     return sanitizedEdge;
   }
 
-  private sanitizeClass(edge: Edge): SanitizedEdge {
-    const id = edge.id;
-
-    const parent = edge.parent?.id ?? null;
-
-    return this.sanitizeSlot({ id, parent });
-  }
-
-  private sanitizeFunction(edge: Edge): SanitizedEdge {
+  private sanitizeGeneric(edge: Edge): SanitizedEdge {
     const id = edge.id;
 
     const parent = edge.parent?.id ?? null;
@@ -715,9 +727,48 @@ export class Tree {
 
     const contentType = slot.getContentType() as string;
 
-    const { children, ...props } = slot.getProps();
+    const attributes = slot.getAttributes();
 
-    return this.sanitizeSlot({ id, parent, contentType, attributes: props });
+    let sanitizedContentType: string | null = null;
+    let sanitizedAttributes: string | null = null;
+
+    const skipped = this.skippedIds.has(id);
+
+    if (!skipped) {
+      const tmpAttributes = {};
+
+      for (const key in attributes) {
+        const value = attributes[key] ?? null;
+
+        switch (key) {
+          case "key":
+          case "ref": {
+            break;
+          }
+
+          default: {
+            const isValueHandler = typeof value === "function";
+
+            if (isValueHandler) {
+              tmpAttributes[key] = true;
+            } else {
+              tmpAttributes[key] = value;
+            }
+          }
+        }
+      }
+
+      sanitizedContentType = contentType;
+
+      sanitizedAttributes = JSON.stringify(tmpAttributes);
+    }
+
+    return this.sanitizeSlot({
+      id,
+      parent,
+      contentType: sanitizedContentType,
+      attributes: sanitizedAttributes,
+    });
   }
 
   private sanitizeText(edge: Edge): SanitizedEdge {
@@ -726,25 +777,15 @@ export class Tree {
 
     const parent = edge.parent?.id ?? null;
 
-    const text = `${slot}`;
+    const skipped = this.skippedIds.has(id);
 
-    return this.sanitizeSlot({ id, parent, text });
-  }
+    let sanitizedText: string | null = null;
 
-  private sanitizeNull(edge: Edge): SanitizedEdge {
-    const id = edge.id;
+    if (!skipped) {
+      sanitizedText = `${slot}`;
+    }
 
-    const parent = edge.parent?.id ?? null;
-
-    return this.sanitizeSlot({ id, parent });
-  }
-
-  private sanitizeEmpty(edge: Edge): SanitizedEdge {
-    const id = edge.id;
-
-    const parent = edge.parent?.id ?? null;
-
-    return this.sanitizeSlot({ id, parent });
+    return this.sanitizeSlot({ id, parent, text: sanitizedText });
   }
 
   private sanitizeSlot({
@@ -754,30 +795,25 @@ export class Tree {
     attributes = null,
     children = [],
     text = null,
-  }: { id: SanitizedEdge["id"]; parent: SanitizedEdge["parent"] } & Partial<
-    Omit<SanitizedEdge, "id" | "attributes" | "skipped"> & {
-      attributes: { [key: string]: any } | null;
-    }
+  }: {
+    id: SanitizedEdge["id"];
+    parent: SanitizedEdge["parent"];
+  } & Partial<
+    Omit<SanitizedEdge, "id" | "parent" | "skipped" | "moved">
   >): SanitizedEdge {
-    let tmpAttributes: string | null = null;
+    const skipped = this.skippedIds.has(id);
 
-    if (attributes !== null) {
-      for (const key in attributes) {
-        const value = attributes[key];
+    let sanitizedParent: number | null = null;
 
-        if (typeof value === "function") {
-          attributes[key] = true;
-        }
-      }
-
-      tmpAttributes = JSON.stringify(attributes);
+    if (!skipped) {
+      sanitizedParent = parent;
     }
 
     return {
       id,
-      parent,
+      parent: sanitizedParent,
       contentType,
-      attributes: tmpAttributes,
+      attributes,
       children,
       text,
       skipped: false,

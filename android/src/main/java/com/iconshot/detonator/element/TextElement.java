@@ -33,20 +33,22 @@ public class TextElement extends Element<TextView, TextElement.Attributes> {
 
     @Override
     protected void patchView() {
-        if (!edge.children.isEmpty()) {
-            StringBuilder stringBuilder = new StringBuilder();
+        StringBuilder stringBuilder = new StringBuilder();
 
-            for (Edge child : edge.children) {
-                if (child.text != null) {
-                    stringBuilder.append(child.text);
-                }
+        for (Edge child : edge.children) {
+            if (child.text != null) {
+                stringBuilder.append(child.text);
             }
+        }
 
-            String text = stringBuilder.toString();
+        String text = stringBuilder.toString();
 
-            if (!view.getText().equals(text)) {
-                view.setText(text);
-            }
+        CharSequence prevText = view.getText();
+
+        boolean patchText = forcePatch || !text.contentEquals(prevText);
+
+        if (patchText) {
+            view.setText(text);
         }
 
         Integer maxLines = attributes.maxLines;

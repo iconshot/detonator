@@ -25,7 +25,6 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     protected Detonator detonator;
 
     public Edge edge;
-    public Edge prevEdge;
 
     public K view;
 
@@ -83,10 +82,9 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     }
 
     public void patch() {
-        attributes = decodeAttributes(edge);
-        prevAttributes = prevEdge != null ? decodeAttributes(prevEdge) : null;
+        prevAttributes = attributes;
 
-        forcePatch = prevAttributes == null;
+        attributes = decodeAttributes(edge);
 
         Style style = attributes.style;
         Style prevStyle = prevAttributes != null ? prevAttributes.style: null;
@@ -481,6 +479,8 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         }
 
         patchView();
+
+        forcePatch = false;
     }
 
     protected void patchFlex(Integer flex) {

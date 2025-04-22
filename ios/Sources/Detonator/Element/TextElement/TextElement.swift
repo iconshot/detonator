@@ -29,7 +29,11 @@ class TextElement: Element {
         
         let text = stringBuilder as String
         
-        if text != view.text {
+        let prevText = view.text
+        
+        let patchTextBool = forcePatch || text != prevText
+        
+        if patchTextBool {
             view.text = text
         }
         
