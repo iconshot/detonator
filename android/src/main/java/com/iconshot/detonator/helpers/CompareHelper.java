@@ -1,6 +1,6 @@
 package com.iconshot.detonator.helpers;
 
-import com.iconshot.detonator.element.Style.StyleTransform;
+import com.iconshot.detonator.module.stylesheet.Style.StyleTransform;
 
 import java.util.List;
 

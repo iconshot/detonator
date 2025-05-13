@@ -1,4 +1,4 @@
-package com.iconshot.detonator.element;
+package com.iconshot.detonator.module.stylesheet;
 
 public class Style {
     // flex

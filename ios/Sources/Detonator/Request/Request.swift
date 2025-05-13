@@ -15,21 +15,15 @@ open class Request {
         self.data = incomingRequest.data
     }
     
-    func decode<T: Decodable>() -> T? {
-        if let json = data?.data(using: .utf8) {
-            do {
-                let decoder = JSONDecoder()
-                
-                let attributes = try decoder.decode(T.self, from: json)
-                
-                return attributes;
-            } catch {}
+    public func decodeData<T: Decodable>() -> T? {
+        guard let data = data else {
+            return nil
         }
         
-        return nil
+        return detonator.decode(data)
     }
     
-    func getComponentEdge() -> Edge? {
+    public func getComponentEdge() -> Edge? {
         if componentId == nil {
             return nil
         }
@@ -39,17 +33,17 @@ open class Request {
     
     public func run() {}
     
-    func end() {
+    public func end() {
         end(data: nil)
     }
     
-    func end(data: Encodable?) {
+    public func end(data: Encodable?) {
         let response = OutgoingResponse(id: id, data: data, error: nil)
         
         emit(response: response)
     }
     
-    func error(message: String) {
+    public func error(message: String) {
         let tmpError = OutgoingResponse.Error(message: message)
         
         let response = OutgoingResponse(id: id, data: nil, error: tmpError)
@@ -57,11 +51,11 @@ open class Request {
         emit(response: response)
     }
     
-    func error(error: Error) {
+    public func error(error: Error) {
         self.error(message: error.localizedDescription)
     }
     
-    func emit(response: OutgoingResponse) {
+    private func emit(response: OutgoingResponse) {
         detonator.emit(name: "response", value: response)
     }
     
@@ -72,7 +66,7 @@ open class Request {
         let data: String?
     }
     
-    struct OutgoingResponse: Encodable {
+    public struct OutgoingResponse: Encodable {
         let id: Int
         let data: NullEncodable<AnyEncodable>?
         let error: NullEncodable<Error>?

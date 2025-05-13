@@ -1,7 +1,7 @@
 import Foundation
 
 class StorageModule: Module {
-    override func register() {
+    override func register() -> Void {
         detonator.addRequestClass(key: "com.iconshot.detonator.storage/getItem", requestClass: StorageGetItemRequest.self)
         detonator.addRequestClass(key: "com.iconshot.detonator.storage/setItem", requestClass: StorageSetItemRequest.self)
     }
@@ -22,7 +22,7 @@ class StorageModule: Module {
     
     class StorageGetItemRequest: Request {
         override func run() {
-            let data: Data = decode()!
+            let data: Data! = decodeData()
             
             let storage = StorageModule.getStorage(name: data.name)
             
@@ -39,7 +39,7 @@ class StorageModule: Module {
     
     class StorageSetItemRequest: Request {
         override func run() {
-            let data: Data = decode()!
+            let data: Data! = decodeData()
             
             let storage = StorageModule.getStorage(name: data.name)
             

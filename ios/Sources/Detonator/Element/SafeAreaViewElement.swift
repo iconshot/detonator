@@ -1,6 +1,6 @@
 class SafeAreaViewElement: ViewElement {
-    override public func decodeAttributes(edge: Edge) -> SafeAreaViewAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> SafeAreaViewAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func patchView() {

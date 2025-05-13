@@ -1,8 +1,8 @@
 import UIKit
 
 class IconElement: Element {
-    override public func decodeAttributes(edge: Edge) -> IconAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> IconAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> TextView {

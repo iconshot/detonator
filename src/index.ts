@@ -17,6 +17,8 @@ export * from "./Component/SafeAreaView";
 export * from "./Component/Icon";
 export * from "./Component/ActivityIndicator";
 
+export * from "./StyleSheet/StyleSheet";
+
 export * from "./Utility/Toast";
 export * from "./Utility/Color";
 export * from "./Utility/Platform";

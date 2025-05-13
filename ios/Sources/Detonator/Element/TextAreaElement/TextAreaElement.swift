@@ -3,8 +3,8 @@ import UIKit
 class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate {
     private let defaultPlaceholderColor: UIColor = UIColor(white: 1, alpha: 0.75)
     
-    override public func decodeAttributes(edge: Edge) -> TextAreaAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> TextAreaAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> TextAreaView {

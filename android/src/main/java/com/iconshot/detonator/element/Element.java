@@ -1,7 +1,5 @@
 package com.iconshot.detonator.element;
 
-import java.util.List;
-
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.ShapeDrawable;
@@ -12,14 +10,26 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.iconshot.detonator.Detonator;
+
 import com.iconshot.detonator.helpers.ColorHelper;
 import com.iconshot.detonator.helpers.CompareHelper;
 import com.iconshot.detonator.helpers.AttributeHelper;
 import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.PixelHelper;
+
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
-import com.iconshot.detonator.tree.Edge;
-import com.iconshot.detonator.element.Style.StyleTransform;
+
+import com.iconshot.detonator.renderer.Edge;
+
+import com.iconshot.detonator.module.stylesheet.Style.StyleTransform;
+import com.iconshot.detonator.module.stylesheet.Style;
+import com.iconshot.detonator.module.stylesheet.StyleEntry;
+import com.iconshot.detonator.module.stylesheet.StyleSheetHelper;
+import com.iconshot.detonator.module.stylesheet.StyleSheetModule;
+import com.iconshot.detonator.module.stylesheet.Styler;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public abstract class Element<K extends View, T extends Element.Attributes> {
     protected Detonator detonator;
@@ -31,8 +41,10 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     protected T attributes;
     protected T prevAttributes;
 
-    protected Styler styler;
-    protected Styler prevStyler;
+    private List<StyleEntry> styleEntries;
+    private List<StyleEntry> prevStyleEntries;
+
+    private StyleEntry additionalStyleEntry;
 
     protected boolean forcePatch = true;
 
@@ -44,10 +56,10 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
     protected abstract Class<T> getAttributesClass();
 
-    protected T decodeAttributes(Edge edge) {
+    protected T decodeAttributes() {
         Class<T> AttributesClass = getAttributesClass();
 
-        return detonator.gson.fromJson(edge.attributes, AttributesClass);
+        return detonator.decode(edge.attributes, AttributesClass);
     }
 
     public void create() {
@@ -83,15 +95,43 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
     public void patch() {
         prevAttributes = attributes;
+        prevStyleEntries = styleEntries;
 
-        attributes = decodeAttributes(edge);
+        attributes = decodeAttributes();
 
-        Style style = attributes.style;
-        Style prevStyle = prevAttributes != null ? prevAttributes.style: null;
+        styleEntries = new ArrayList<>();
 
-        styler = new Styler(style);
-        prevStyler = new Styler(prevStyle);
+        if (attributes.style != null) {
+            for (Object tmpStyle : attributes.style) {
+                if (tmpStyle instanceof Double) {
+                    Integer styleEntryId = ((Double) tmpStyle).intValue();
 
+                    StyleEntry styleEntry = StyleSheetModule.styleEntries.get(styleEntryId);
+
+                    styleEntries.add(styleEntry);
+                } else if (tmpStyle instanceof String) {
+                    StyleEntry styleEntry = detonator.decode((String) tmpStyle, StyleEntry.class);
+
+                    styleEntries.add(styleEntry);
+                }
+            }
+        }
+
+        Style style = createStyle(styleEntries);
+
+        Style prevStyle = prevStyleEntries != null ? createStyle(prevStyleEntries) : null;
+
+        Styler styler = new Styler(style);
+        Styler prevStyler = new Styler(prevStyle);
+
+        patchStyler(styler, prevStyler);
+
+        patchView();
+
+        forcePatch = false;
+    }
+
+    private void patchStyler(Styler styler, Styler prevStyler) {
         Integer flex = styler.getFlex();
         String flexDirection = styler.getFlexDirection();
         String justifyContent = styler.getJustifyContent();
@@ -477,10 +517,6 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         if (patchTransform) {
             patchTransform(transform);
         }
-
-        patchView();
-
-        forcePatch = false;
     }
 
     protected void patchFlex(Integer flex) {
@@ -1111,378 +1147,63 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         return 0;
     }
 
-    public void applyStyle(Style style, List<String> keys) {
+    public void applyStyle(StyleEntry[] styleEntries) {
+        Style style = createStyle(this.styleEntries);
+
+        if (additionalStyleEntry == null) {
+            additionalStyleEntry = new StyleEntry();
+
+            additionalStyleEntry.style = new Style();
+            additionalStyleEntry.keys = new ArrayList<>();
+        }
+
+        for (StyleEntry styleEntry : styleEntries) {
+            StyleSheetHelper.fillStyleEntry(additionalStyleEntry, styleEntry);
+        }
+
+        Style tmpStyle = createStyle(this.styleEntries);
+
+        Styler tmpStyler = new Styler(tmpStyle);
         Styler styler = new Styler(style);
 
-        Integer flex = styler.getFlex();
-        String flexDirection = styler.getFlexDirection();
-        String justifyContent = styler.getJustifyContent();
-        String alignItems = styler.getAlignItems();
-        String alignSelf = styler.getAlignSelf();
-        Float gap = styler.getGap();
-        Object backgroundColor = styler.getBackgroundColor();
-        Object width = styler.getWidth();
-        Object height = styler.getHeight();
-        Object minWidth = styler.getMinWidth();
-        Object minHeight = styler.getMinHeight();
-        Object maxWidth = styler.getMaxWidth();
-        Object maxHeight = styler.getMaxHeight();
-        Float padding = styler.getPadding();
-        Float paddingHorizontal = styler.getPaddingHorizontal();
-        Float paddingVertical = styler.getPaddingVertical();
-        Float paddingTop = styler.getPaddingTop();
-        Float paddingLeft = styler.getPaddingLeft();
-        Float paddingBottom = styler.getPaddingBottom();
-        Float paddingRight = styler.getPaddingRight();
-        Float margin = styler.getMargin();
-        Float marginHorizontal = styler.getMarginHorizontal();
-        Float marginVertical = styler.getMarginVertical();
-        Float marginTop = styler.getMarginTop();
-        Float marginLeft = styler.getMarginLeft();
-        Float marginBottom = styler.getMarginBottom();
-        Float marginRight = styler.getMarginRight();
-        Float fontSize = styler.getFontSize();
-        Float lineHeight = styler.getLineHeight();
-        String fontWeight = styler.getFontWeight();
-        Object color = styler.getColor();
-        String textAlign = styler.getTextAlign();
-        String textDecoration = styler.getTextDecoration();
-        String textTransform = styler.getTextTransform();
-        String textOverflow = styler.getTextOverflow();
-        String overflowWrap = styler.getOverflowWrap();
-        String wordBreak = styler.getWordBreak();
-        String position = styler.getPosition();
-        Object top = styler.getTop();
-        Object left = styler.getLeft();
-        Object bottom = styler.getBottom();
-        Object right = styler.getRight();
-        Integer zIndex = styler.getZIndex();
-        String display = styler.getDisplay();
-        String pointerEvents = styler.getPointerEvents();
-        String objectFit = styler.getObjectFit();
-        String overflow = styler.getOverflow();
-        Float opacity = styler.getOpacity();
-        Float aspectRatio = styler.getAspectRatio();
-        Object borderRadius = styler.getBorderRadius();
-        Object borderRadiusTopLeft = styler.getBorderRadiusTopLeft();
-        Object borderRadiusTopRight = styler.getBorderRadiusTopRight();
-        Object borderRadiusBottomLeft = styler.getBorderRadiusBottomLeft();
-        Object borderRadiusBottomRight = styler.getBorderRadiusBottomRight();
-        Float borderWidth = styler.getBorderWidth();
-        Object borderColor = styler.getBorderColor();
-        Float borderTopWidth = styler.getBorderTopWidth();
-        Object borderTopColor = styler.getBorderTopColor();
-        Float borderLeftWidth = styler.getBorderLeftWidth();
-        Object borderLeftColor = styler.getBorderLeftColor();
-        Float borderBottomWidth = styler.getBorderBottomWidth();
-        Object borderBottomColor = styler.getBorderBottomColor();
-        Float borderRightWidth = styler.getBorderRightWidth();
-        Object borderRightColor = styler.getBorderRightColor();
-        StyleTransform transform = styler.getTransform();
+        patchStyler(tmpStyler, styler);
+    }
 
-        boolean patchFlex = keys.contains("flex");
-        boolean patchFlexDirection = keys.contains("flexDirection");
-        boolean patchJustifyContent = keys.contains("justifyContent");
-        boolean patchAlignItems = keys.contains("alignItems");
-        boolean patchAlignSelf = keys.contains("alignSelf");
-        boolean patchGap = keys.contains("gap");
-        boolean patchBackgroundColor = keys.contains("backgroundColor");
-        boolean patchWidth = keys.contains("width");
-        boolean patchHeight = keys.contains("height");
-        boolean patchMinWidth = keys.contains("minWidth");
-        boolean patchMinHeight = keys.contains("minHeight");
-        boolean patchMaxWidth = keys.contains("maxWidth");
-        boolean patchMaxHeight = keys.contains("maxHeight");
-        boolean patchPadding = keys.contains("padding");
-        boolean patchPaddingHorizontal = keys.contains("paddingHorizontal");
-        boolean patchPaddingVertical = keys.contains("paddingVertical");
-        boolean patchPaddingTop = keys.contains("paddingTop");
-        boolean patchPaddingLeft = keys.contains("paddingLeft");
-        boolean patchPaddingBottom = keys.contains("paddingBottom");
-        boolean patchPaddingRight = keys.contains("paddingRight");
-        boolean patchMargin = keys.contains("margin");
-        boolean patchMarginHorizontal = keys.contains("marginHorizontal");
-        boolean patchMarginVertical = keys.contains("marginVertical");
-        boolean patchMarginTop = keys.contains("marginTop");
-        boolean patchMarginLeft = keys.contains("marginLeft");
-        boolean patchMarginBottom = keys.contains("marginBottom");
-        boolean patchMarginRight = keys.contains("marginRight");
-        boolean patchFontSize = keys.contains("fontSize");
-        boolean patchLineHeight = keys.contains("lineHeight");
-        boolean patchFontWeight = keys.contains("fontWeight");
-        boolean patchColor = keys.contains("color");
-        boolean patchTextAlign = keys.contains("textAlign");
-        boolean patchTextDecoration = keys.contains("textDecoration");
-        boolean patchTextTransform = keys.contains("textTransform");
-        boolean patchTextOverflow = keys.contains("textOverflow");
-        boolean patchOverflowWrap = keys.contains("overflowWrap");
-        boolean patchWordBreak = keys.contains("wordBreak");
-        boolean patchPosition = keys.contains("position");
-        boolean patchTop = keys.contains("top");
-        boolean patchLeft = keys.contains("left");
-        boolean patchBottom = keys.contains("bottom");
-        boolean patchRight = keys.contains("right");
-        boolean patchZIndex = keys.contains("zIndex");
-        boolean patchDisplay = keys.contains("display");
-        boolean patchPointerEvents = keys.contains("pointerEvents");
-        boolean patchObjectFit = keys.contains("objectFit");
-        boolean patchOverflow = keys.contains("overflow");
-        boolean patchOpacity = keys.contains("opacity");
-        boolean patchAspectRatio = keys.contains("aspectRatio");
-        boolean patchBorderRadius = keys.contains("borderRadius");
-        boolean patchBorderRadiusTopLeft = keys.contains("borderRadiusTopLeft");
-        boolean patchBorderRadiusTopRight = keys.contains("borderRadiusTopRight");
-        boolean patchBorderRadiusBottomLeft = keys.contains("borderRadiusBottomLeft");
-        boolean patchBorderRadiusBottomRight = keys.contains("borderRadiusBottomRight");
-        boolean patchBorderWidth = keys.contains("borderWidth");
-        boolean patchBorderColor = keys.contains("borderColor");
-        boolean patchBorderTopWidth = keys.contains("borderTopWidth");
-        boolean patchBorderTopColor = keys.contains("borderTopColor");
-        boolean patchBorderLeftWidth = keys.contains("borderLeftWidth");
-        boolean patchBorderLeftColor = keys.contains("borderLeftColor");
-        boolean patchBorderBottomWidth = keys.contains("borderBottomWidth");
-        boolean patchBorderBottomColor = keys.contains("borderBottomColor");
-        boolean patchBorderRightWidth = keys.contains("borderRightWidth");
-        boolean patchBorderRightColor = keys.contains("borderRightColor");
-        boolean patchTransform = keys.contains("transform");
+    public void removeStyle(List<String>[] toRemoveKeys) {
+        Style style = createStyle(this.styleEntries);
 
-        if (patchFlex) {
-            patchFlex(flex);
+        for (List<String> tmpKeys : toRemoveKeys) {
+            if (tmpKeys == null) {
+                additionalStyleEntry = null;
+
+                continue;
+            }
+
+            if (additionalStyleEntry == null) {
+                continue;
+            }
+
+            StyleSheetHelper.removeStyleEntryKeys(additionalStyleEntry, tmpKeys);
         }
 
-        if (patchFlexDirection) {
-            patchFlexDirection(flexDirection);
+        Style tmpStyle = createStyle(this.styleEntries);
+
+        Styler tmpStyler = new Styler(tmpStyle);
+        Styler styler = new Styler(style);
+
+        patchStyler(tmpStyler, styler);
+    }
+
+    private Style createStyle(List<StyleEntry> styleEntries) {
+        List<StyleEntry> tmpStyleEntries = new ArrayList<>();
+
+        tmpStyleEntries.addAll(styleEntries);
+
+        if (additionalStyleEntry != null) {
+            tmpStyleEntries.add(additionalStyleEntry);
         }
 
-        if (patchJustifyContent) {
-            patchJustifyContent(justifyContent);
-        }
-
-        if (patchAlignItems) {
-            patchAlignItems(alignItems);
-        }
-
-        if (patchAlignSelf) {
-            patchAlignSelf(alignSelf);
-        }
-
-        if (patchGap) {
-            patchGap(gap);
-        }
-
-        if (
-                patchBackgroundColor
-                        || patchBorderRadius
-                        || patchBorderRadiusTopLeft
-                        || patchBorderRadiusTopRight
-                        || patchBorderRadiusBottomLeft
-                        || patchBorderRadiusBottomRight
-        ) {
-            patchBackgroundColor(
-                    patchBackgroundColor ? backgroundColor : this.styler.getBackgroundColor(),
-                    patchBorderRadius ? borderRadius : this.styler.getBorderRadius(),
-                    patchBorderRadiusTopLeft ? borderRadiusTopLeft : this.styler.getBorderRadiusTopLeft(),
-                    patchBorderRadiusTopRight ? borderRadiusTopRight : this.styler.getBorderRadiusTopRight(),
-                    patchBorderRadiusBottomLeft ? borderRadiusBottomLeft : this.styler.getBorderRadiusBottomLeft(),
-                    patchBorderRadiusBottomRight ? borderRadiusBottomRight : this.styler.getBorderRadiusBottomRight()
-            );
-        }
-
-        if (patchWidth) {
-            patchWidth(width);
-        }
-
-        if (patchHeight) {
-            patchHeight(height);
-        }
-
-        if (patchMinWidth) {
-            patchMinWidth(minWidth);
-        }
-
-        if (patchMinHeight) {
-            patchMinHeight(minHeight);
-        }
-
-        if (patchMaxWidth) {
-            patchMaxWidth(maxWidth);
-        }
-
-        if (patchMaxHeight) {
-            patchMaxHeight(maxHeight);
-        }
-
-        if (
-                patchPadding
-                        || patchPaddingHorizontal
-                        || patchPaddingVertical
-                        || patchPaddingTop
-                        || patchPaddingLeft
-                        || patchPaddingBottom
-                        || patchPaddingRight
-        ) {
-            patchPadding(
-                    patchPadding ? padding : this.styler.getPadding(),
-                    patchPaddingHorizontal ? paddingHorizontal : this.styler.getPaddingHorizontal(),
-                    patchPaddingVertical ? paddingVertical : this.styler.getPaddingVertical(),
-                    patchPaddingTop ? paddingTop : this.styler.getPaddingTop(),
-                    patchPaddingLeft ? paddingLeft : this.styler.getPaddingLeft(),
-                    patchPaddingBottom ? paddingBottom : this.styler.getPaddingBottom(),
-                    patchPaddingRight ? paddingRight : this.styler.getPaddingRight()
-            );
-        }
-
-        if (
-                patchMargin
-                        || patchMarginHorizontal
-                        || patchMarginVertical
-                        || patchMarginTop
-                        || patchMarginLeft
-                        || patchMarginBottom
-                        || patchMarginRight
-        ) {
-            patchMargin(
-                    patchMargin ? margin: this.styler.getMargin(),
-                    patchMarginHorizontal ? marginHorizontal : this.styler.getMarginHorizontal(),
-                    patchMarginVertical ? marginVertical : this.styler.getMarginVertical(),
-                    patchMarginTop ? marginTop : this.styler.getMarginTop(),
-                    patchMarginLeft ? marginLeft : this.styler.getMarginLeft(),
-                    patchMarginBottom ? marginBottom : this.styler.getMarginBottom(),
-                    patchMarginRight ? marginRight : this.styler.getMarginRight()
-            );
-        }
-
-        if (patchFontSize) {
-            patchFontSize(fontSize);
-        }
-
-        if (patchLineHeight) {
-            patchLineHeight(lineHeight);
-        }
-
-        if (patchFontWeight) {
-            patchFontWeight(fontWeight);
-        }
-
-        if (patchColor) {
-            patchColor(color);
-        }
-
-        if (patchTextAlign) {
-            patchTextAlign(textAlign);
-        }
-
-        if (patchTextDecoration) {
-            patchTextDecoration(textDecoration);
-        }
-
-        if (patchTextTransform) {
-            patchTextTransform(textTransform);
-        }
-
-        if (patchTextOverflow) {
-            patchTextOverflow(textOverflow);
-        }
-
-        if (patchOverflowWrap) {
-            patchOverflowWrap(overflowWrap);
-        }
-
-        if (patchWordBreak) {
-            patchWordBreak(wordBreak);
-        }
-
-        if (patchPosition) {
-            patchPosition(position);
-        }
-
-        if (patchTop) {
-            patchTop(top);
-        }
-
-        if (patchLeft) {
-            patchLeft(left);
-        }
-
-        if (patchBottom) {
-            patchBottom(bottom);
-        }
-
-        if (patchRight) {
-            patchRight(right);
-        }
-
-        if (patchZIndex) {
-            patchZIndex(zIndex);
-        }
-
-        if (patchDisplay) {
-            patchDisplay(display);
-        }
-
-        if (patchPointerEvents) {
-            patchPointerEvents(pointerEvents);
-        }
-
-        if (patchObjectFit) {
-            patchObjectFit(objectFit);
-        }
-
-        if (patchOverflow) {
-            patchOverflow(overflow);
-        }
-
-        if (patchOpacity) {
-            patchOpacity(opacity);
-        }
-
-        if (patchAspectRatio) {
-            patchAspectRatio(aspectRatio);
-        }
-
-        if (patchBorderWidth) {
-            patchBorderWidth(borderWidth);
-        }
-
-        if (patchBorderColor) {
-            patchBorderColor(borderColor);
-        }
-
-        if (patchBorderTopWidth) {
-            patchBorderTopWidth(borderTopWidth);
-        }
-
-        if (patchBorderTopColor) {
-            patchBorderTopColor(borderTopColor);
-        }
-
-        if (patchBorderLeftWidth) {
-            patchBorderLeftWidth(borderLeftWidth);
-        }
-
-        if (patchBorderLeftColor) {
-            patchBorderLeftColor(borderLeftColor);
-        }
-
-        if (patchBorderBottomWidth) {
-            patchBorderBottomWidth(borderBottomWidth);
-        }
-
-        if (patchBorderBottomColor) {
-            patchBorderBottomColor(borderBottomColor);
-        }
-
-        if (patchBorderRightWidth) {
-            patchBorderRightWidth(borderRightWidth);
-        }
-
-        if (patchBorderRightColor) {
-            patchBorderRightColor(borderRightColor);
-        }
-
-        if (patchTransform) {
-            patchTransform(transform);
-        }
+        return StyleSheetHelper.createStyle(tmpStyleEntries);
     }
 
     public void remove() {
@@ -1518,7 +1239,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     }
 
     public static class Attributes {
-        public Style style;
+        public Object[] style;
         public Boolean onTap;
         public Boolean onLongTap;
         public Boolean onDoubleTap;

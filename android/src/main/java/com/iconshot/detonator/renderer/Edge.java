@@ -1,4 +1,4 @@
-package com.iconshot.detonator.tree;
+package com.iconshot.detonator.renderer;
 
 import com.iconshot.detonator.element.Element;
 

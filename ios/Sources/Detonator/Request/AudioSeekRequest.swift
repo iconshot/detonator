@@ -2,7 +2,7 @@ import AVFoundation
 
 class AudioSeekRequest: Request {
     override public func run() {
-        let position: Int = decode()!
+        let position: Int! = decodeData()
         
         let edge = getComponentEdge()!
         

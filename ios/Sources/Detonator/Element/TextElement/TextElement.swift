@@ -1,8 +1,8 @@
 import UIKit
 
 class TextElement: Element {
-    override public func decodeAttributes(edge: Edge) -> TextAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> TextAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> TextView {

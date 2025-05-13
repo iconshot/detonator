@@ -10,6 +10,7 @@ import androidx.media3.exoplayer.ExoPlayer;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.CompareHelper;
 import com.iconshot.detonator.helpers.ContextHelper;
+import com.iconshot.detonator.module.stylesheet.Styler;
 
 public class AudioElement extends Element<View, AudioElement.Attributes> {
     public ExoPlayer player;
@@ -64,6 +65,11 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
                 }
             }
         }
+    }
+
+    @Override
+    protected void patchDisplay(String display) {
+        super.patchDisplay("none");
     }
 
     private void patchUrl(String url) {

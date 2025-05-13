@@ -1,7 +1,7 @@
 import UIKit
 
 class FullScreenModule: Module {
-    override func register() {
+    override func register() -> Void {
         detonator.addRequestClass(key: "com.iconshot.detonator.fullscreen/open", requestClass: FullScreenOpenRequest.self)
         detonator.addRequestClass(key: "com.iconshot.detonator.fullscreen/close", requestClass: FullScreenCloseRequest.self)
     }

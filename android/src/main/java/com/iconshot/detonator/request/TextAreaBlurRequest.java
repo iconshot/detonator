@@ -6,7 +6,7 @@ import android.widget.EditText;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ContextHelper;
-import com.iconshot.detonator.tree.Edge;
+import com.iconshot.detonator.renderer.Edge;
 
 public class TextAreaBlurRequest extends Request {
     public TextAreaBlurRequest(Detonator detonator, IncomingRequest incomingRequest) {

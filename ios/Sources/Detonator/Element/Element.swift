@@ -1,17 +1,27 @@
 import UIKit
 
+public enum AttributesStyle: Decodable {
+    case string(String)
+    case int(Int)
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        
+        if let string = try? container.decode(String.self) {
+            self = .string(string)
+        } else if let array = try? container.decode(Int.self) {
+            self = .int(array)
+        } else {
+            throw DecodingError.typeMismatch(AttributesStyle.self, DecodingError.Context(codingPath: decoder.codingPath, debugDescription: "Expected String or Int"))
+        }
+    }
+}
+
 open class Attributes: Decodable {
-    public let style: Style?
+    public let style: [AttributesStyle?]?
     public let onTap: Bool?
     public let onLongTap: Bool?
     public let onDoubleTap: Bool?
-    
-    private enum CodingKeys: String, CodingKey {
-        case style
-        case onTap
-        case onLongTap
-        case onDoubleTap
-    }
 }
 
 open class Element: NSObject {
@@ -24,8 +34,10 @@ open class Element: NSObject {
     public var attributes: Attributes!
     public var prevAttributes: Attributes?
     
-    var styler: Styler!
-    var prevStyler: Styler!
+    private var styleEntries: [StyleEntry]!
+    private var prevStyleEntries: [StyleEntry]?
+    
+    private var additionalStyleEntry: StyleEntry?
     
     public var forcePatch: Bool = true
     
@@ -41,25 +53,15 @@ open class Element: NSObject {
         longTapGestureRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(onLongTapListener(_:)))
     }
     
-    public func decodeAttributes<T: Attributes>(edge: Edge) -> T? {
-        if let json = edge.attributes!.data(using: .utf8) {
-            do {
-                let decoder = JSONDecoder()
-                
-                let attributes = try decoder.decode(T.self, from: json)
-                
-                return attributes;
-            } catch {}
-        }
-        
-        return nil
+    public func decodeAttributes<T: Attributes>() -> T {
+        return detonator.decode(edge.attributes!)!
     }
     
-    open func decodeAttributes(edge: Edge) -> Attributes? {
+    open func decodeAttributes() -> Attributes? {
         preconditionFailure("This method must be overridden.")
     }
     
-    public func create() {
+    public func create() -> Void {
         let view = createView()
         
         view.addGestureRecognizer(tapGestureRecognizer)
@@ -68,17 +70,54 @@ open class Element: NSObject {
         self.view = view
     }
     
-    public func patch() {
+    public func patch() -> Void {
         prevAttributes = attributes
+        prevStyleEntries = styleEntries
         
-        attributes = decodeAttributes(edge: edge)
-                
-        let style = attributes.style
-        let prevStyle = prevAttributes?.style
+        attributes = decodeAttributes()
         
-        styler = Styler(style: style)
-        prevStyler = Styler(style: prevStyle)
+        styleEntries = []
         
+        if attributes.style != nil {
+            for tmpStyle in attributes.style! {
+                switch tmpStyle {
+                case .int(let int):
+                    let styleEntryId = int
+                    
+                    let styleEntry = StyleSheetModule.styleEntries[styleEntryId]!
+                    
+                    styleEntries.append(styleEntry)
+                    
+                    break
+                    
+                case .string(let string):
+                    let styleEntry: StyleEntry = detonator.decode(string)!
+                    
+                    styleEntries.append(styleEntry)
+                    
+                    break
+                    
+                default:
+                    break
+                }
+            }
+        }
+        
+        let style = createStyle(styleEntries: styleEntries)
+        
+        let prevStyle = prevStyleEntries != nil ? createStyle(styleEntries: prevStyleEntries!) : nil
+        
+        let styler = Styler(style: style)
+        let prevStyler = Styler(style: prevStyle)
+        
+        patchStyler(styler: styler, prevStyler: prevStyler)
+        
+        patchView()
+        
+        forcePatch = false
+    }
+    
+    private func patchStyler(styler: Styler, prevStyler: Styler) -> Void {
         let flex = styler.getFlex()
         let flexDirection = styler.getFlexDirection()
         let justifyContent = styler.getJustifyContent()
@@ -511,10 +550,6 @@ open class Element: NSObject {
         if patchTransformBool {
             patchTransform(transform: transform)
         }
-        
-        patchView()
-        
-        forcePatch = false
     }
     
     open func patchFlex(flex: Int?) {
@@ -568,16 +603,16 @@ open class Element: NSObject {
         }
     }
     
-    open func patchGap(gap: Float?) {
+    open func patchGap(gap: Float?) -> Void {
     }
 
-    open func patchBackgroundColor(backgroundColor: StyleColor?) {
+    open func patchBackgroundColor(backgroundColor: StyleColor?) -> Void {
         let tmpBackgroundColor = backgroundColor != nil ? ColorHelper.parseColor(color: backgroundColor!) : nil
                     
         view.backgroundColor = tmpBackgroundColor ?? UIColor.clear
     }
 
-    open func patchWidth(width: StyleSize?) {
+    open func patchWidth(width: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch width {
@@ -601,7 +636,7 @@ open class Element: NSObject {
         }
     }
 
-    open func patchHeight(height: StyleSize?) {
+    open func patchHeight(height: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch height {
@@ -625,7 +660,7 @@ open class Element: NSObject {
         }
     }
 
-    open func patchMinWidth(minWidth: StyleSize?) {
+    open func patchMinWidth(minWidth: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch minWidth {
@@ -649,7 +684,7 @@ open class Element: NSObject {
         }
     }
 
-    open func patchMinHeight(minHeight: StyleSize?) {
+    open func patchMinHeight(minHeight: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch minHeight {
@@ -673,7 +708,7 @@ open class Element: NSObject {
         }
     }
 
-    open func patchMaxWidth(maxWidth: StyleSize?) {
+    open func patchMaxWidth(maxWidth: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch maxWidth {
@@ -697,7 +732,7 @@ open class Element: NSObject {
         }
     }
 
-    open func patchMaxHeight(maxHeight: StyleSize?) {
+    open func patchMaxHeight(maxHeight: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch maxHeight {
@@ -729,7 +764,7 @@ open class Element: NSObject {
         paddingLeft: Float?,
         paddingBottom: Float?,
         paddingRight: Float?
-    ) {
+    ) -> Void {
         let layoutParams = view.layoutParams
         
         let tmpPadding = padding ?? 0
@@ -779,7 +814,7 @@ open class Element: NSObject {
         marginLeft: Float?,
         marginBottom: Float?,
         marginRight: Float?
-    ) {
+    ) -> Void {
         let layoutParams = view.layoutParams
 
         let tmpMargin = margin ?? 0
@@ -821,37 +856,37 @@ open class Element: NSObject {
         layoutParams.margin.right = tmpMarginRight
     }
 
-    open func patchFontSize(fontSize: Float?) {
+    open func patchFontSize(fontSize: Float?) -> Void {
     }
 
-    open func patchLineHeight(lineHeight: Float?) {
+    open func patchLineHeight(lineHeight: Float?) -> Void {
     }
 
-    open func patchFontWeight(fontWeight: String?) {
+    open func patchFontWeight(fontWeight: String?) -> Void {
     }
 
-    open func patchColor(color: StyleColor?) {
+    open func patchColor(color: StyleColor?) -> Void {
     }
 
-    open func patchTextAlign(textAlign: String?) {
+    open func patchTextAlign(textAlign: String?) -> Void {
     }
 
-    open func patchTextDecoration(textDecoration: String?) {
+    open func patchTextDecoration(textDecoration: String?) -> Void {
     }
 
-    open func patchTextTransform(textTransform: String?) {
+    open func patchTextTransform(textTransform: String?) -> Void {
     }
 
-    open func patchTextOverflow(textOverflow: String?) {
+    open func patchTextOverflow(textOverflow: String?) -> Void {
     }
 
-    open func patchOverflowWrap(overflowWrap: String?) {
+    open func patchOverflowWrap(overflowWrap: String?) -> Void {
     }
 
-    open func patchWordBreak(wordBreak: String?) {
+    open func patchWordBreak(wordBreak: String?) -> Void {
     }
 
-    open func patchPosition(position: String?) {
+    open func patchPosition(position: String?) -> Void {
         let layoutParams = view.layoutParams
         
         switch position {
@@ -867,7 +902,7 @@ open class Element: NSObject {
         }
     }
 
-    open func patchTop(top: StyleSize?) {
+    open func patchTop(top: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch top {
@@ -891,7 +926,7 @@ open class Element: NSObject {
         }
     }
 
-    open func patchLeft(left: StyleSize?) {
+    open func patchLeft(left: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch left {
@@ -915,7 +950,7 @@ open class Element: NSObject {
         }
     }
 
-    open func patchBottom(bottom: StyleSize?) {
+    open func patchBottom(bottom: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch bottom {
@@ -939,7 +974,7 @@ open class Element: NSObject {
         }
     }
 
-    open func patchRight(right: StyleSize?) {
+    open func patchRight(right: StyleSize?) -> Void {
         let layoutParams = view.layoutParams
         
         switch right {
@@ -963,11 +998,11 @@ open class Element: NSObject {
         }
     }
 
-    open func patchZIndex(zIndex: Int?) {
+    open func patchZIndex(zIndex: Int?) -> Void {
         view.layer.zPosition = zIndex != nil ? CGFloat(zIndex!) : 0
     }
 
-    open func patchDisplay(display: String?) {
+    open func patchDisplay(display: String?) -> Void {
         let layoutParams = view.layoutParams
         
         switch display {
@@ -989,20 +1024,20 @@ open class Element: NSObject {
         }
     }
 
-    open func patchPointerEvents(pointerEvents: String?) {
+    open func patchPointerEvents(pointerEvents: String?) -> Void {
     }
 
-    open func patchObjectFit(objectFit: String?) {
+    open func patchObjectFit(objectFit: String?) -> Void {
     }
 
-    open func patchOverflow(overflow: String?) {
+    open func patchOverflow(overflow: String?) -> Void {
     }
 
-    open func patchOpacity(opacity: Float?) {
+    open func patchOpacity(opacity: Float?) -> Void {
         view.alpha = opacity != nil ? CGFloat(opacity!) : 1.0
     }
 
-    open func patchAspectRatio(aspectRatio: Float?) {
+    open func patchAspectRatio(aspectRatio: Float?) -> Void {
         let layoutParams = view.layoutParams
         
         layoutParams.aspectRatio = aspectRatio
@@ -1014,7 +1049,7 @@ open class Element: NSObject {
         borderRadiusTopRight: StyleSize?,
         borderRadiusBottomLeft: StyleSize?,
         borderRadiusBottomRight: StyleSize?
-    ) {
+    ) -> Void {
         let layoutParams = view.layoutParams
         
         layoutParams.onLayoutClosures["borderRadius"] = {
@@ -1130,37 +1165,37 @@ open class Element: NSObject {
         return CGFloat(min(value, maxRadius))
     }
 
-    open func patchBorderWidth(borderWidth: Float?) {
+    open func patchBorderWidth(borderWidth: Float?) -> Void {
     }
 
-    open func patchBorderColor(borderColor: StyleColor?) {
+    open func patchBorderColor(borderColor: StyleColor?) -> Void {
     }
 
-    open func patchBorderTopWidth(borderTopWidth: Float?) {
+    open func patchBorderTopWidth(borderTopWidth: Float?) -> Void {
     }
 
-    open func patchBorderTopColor(borderTopColor: StyleColor?) {
+    open func patchBorderTopColor(borderTopColor: StyleColor?) -> Void {
     }
 
-    open func patchBorderLeftWidth(borderLeftWidth: Float?) {
+    open func patchBorderLeftWidth(borderLeftWidth: Float?) -> Void {
     }
 
-    open func patchBorderLeftColor(borderLeftColor: StyleColor?) {
+    open func patchBorderLeftColor(borderLeftColor: StyleColor?) -> Void {
     }
 
-    open func patchBorderBottomWidth(borderBottomWidth: Float?) {
+    open func patchBorderBottomWidth(borderBottomWidth: Float?) -> Void {
     }
 
-    open func patchBorderBottomColor(borderBottomColor: StyleColor?) {
+    open func patchBorderBottomColor(borderBottomColor: StyleColor?) -> Void {
     }
 
-    open func patchBorderRightWidth(borderRightWidth: Float?) {
+    open func patchBorderRightWidth(borderRightWidth: Float?) -> Void {
     }
 
-    open func patchBorderRightColor(borderRightColor: StyleColor?) {
+    open func patchBorderRightColor(borderRightColor: StyleColor?) -> Void {
     }
     
-    open func patchTransform(transform: StyleTransform?) {
+    open func patchTransform(transform: StyleTransform?) -> Void {
         let layoutParams = view.layoutParams
         
         layoutParams.onLayoutClosures["transform"] = {
@@ -1237,368 +1272,60 @@ open class Element: NSObject {
         return 0
     }
     
-    public func applyStyle(style: Style, keys: [String]) {
+    public func applyStyle(styleEntries: [StyleEntry]) -> Void {
+        let style = createStyle(styleEntries: self.styleEntries)
+        
+        if additionalStyleEntry == nil {
+            additionalStyleEntry = StyleEntry(style: Style(), keys: [])
+        }
+        
+        for styleEntry in styleEntries {
+            StyleSheetHelper.fillStyleEntry(styleEntry: additionalStyleEntry!, tmpStyleEntry: styleEntry)
+        }
+        
+        let tmpStyle = createStyle(styleEntries: self.styleEntries)
+        
+        let tmpStyler = Styler(style: tmpStyle)
         let styler = Styler(style: style)
         
-        let flex = styler.getFlex()
-        let flexDirection = styler.getFlexDirection()
-        let justifyContent = styler.getJustifyContent()
-        let alignItems = styler.getAlignItems()
-        let alignSelf = styler.getAlignSelf()
-        let backgroundColor = styler.getBackgroundColor()
-        let width = styler.getWidth()
-        let height = styler.getHeight()
-        let minWidth = styler.getMinWidth()
-        let minHeight = styler.getMinHeight()
-        let maxWidth = styler.getMaxWidth()
-        let maxHeight = styler.getMaxHeight()
-        let padding = styler.getPadding()
-        let paddingHorizontal = styler.getPaddingHorizontal()
-        let paddingVertical = styler.getPaddingVertical()
-        let paddingTop = styler.getPaddingTop()
-        let paddingLeft = styler.getPaddingLeft()
-        let paddingBottom = styler.getPaddingBottom()
-        let paddingRight = styler.getPaddingRight()
-        let margin = styler.getMargin()
-        let marginHorizontal = styler.getMarginHorizontal()
-        let marginVertical = styler.getMarginVertical()
-        let marginTop = styler.getMarginTop()
-        let marginLeft = styler.getMarginLeft()
-        let marginBottom = styler.getMarginBottom()
-        let marginRight = styler.getMarginRight()
-        let fontSize = styler.getFontSize()
-        let lineHeight = styler.getLineHeight()
-        let fontWeight = styler.getFontWeight()
-        let color = styler.getColor()
-        let textAlign = styler.getTextAlign()
-        let textDecoration = styler.getTextDecoration()
-        let textTransform = styler.getTextTransform()
-        let textOverflow = styler.getTextOverflow()
-        let overflowWrap = styler.getOverflowWrap()
-        let wordBreak = styler.getWordBreak()
-        let position = styler.getPosition()
-        let top = styler.getTop()
-        let left = styler.getLeft()
-        let bottom = styler.getBottom()
-        let right = styler.getRight()
-        let zIndex = styler.getZIndex()
-        let display = styler.getDisplay()
-        let pointerEvents = styler.getPointerEvents()
-        let objectFit = styler.getObjectFit()
-        let overflow = styler.getOverflow()
-        let opacity = styler.getOpacity()
-        let aspectRatio = styler.getAspectRatio()
-        let borderRadius = styler.getBorderRadius()
-        let borderRadiusTopLeft = styler.getBorderRadiusTopLeft()
-        let borderRadiusTopRight = styler.getBorderRadiusTopRight()
-        let borderRadiusBottomLeft = styler.getBorderRadiusBottomLeft()
-        let borderRadiusBottomRight = styler.getBorderRadiusBottomRight()
-        let borderWidth = styler.getBorderWidth()
-        let borderColor = styler.getBorderColor()
-        let borderTopWidth = styler.getBorderTopWidth()
-        let borderTopColor = styler.getBorderTopColor()
-        let borderLeftWidth = styler.getBorderLeftWidth()
-        let borderLeftColor = styler.getBorderLeftColor()
-        let borderBottomWidth = styler.getBorderBottomWidth()
-        let borderBottomColor = styler.getBorderBottomColor()
-        let borderRightWidth = styler.getBorderRightWidth()
-        let borderRightColor = styler.getBorderRightColor()
-        let transform = styler.getTransform()
+        patchStyler(styler: tmpStyler, prevStyler: styler)
+    }
     
-        let patchFlexBool = keys.contains("flex")
-        let patchFlexDirectionBool = keys.contains("flexDirection")
-        let patchJustifyContentBool = keys.contains("justifyContent")
-        let patchAlignItemsBool = keys.contains("alignItems")
-        let patchAlignSelfBool = keys.contains("alignSelf")
-        let patchBackgroundColorBool = keys.contains("backgroundColor")
-        let patchWidthBool = keys.contains("width")
-        let patchHeightBool = keys.contains("height")
-        let patchMinWidthBool = keys.contains("minWidth")
-        let patchMinHeightBool = keys.contains("minHeight")
-        let patchMaxWidthBool = keys.contains("maxWidth")
-        let patchMaxHeightBool = keys.contains("maxHeight")
-        let patchPaddingBool = keys.contains("padding")
-        let patchPaddingHorizontalBool = keys.contains("paddingHorizontal")
-        let patchPaddingVerticalBool = keys.contains("paddingVertical")
-        let patchPaddingTopBool = keys.contains("paddingTop")
-        let patchPaddingLeftBool = keys.contains("paddingLeft")
-        let patchPaddingBottomBool = keys.contains("paddingBottom")
-        let patchPaddingRightBool = keys.contains("paddingRight")
-        let patchMarginBool = keys.contains("margin")
-        let patchMarginHorizontalBool = keys.contains("marginHorizontal")
-        let patchMarginVerticalBool = keys.contains("marginVertical")
-        let patchMarginTopBool = keys.contains("marginTop")
-        let patchMarginLeftBool = keys.contains("marginLeft")
-        let patchMarginBottomBool = keys.contains("marginBottom")
-        let patchMarginRightBool = keys.contains("marginRight")
-        let patchFontSizeBool = keys.contains("fontSize")
-        let patchLineHeightBool = keys.contains("lineHeight")
-        let patchFontWeightBool = keys.contains("fontWeight")
-        let patchColorBool = keys.contains("color")
-        let patchTextAlignBool = keys.contains("textAlign")
-        let patchTextDecorationBool = keys.contains("textDecoration")
-        let patchTextTransformBool = keys.contains("textTransform")
-        let patchTextOverflowBool = keys.contains("textOverflow")
-        let patchOverflowWrapBool = keys.contains("overflowWrap")
-        let patchWordBreakBool = keys.contains("wordBreak")
-        let patchPositionBool = keys.contains("position")
-        let patchTopBool = keys.contains("top")
-        let patchLeftBool = keys.contains("left")
-        let patchBottomBool = keys.contains("bottom")
-        let patchRightBool = keys.contains("right")
-        let patchZIndexBool = keys.contains("zIndex")
-        let patchDisplayBool = keys.contains("display")
-        let patchPointerEventsBool = keys.contains("pointerEvents")
-        let patchObjectFitBool = keys.contains("objectFit")
-        let patchOverflowBool = keys.contains("overflow")
-        let patchOpacityBool = keys.contains("opacity")
-        let patchAspectRatioBool = keys.contains("aspectRatio")
-        let patchBorderRadiusBool = keys.contains("borderRadius")
-        let patchBorderRadiusTopLeftBool = keys.contains("borderRadiusTopLeft")
-        let patchBorderRadiusTopRightBool = keys.contains("borderRadiusTopRight")
-        let patchBorderRadiusBottomLeftBool = keys.contains("borderRadiusBottomLeft")
-        let patchBorderRadiusBottomRightBool = keys.contains("borderRadiusBottomRight")
-        let patchBorderWidthBool = keys.contains("borderWidth")
-        let patchBorderColorBool = keys.contains("borderColor")
-        let patchBorderTopWidthBool = keys.contains("borderTopWidth")
-        let patchBorderTopColorBool = keys.contains("borderTopColor")
-        let patchBorderLeftWidthBool = keys.contains("borderLeftWidth")
-        let patchBorderLeftColorBool = keys.contains("borderLeftColor")
-        let patchBorderBottomWidthBool = keys.contains("borderBottomWidth")
-        let patchBorderBottomColorBool = keys.contains("borderBottomColor")
-        let patchBorderRightWidthBool = keys.contains("borderRightWidth")
-        let patchBorderRightColorBool = keys.contains("borderRightColor")
-        let patchTransformBool = keys.contains("transform")
-        
-        if patchFlexBool {
-            patchFlex(flex: flex)
-        }
+    public func removeStyle(toRemoveKeys: [[String]?]) -> Void {
+        let style = createStyle(styleEntries: self.styleEntries)
 
-        if patchFlexDirectionBool {
-            patchFlexDirection(flexDirection: flexDirection)
-        }
-
-        if patchJustifyContentBool {
-            patchJustifyContent(justifyContent: justifyContent)
-        }
-
-        if patchAlignItemsBool {
-            patchAlignItems(alignItems: alignItems)
-        }
-
-        if patchAlignSelfBool {
-            patchAlignSelf(alignSelf: alignSelf)
-        }
-
-        if patchBackgroundColorBool {
-            patchBackgroundColor(backgroundColor: backgroundColor)
-        }
-
-        if patchWidthBool {
-            patchWidth(width: width)
-        }
-
-        if patchHeightBool {
-            patchHeight(height: height)
-        }
-
-        if patchMinWidthBool {
-            patchMinWidth(minWidth: minWidth)
-        }
-
-        if patchMinHeightBool {
-            patchMinHeight(minHeight: minHeight)
-        }
-
-        if patchMaxWidthBool {
-            patchMaxWidth(maxWidth: maxWidth)
-        }
-
-        if patchMaxHeightBool {
-            patchMaxHeight(maxHeight: maxHeight)
+        for tmpKeys in toRemoveKeys {
+            if tmpKeys == nil {
+                additionalStyleEntry = nil
+                
+                continue
+            }
+            
+            if additionalStyleEntry == nil {
+                continue
+            }
+            
+            StyleSheetHelper.removeStyleEntryKeys(styleEntry: additionalStyleEntry!, keys: tmpKeys!)
         }
         
-        if patchPaddingBool
-            || patchPaddingHorizontalBool
-            || patchPaddingVerticalBool
-            || patchPaddingTopBool
-            || patchPaddingLeftBool
-            || patchPaddingBottomBool
-            || patchPaddingRightBool {
-            patchPadding(
-                padding: patchPaddingBool ? padding : self.styler.getPadding(),
-                paddingHorizontal: patchPaddingHorizontalBool ? paddingHorizontal : self.styler.getPaddingHorizontal(),
-                paddingVertical: patchPaddingVerticalBool ? paddingVertical : self.styler.getPaddingVertical(),
-                paddingTop: patchPaddingTopBool ? paddingTop : self.styler.getPaddingTop(),
-                paddingLeft: patchPaddingLeftBool ? paddingLeft : self.styler.getPaddingLeft(),
-                paddingBottom: patchPaddingBottomBool ? paddingBottom : self.styler.getPaddingBottom(),
-                paddingRight: patchPaddingRightBool ? paddingRight : self.styler.getPaddingRight()
-            )
-        }
-
-        if patchMarginBool
-            || patchMarginHorizontalBool
-            || patchMarginVerticalBool
-            || patchMarginTopBool
-            || patchMarginLeftBool
-            || patchMarginBottomBool
-            || patchMarginRightBool {
-            patchMargin(
-                margin: patchMarginBool ? margin : self.styler.getMargin(),
-                marginHorizontal: patchMarginHorizontalBool ? marginHorizontal : self.styler.getMarginHorizontal(),
-                marginVertical: patchMarginVerticalBool ? marginVertical : self.styler.getMarginVertical(),
-                marginTop: patchMarginTopBool ? marginTop : self.styler.getMarginTop(),
-                marginLeft: patchMarginLeftBool ? marginLeft : self.styler.getMarginLeft(),
-                marginBottom: patchMarginBottomBool ? marginBottom : self.styler.getMarginBottom(),
-                marginRight: patchMarginRightBool ? marginRight : self.styler.getMarginRight()
-            )
-        }
-
-        if patchFontSizeBool {
-            patchFontSize(fontSize: fontSize)
-        }
-
-        if patchLineHeightBool {
-            patchLineHeight(lineHeight: lineHeight)
-        }
-
-        if patchFontWeightBool {
-            patchFontWeight(fontWeight: fontWeight)
-        }
-
-        if patchColorBool {
-            patchColor(color: color)
-        }
-
-        if patchTextAlignBool {
-            patchTextAlign(textAlign: textAlign)
-        }
-
-        if patchTextDecorationBool {
-            patchTextDecoration(textDecoration: textDecoration)
-        }
-
-        if patchTextTransformBool {
-            patchTextTransform(textTransform: textTransform)
-        }
-
-        if patchTextOverflowBool {
-            patchTextOverflow(textOverflow: textOverflow)
-        }
-
-        if patchOverflowWrapBool {
-            patchOverflowWrap(overflowWrap: overflowWrap)
-        }
-
-        if patchWordBreakBool {
-            patchWordBreak(wordBreak: wordBreak)
-        }
-
-        if patchPositionBool {
-            patchPosition(position: position)
-        }
-
-        if patchTopBool {
-            patchTop(top: top)
-        }
-
-        if patchLeftBool {
-            patchLeft(left: left)
-        }
-
-        if patchBottomBool {
-            patchBottom(bottom: bottom)
-        }
-
-        if patchRightBool {
-            patchRight(right: right)
-        }
-
-        if patchZIndexBool {
-            patchZIndex(zIndex: zIndex)
-        }
-
-        if patchDisplayBool {
-            patchDisplay(display: display)
-        }
-
-        if patchPointerEventsBool {
-            patchPointerEvents(pointerEvents: pointerEvents)
-        }
-
-        if patchObjectFitBool {
-            patchObjectFit(objectFit: objectFit)
-        }
-
-        if patchOverflowBool {
-            patchOverflow(overflow: overflow)
-        }
-
-        if patchOpacityBool {
-            patchOpacity(opacity: opacity)
-        }
-
-        if patchAspectRatioBool {
-            patchAspectRatio(aspectRatio: aspectRatio)
-        }
-
-        if patchBorderRadiusBool
-            || patchBorderRadiusTopLeftBool
-            || patchBorderRadiusTopRightBool
-            || patchBorderRadiusBottomLeftBool
-            || patchBorderRadiusBottomRightBool {
-            patchBorderRadius(
-                borderRadius: patchBorderRadiusBool ? borderRadius : self.styler.getBorderRadius(),
-                borderRadiusTopLeft: patchBorderRadiusTopLeftBool ? borderRadiusTopLeft : self.styler.getBorderRadiusTopLeft(),
-                borderRadiusTopRight: patchBorderRadiusTopRightBool ? borderRadiusTopRight : self.styler.getBorderRadiusTopRight(),
-                borderRadiusBottomLeft: patchBorderRadiusBottomLeftBool ? borderRadiusBottomLeft: self.styler.getBorderRadiusBottomLeft(),
-                borderRadiusBottomRight: patchBorderRadiusBottomRightBool ? borderRadiusBottomRight : self.styler.getBorderRadiusBottomRight()
-            )
-        }
-
-        if patchBorderWidthBool {
-            patchBorderWidth(borderWidth: borderWidth)
-        }
-
-        if patchBorderColorBool {
-            patchBorderColor(borderColor: borderColor)
-        }
-
-        if patchBorderTopWidthBool {
-            patchBorderTopWidth(borderTopWidth: borderTopWidth)
-        }
-
-        if patchBorderTopColorBool {
-            patchBorderTopColor(borderTopColor: borderTopColor)
-        }
-
-        if patchBorderLeftWidthBool {
-            patchBorderLeftWidth(borderLeftWidth: borderLeftWidth)
-        }
-
-        if patchBorderLeftColorBool {
-            patchBorderLeftColor(borderLeftColor: borderLeftColor)
-        }
-
-        if patchBorderBottomWidthBool {
-            patchBorderBottomWidth(borderBottomWidth: borderBottomWidth)
-        }
-
-        if patchBorderBottomColorBool {
-            patchBorderBottomColor(borderBottomColor: borderBottomColor)
-        }
-
-        if patchBorderRightWidthBool {
-            patchBorderRightWidth(borderRightWidth: borderRightWidth)
-        }
-
-        if patchBorderRightColorBool {
-            patchBorderRightColor(borderRightColor: borderRightColor)
+        let tmpStyle = createStyle(styleEntries: self.styleEntries)
+        
+        let tmpStyler = Styler(style: tmpStyle)
+        let styler = Styler(style: style)
+        
+        patchStyler(styler: tmpStyler, prevStyler: styler)
+    }
+    
+    private func createStyle(styleEntries: [StyleEntry]) -> Style {
+        var tmpStyleEntries: [StyleEntry] = []
+        
+        tmpStyleEntries.append(contentsOf: styleEntries)
+        
+        if additionalStyleEntry != nil {
+            tmpStyleEntries.append(additionalStyleEntry!)
         }
         
-        if patchTransformBool {
-            patchTransform(transform: transform)
-        }
+        return StyleSheetHelper.createStyle(styleEntries: tmpStyleEntries)
     }
     
     public func remove() {

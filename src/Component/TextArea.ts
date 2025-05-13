@@ -1,10 +1,12 @@
-import $ from "untrue";
+import $, { PropsNoChildren } from "untrue";
 
 import { Detonator } from "../Detonator";
 
+import { StyleColor } from "../StyleSheet/StyleSheet";
+
 import { BaseView } from "./BaseView";
 
-import { StyleColor, ViewProps } from "./View";
+import { ViewProps } from "./View";
 
 export interface TextAreaChangeEvent extends Event {
   value: string;
@@ -61,7 +63,10 @@ export class TextArea extends BaseView<TextAreaProps> {
   public render(): any {
     const { children, ...attributes } = this.props;
 
-    const tmpAttributes = { ...attributes, onChange: this.onChange };
+    const tmpAttributes: PropsNoChildren<TextAreaProps> = {
+      ...attributes,
+      onChange: this.onChange,
+    };
 
     return $("com.iconshot.detonator.textarea", tmpAttributes, children);
   }

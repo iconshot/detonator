@@ -7,9 +7,11 @@ import {
   Comparer,
 } from "untrue";
 
-import { Messenger } from "../Messenger";
+import { Detonator } from "../Detonator";
 
 import { ErrorHandler } from "../ErrorHandler";
+
+import { StyleSheetHelper } from "../StyleSheet/StyleSheetHelper";
 
 import { HandlerManager } from "../Manager/HandlerManager";
 
@@ -48,7 +50,10 @@ export class Tree {
 
     const elementId = elementEdge?.id ?? null;
 
-    Messenger.treeInit({ treeId, elementId });
+    Detonator.send("com.iconshot.detonator.renderer/treeInit", {
+      treeId,
+      elementId,
+    });
   }
 
   public deinit(): void {
@@ -60,7 +65,9 @@ export class Tree {
 
     this.deinitialized = true;
 
-    Messenger.treeDeinit({ treeId: this.treeId });
+    Detonator.send("com.iconshot.detonator.renderer/treeDeinit", {
+      treeId: this.treeId,
+    });
   }
 
   public mount(slot: Slot): void {
@@ -80,7 +87,10 @@ export class Tree {
 
     const sanitizedEdge = this.sanitizeEdge(this.edge);
 
-    Messenger.mount({ treeId: this.treeId, edge: sanitizedEdge });
+    Detonator.send("com.iconshot.detonator.renderer/mount", {
+      treeId: this.treeId,
+      edge: sanitizedEdge,
+    });
   }
 
   public unmount(): void {
@@ -102,7 +112,9 @@ export class Tree {
 
     clearTimeout(this.timeout);
 
-    Messenger.unmount({ treeId: this.treeId });
+    Detonator.send("com.iconshot.detonator.renderer/unmount", {
+      treeId: this.treeId,
+    });
   }
 
   private renderChildren(
@@ -612,7 +624,10 @@ export class Tree {
       sanitizedEdges.push(sanitizedEdge);
     }
 
-    Messenger.rerender({ treeId: this.treeId, edges: sanitizedEdges });
+    Detonator.send("com.iconshot.detonator.renderer/rerender", {
+      treeId: this.treeId,
+      edges: sanitizedEdges,
+    });
 
     this.skippedIds.clear();
     this.movedIds.clear();
@@ -743,6 +758,20 @@ export class Tree {
         switch (key) {
           case "key":
           case "ref": {
+            break;
+          }
+
+          case "style": {
+            const style = value;
+
+            if (style === null) {
+              tmpAttributes[key] = null;
+            } else {
+              const styles = StyleSheetHelper.combineStyles(style);
+
+              tmpAttributes[key] = styles;
+            }
+
             break;
           }
 

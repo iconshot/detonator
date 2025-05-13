@@ -5,7 +5,7 @@ open class Module {
         self.detonator = detonator
     }
     
-    func register() {
+    open func register() -> Void {
         preconditionFailure("This method must be overriden.")
     }
 }

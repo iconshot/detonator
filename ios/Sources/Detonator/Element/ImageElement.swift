@@ -1,8 +1,8 @@
 import UIKit
 
 class ImageElement: Element {
-    override public func decodeAttributes(edge: Edge) -> ImageAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> ImageAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> UIImageView {

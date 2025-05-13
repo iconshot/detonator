@@ -1,5 +1,5 @@
 export class Platform {
-  static get(): "ios" | "android" {
+  public static get(): "ios" | "android" {
     const windowAny = window as any;
 
     return windowAny.__detonator_platform;

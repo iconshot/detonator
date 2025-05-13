@@ -1,6 +1,6 @@
-package com.iconshot.detonator.element;
+package com.iconshot.detonator.module.stylesheet;
 
-import com.iconshot.detonator.element.Style.StyleTransform;
+import com.iconshot.detonator.module.stylesheet.Style.StyleTransform;
 
 public class Styler {
     private Style style;

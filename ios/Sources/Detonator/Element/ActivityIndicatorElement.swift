@@ -1,8 +1,8 @@
 import UIKit
 
 class ActivityIndicatorElement: Element {
-    override public func decodeAttributes(edge: Edge) -> ActivityIndicatorAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> ActivityIndicatorAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> UIActivityIndicatorView {

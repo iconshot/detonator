@@ -1,8 +1,30 @@
 import $, { Hook } from "untrue";
 
-import { View, Text, Color } from "detonator";
+import { View, Text, Color, StyleSheet } from "detonator";
 
 const buttonColor = new Color(Color.Hues.CERULEAN);
+
+const styles = StyleSheet.create({
+  container: {
+    width: "100%",
+    height: "100%",
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 30,
+  },
+  heading: { color: "white", fontSize: 30 },
+  counter: { color: "white", fontSize: 24 },
+  button: {
+    borderRadius: 10,
+    backgroundColor: buttonColor.hex(90),
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 15,
+    paddingHorizontal: 25,
+  },
+  buttonText: { color: "white", fontSize: 18 },
+});
 
 function App() {
   const [counter, updateCounter] = Hook.useState(0);
@@ -30,45 +52,15 @@ function App() {
     });
   };
 
-  return $(
-    View,
-    {
-      style: {
-        width: "100%",
-        height: "100%",
-        backgroundColor: "black",
-        justifyContent: "center",
-        alignItems: "center",
-        gap: 30,
-      },
-    },
-    [
-      $(Text, { style: { color: "white", fontSize: 30 } }, "Hello, world."),
-      $(
-        Text,
-        {
-          ref: textRef,
-          style: { color: "white", fontSize: 24 },
-        },
-        counter
-      ),
-      $(
-        View,
-        {
-          style: {
-            borderRadius: 10,
-            backgroundColor: buttonColor.hex(90),
-            justifyContent: "center",
-            alignItems: "center",
-            paddingVertical: 15,
-            paddingHorizontal: 25,
-          },
-          onTap,
-        },
-        $(Text, { style: { color: "white", fontSize: 18 } }, "Tap")
-      ),
-    ]
-  );
+  return $(View, { style: styles.container }, [
+    $(Text, { style: styles.heading }, "Hello, world."),
+    $(Text, { ref: textRef, style: styles.counter }, counter),
+    $(
+      View,
+      { style: styles.button, onTap },
+      $(Text, { style: styles.buttonText }, "Tap")
+    ),
+  ]);
 }
 
 export default App;

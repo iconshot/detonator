@@ -11,8 +11,8 @@ class VideoElement: Element {
     
     private var currentPosition: Int = 0
     
-    override public func decodeAttributes(edge: Edge) -> VideoAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> VideoAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> VideoView {

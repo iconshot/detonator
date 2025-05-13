@@ -2,7 +2,7 @@ import UIKit
 
 class TextAreaSetValueRequest: Request {
     override public func run() {
-        let value: String = decode()!
+        let value: String! = decodeData()
         
         let edge = getComponentEdge()!
         

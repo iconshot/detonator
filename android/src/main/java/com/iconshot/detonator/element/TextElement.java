@@ -8,7 +8,7 @@ import com.iconshot.detonator.helpers.ColorHelper;
 import com.iconshot.detonator.helpers.CompareHelper;
 import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.PixelHelper;
-import com.iconshot.detonator.tree.Edge;
+import com.iconshot.detonator.renderer.Edge;
 
 public class TextElement extends Element<TextView, TextElement.Attributes> {
     private int defaultColor;

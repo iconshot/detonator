@@ -3,8 +3,8 @@ import UIKit
 class VerticalScrollViewElement: Element {
     private var isAtBottom: Bool = false
     
-    override public func decodeAttributes(edge: Edge) -> VerticalScrollViewAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> VerticalScrollViewAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> VerticalScrollView {
@@ -84,6 +84,16 @@ class VerticalScrollViewElement: Element {
             layoutParams.onLayoutClosures["scroll"] = nil
         }
     }
+    
+    override func patchPadding(
+        padding: Float?,
+        paddingHorizontal: Float?,
+        paddingVertical: Float?,
+        paddingTop: Float?,
+        paddingLeft: Float?,
+        paddingBottom: Float?,
+        paddingRight: Float?
+    ) {}
     
     override func patchBorderRadius(
         borderRadius: StyleSize?,

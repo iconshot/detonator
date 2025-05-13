@@ -9,8 +9,8 @@ class AudioElement: Element {
     
     private var currentPosition: Int = 0
     
-    override public func decodeAttributes(edge: Edge) -> AudioAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> AudioAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> UIView {
@@ -48,6 +48,10 @@ class AudioElement: Element {
                 }
             }
         }
+    }
+    
+    override func patchDisplay(display: String?) {
+        super.patchDisplay(display: "none")
     }
     
     private func patchUrl(url: String?) {

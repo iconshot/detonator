@@ -1,6 +1,6 @@
 class ImageGetSizeRequest: Request {
     override public func run() {
-        let urlString: String = decode()!
+        let urlString: String! = decodeData()
         
         ImageHelper.getImageSize(urlString: urlString) { size, error in
             if let error = error {

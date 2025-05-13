@@ -3,7 +3,7 @@ package com.iconshot.detonator.request;
 import android.widget.EditText;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.tree.Edge;
+import com.iconshot.detonator.renderer.Edge;
 
 public class InputSetValueRequest extends Request<String> {
     public InputSetValueRequest(Detonator detonator, IncomingRequest incomingRequest) {
@@ -12,7 +12,7 @@ public class InputSetValueRequest extends Request<String> {
 
     @Override
     public void run() {
-        String value = decode(String.class);
+        String value = decodeData(String.class);
 
         Edge edge = getComponentEdge();
 

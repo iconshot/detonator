@@ -4,7 +4,7 @@ import { TreeHub } from "../Tree/TreeHub";
 
 export class HandlerManager {
   public static listen(): void {
-    Detonator.on("handler", (json: string): void => {
+    Detonator.emitter.on("handler", (json: string): void => {
       const {
         name,
         edgeId,

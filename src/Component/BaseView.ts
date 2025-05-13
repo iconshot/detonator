@@ -1,11 +1,19 @@
 import { Component } from "untrue";
 
-import { Detonator } from "../Detonator";
+import { Style } from "../StyleSheet/StyleSheet";
 
-import { ViewProps, Style } from "./View";
+import { StyleSheetApplyStyleHelper } from "../StyleSheet/StyleSheetApplyStyleHelper";
+
+import { StyleSheetRemoveStyleHelper } from "../StyleSheet/StyleSheetRemoveStyleHelper";
+
+import { ViewProps } from "./View";
 
 export class BaseView<K extends ViewProps = ViewProps> extends Component<K> {
   public style(style: Style): void {
-    Detonator.style(this, style);
+    StyleSheetApplyStyleHelper.applyStyle(this, style);
+  }
+
+  public removeStyle<K extends keyof Style>(key: K | K[] | null = null): void {
+    StyleSheetRemoveStyleHelper.removeStyle(this, key);
   }
 }

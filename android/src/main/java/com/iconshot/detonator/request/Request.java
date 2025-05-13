@@ -1,7 +1,7 @@
 package com.iconshot.detonator.request;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.tree.Edge;
+import com.iconshot.detonator.renderer.Edge;
 
 public abstract class Request<T> {
     protected Detonator detonator;
@@ -18,8 +18,12 @@ public abstract class Request<T> {
         this.data = incomingRequest.data;
     }
 
-    protected T decode(Class<T> DataClass) {
-        return detonator.gson.fromJson(data, DataClass);
+    protected T decodeData(Class<T> DataClass) {
+        if (data == null) {
+            return null;
+        }
+
+        return detonator.decode(data, DataClass);
     }
 
     protected Edge getComponentEdge() {

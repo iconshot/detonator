@@ -96,6 +96,18 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
         }
     }
 
+    @Override
+    protected void patchPadding(
+            Float padding,
+            Float paddingHorizontal,
+            Float paddingVertical,
+            Float paddingTop,
+            Float paddingLeft,
+            Float paddingBottom,
+            Float paddingRight
+    ) {
+    }
+
     protected void patchBackgroundColor(
             Object backgroundColor,
             Object borderRadius,

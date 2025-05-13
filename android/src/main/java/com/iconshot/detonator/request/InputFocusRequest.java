@@ -6,7 +6,7 @@ import android.widget.EditText;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ContextHelper;
-import com.iconshot.detonator.tree.Edge;
+import com.iconshot.detonator.renderer.Edge;
 
 public class InputFocusRequest extends Request {
     public InputFocusRequest(Detonator detonator, IncomingRequest incomingRequest) {

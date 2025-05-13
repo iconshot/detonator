@@ -11,7 +11,7 @@ public class ToastShowRequest extends Request<ToastShowRequest.Data> {
     }
 
     public void run() {
-        Data data = decode(Data.class);
+        Data data = decodeData(Data.class);
 
         int duration = data.isShort ? Toast.LENGTH_SHORT : Toast.LENGTH_LONG;
 

@@ -1,8 +1,10 @@
-import $, { Ref } from "untrue";
+import $, { PropsNoChildren, Ref } from "untrue";
+
+import { Style, StyleColor } from "../StyleSheet/StyleSheet";
 
 import { BaseView } from "./BaseView";
 
-import { Style, StyleColor, View, ViewProps } from "./View";
+import { View, ViewProps } from "./View";
 
 interface ActivityIndicatorProps extends ViewProps {
   color: StyleColor;
@@ -21,7 +23,13 @@ export class ActivityIndicator extends BaseView<ActivityIndicatorProps> {
   public render(): any {
     const { size, color, children, ...attributes } = this.props;
 
-    const tmpAttributes: any = { size, style: { color } };
+    const tmpAttributes: Omit<
+      PropsNoChildren<ActivityIndicatorProps>,
+      "color"
+    > = {
+      style: { color },
+      size,
+    };
 
     return $(
       View,

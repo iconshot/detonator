@@ -4,7 +4,7 @@ import androidx.media3.common.Player;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.AudioElement;
-import com.iconshot.detonator.tree.Edge;
+import com.iconshot.detonator.renderer.Edge;
 
 public class AudioSeekRequest extends Request<Integer> {
     public AudioSeekRequest(Detonator detonator, IncomingRequest incomingRequest) {
@@ -12,7 +12,7 @@ public class AudioSeekRequest extends Request<Integer> {
     }
 
     public void run() {
-        Integer position = decode(Integer.class);
+        Integer position = decodeData(Integer.class);
 
         Edge edge = getComponentEdge();
 

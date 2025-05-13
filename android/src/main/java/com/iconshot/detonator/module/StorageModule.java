@@ -29,7 +29,7 @@ public class StorageModule extends Module {
 
         @Override
         public void run() {
-            Data data = decode(Data.class);
+            Data data = decodeData(Data.class);
 
             SharedPreferences sharedPreferences = StorageModule.getSharedPreferences(data.name);
 
@@ -51,7 +51,7 @@ public class StorageModule extends Module {
 
         @Override
         public void run() {
-            Data data = decode(Data.class);
+            Data data = decodeData(Data.class);
 
             SharedPreferences sharedPreferences = StorageModule.getSharedPreferences(data.name);
 

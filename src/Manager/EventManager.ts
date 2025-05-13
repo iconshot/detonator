@@ -4,7 +4,7 @@ import { Detonator } from "../Detonator";
 
 export class EventManager {
   public static bind(name: string, emitter: Emitter): void {
-    Detonator.on("event", (json: string): void => {
+    Detonator.emitter.on("event", (json: string): void => {
       const { name: eventName, data }: { name: string; data: any } =
         JSON.parse(json);
 

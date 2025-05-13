@@ -3,7 +3,6 @@ package com.iconshot.detonator;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
-import android.view.ViewGroup;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
@@ -12,10 +11,10 @@ import android.os.Handler;
 import android.os.Looper;
 
 import java.lang.reflect.Constructor;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+
+import com.iconshot.detonator.renderer.Renderer;
 
 import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.element.ActivityIndicatorElement;
@@ -30,7 +29,6 @@ import com.iconshot.detonator.element.TextElement;
 import com.iconshot.detonator.element.AudioElement;
 import com.iconshot.detonator.element.videoelement.VideoElement;
 import com.iconshot.detonator.element.viewelement.ViewElement;
-import com.iconshot.detonator.element.Style;
 
 import com.iconshot.detonator.emitter.EventEmitter;
 import com.iconshot.detonator.emitter.HandlerEmitter;
@@ -55,6 +53,7 @@ import com.iconshot.detonator.request.AudioSeekRequest;
 import com.iconshot.detonator.module.Module;
 import com.iconshot.detonator.module.AppStateModule;
 import com.iconshot.detonator.module.StorageModule;
+import com.iconshot.detonator.module.stylesheet.StyleSheetModule;
 import com.iconshot.detonator.module.fullscreen.FullScreenModule;
 
 import com.iconshot.detonator.helpers.ContextHelper;
@@ -62,29 +61,33 @@ import com.iconshot.detonator.helpers.FileHelper;
 
 import com.iconshot.detonator.layout.ViewLayout;
 
-
-import com.iconshot.detonator.tree.Tree;
-import com.iconshot.detonator.tree.Edge;
-import com.iconshot.detonator.tree.Target;
+import com.iconshot.detonator.renderer.Edge;
 
 public class Detonator {
     private final String path;
+
+    private final Renderer renderer;
+
+    private final Map<String, MessageHandler> messageHandlers;
+
     private final Map<String, Class<? extends Element>> elementClasses;
     private final Map<String, Class<? extends Request>> requestClasses;
     private final Map<String, Class<? extends Module>> moduleClasses;
+
     private final Map<String, Module> modules;
+
     private final HandlerEmitter handlerEmitter;
     private final EventEmitter eventEmitter;
-    private final Map<Integer, Tree> trees;
-    private final Map<Integer, Edge> edges;
+
     private final Handler uiHandler;
-    public final Gson gson;
+    private final Gson gson;
+
     private WebView webView;
-    private final ViewLayout rootView;
 
     public Detonator(ViewLayout rootView, String path) {
         this.path = path;
-        this.rootView = rootView;
+
+        messageHandlers = new HashMap<>();
 
         elementClasses = new HashMap<>();
         requestClasses = new HashMap<>();
@@ -95,8 +98,11 @@ public class Detonator {
         handlerEmitter = new HandlerEmitter(this);
         eventEmitter = new EventEmitter(this);
 
-        trees = new HashMap<>();
-        edges = new HashMap<>();
+        renderer = new Renderer(this, rootView);
+
+        if (ContextHelper.context == null) {
+            ContextHelper.context = rootView.getContext();
+        }
 
         uiHandler = new Handler(Looper.getMainLooper());
 
@@ -106,9 +112,38 @@ public class Detonator {
 
         gson = builder.create();
 
-        if (ContextHelper.context == null) {
-            ContextHelper.context = rootView.getContext();
-        }
+        addMessageHandler("com.iconshot.detonator/request", (dataString) -> {
+            Request.IncomingRequest incomingRequest = decode(dataString, Request.IncomingRequest.class);
+
+            Class<? extends Request> requestClass = requestClasses.get(incomingRequest.name);
+
+            if (requestClass == null) {
+                return;
+            }
+
+            Request request;
+
+            try {
+                Constructor<? extends Request> constructor;
+
+                constructor = requestClass.getDeclaredConstructor(
+                        Detonator.class,
+                        Request.IncomingRequest.class
+                );
+
+                request = constructor.newInstance(this, incomingRequest);
+            } catch (Exception e) {
+                return;
+            }
+
+            request.run();
+        });
+
+        addMessageHandler("com.iconshot.detonator/log", dataString -> {
+            String str = dataString.substring(1, dataString.length() - 1);
+
+            System.out.println(str);
+        });
 
         addElementClass("com.iconshot.detonator.view", ViewElement.class);
         addElementClass("com.iconshot.detonator.text", TextElement.class);
@@ -142,6 +177,7 @@ public class Detonator {
         addModuleClass("com.iconshot.detonator.appstate", AppStateModule.class);
         addModuleClass("com.iconshot.detonator.storage", StorageModule.class);
         addModuleClass("com.iconshot.detonator.fullscreen", FullScreenModule.class);
+        addModuleClass("com.iconshot.detonator.stylesheet", StyleSheetModule.class);
 
         initWebView();
 
@@ -164,16 +200,40 @@ public class Detonator {
         evaluate(code);
     }
 
+    public <T> T decode(String data, Class<T> dataClass) {
+        return gson.fromJson(data, dataClass);
+    }
+
     public Edge getEdge(int edgeId) {
-        return edges.get(edgeId);
+        return renderer.edges.get(edgeId);
+    }
+
+    public Class<? extends Element> getElementClass(String key) {
+        return elementClasses.get(key);
+    }
+
+    public MessageHandler getMessageHandler(String key) {
+        return messageHandlers.get(key);
+    }
+
+    public void addMessageHandler(String key, MessageHandler messageHandler) {
+        messageHandlers.put(key, messageHandler);
     }
 
     public void addElementClass(String key, Class<? extends Element> elementClass) {
         elementClasses.put(key, elementClass);
     }
 
+    public Class<? extends Request> getRequestClass(String key) {
+        return requestClasses.get(key);
+    }
+
     public void addRequestClass(String key, Class<? extends Request> requestClass) {
         requestClasses.put(key, requestClass);
+    }
+
+    public Class<? extends Module> getModuleClass(String key) {
+        return moduleClasses.get(key);
     }
 
     public void addModuleClass(String key, Class<? extends Module> moduleClass) {
@@ -194,7 +254,7 @@ public class Detonator {
                 .replaceAll("\\\\", "\\\\\\\\")
                 .replaceAll("\"", "\\\\\"");
 
-        String code = "window.Detonator.emit(\"" + name + "\", \"" + escape + "\");";
+        String code = "window.Detonator.emitter.emit(\"" + name + "\", \"" + escape + "\");";
 
         evaluate(code);
     }
@@ -243,8 +303,12 @@ public class Detonator {
         }
     }
 
+    public void performLayout() {
+        this.renderer.performLayout();
+    }
+
     @JavascriptInterface
-    public void postMessage(String json) {
+    public void postMessage(String messageString) {
         /*
 
         why the uiHandler.post?
@@ -259,435 +323,24 @@ public class Detonator {
 
         */
 
-        Message message = gson.fromJson(json, Message.class);
-
         uiHandler.post(() -> {
-            switch (message.action) {
-                case "treeInit": {
-                    treeInit(message.data);
+            String[] parts = messageString.split("\n");
 
-                    break;
-                }
+            String name = parts[0];
+            String data = parts[1];
 
-                case "treeDeinit": {
-                    treeDeinit(message.data);
+            MessageHandler messageHandler = messageHandlers.get(name);
 
-                    break;
-                }
-
-                case "mount": {
-                    mount(message.data);
-
-                    break;
-                }
-
-                case "rerender": {
-                    rerender(message.data);
-
-                    break;
-                }
-
-                case "unmount": {
-                    unmount(message.data);
-
-                    break;
-                }
-
-                case "style": {
-                    style(message.data);
-
-                    break;
-                }
-
-                case "request": {
-                    request(message.data);
-
-                    break;
-                }
-
-                case "log": {
-                    log(message.data);
-
-                    break;
-                }
+            if (messageHandler == null) {
+                return;
             }
+
+            messageHandler.handle(data);
         });
     }
 
-    private void treeInit(String dataString) {
-        TreeInitData data = gson.fromJson(dataString, TreeInitData.class);
-
-        ViewLayout view;
-
-        if (data.elementId != null) {
-            Edge elementEdge = edges.get(data.elementId);
-
-            view = (ViewLayout) elementEdge.element.view;
-        } else {
-            view = rootView;
-        }
-
-        Tree tree = new Tree(view);
-
-        trees.put(data.treeId, tree);
-    }
-
-    private void treeDeinit(String dataString) {
-        TreeDeinitData data = gson.fromJson(dataString, TreeDeinitData.class);
-
-        trees.remove(data.treeId);
-    }
-
-    private void mount(String dataString) {
-        MountData data = gson.fromJson(dataString, MountData.class);
-
-        Tree tree = trees.get(data.treeId);
-
-        Target target = new Target(tree.view, 0);
-
-        tree.edge = data.edge;
-
-        renderEdge(tree.edge, null, target);
-
-        performLayout();
-    }
-
-    private void unmount(String dataString) {
-        UnmountData data = gson.fromJson(dataString, UnmountData.class);
-
-        Tree tree = trees.get(data.treeId);
-
-        Target target = new Target(tree.view, 0);
-
-        unmountEdge(tree.edge, target);
-
-        tree.edge = null;
-
-        performLayout();
-    }
-
-    private void rerender(String dataString) {
-        RerenderData data = gson.fromJson(dataString, RerenderData.class);
-
-        Tree tree = trees.get(data.treeId);
-
-        for (Edge tmpEdge : data.edges) {
-            Edge edge = edges.get(tmpEdge.id);
-
-            Target target = createTarget(edge, tree);
-
-            Edge prevEdge = edge.clone();
-
-            edge.copyFrom(tmpEdge);
-
-            renderEdge(edge, prevEdge, target);
-
-            int difference = edge.targetViewsCount - prevEdge.targetViewsCount;
-
-            if (difference != 0) {
-                propagateTargetViewsCountDifference(edge, difference);
-            }
-        }
-
-        performLayout();
-    }
-
-    private void style(String dataString) {
-        StyleItem[] styleItems = gson.fromJson(dataString, StyleItem[].class);
-
-        for (StyleItem styleItem : styleItems) {
-            Edge edge = edges.get(styleItem.elementId);
-
-            edge.element.applyStyle(styleItem.style, styleItem.keys);
-        }
-
-        performLayout();
-    }
-
-    private void request(String data) {
-        Request.IncomingRequest incomingRequest = gson.fromJson(data, Request.IncomingRequest.class);
-
-        Class<? extends Request> requestClass = requestClasses.get(incomingRequest.name);
-
-        if (requestClass == null) {
-            return;
-        }
-
-        Request request;
-
-        try {
-            Constructor<? extends Request> constructor;
-
-            constructor = requestClass.getDeclaredConstructor(
-                    Detonator.class,
-                    Request.IncomingRequest.class
-            );
-
-            request = constructor.newInstance(Detonator.this, incomingRequest);
-        } catch (Exception e) {
-            return;
-        }
-
-        request.run();
-    }
-
-    private void log(String dataString) {
-        String str = dataString.substring(1, dataString.length() - 1);
-
-        System.out.println(str);
-    }
-
-    public void performLayout() {
-        rootView.performLayout();
-
-        if (FullScreenModule.fullScreenView != null) {
-            FullScreenModule.fullScreenView.performLayout();
-        }
-    }
-
-    private void renderChildren(Edge edge, Edge prevEdge, Target target) {
-        List<Edge> children = edge.children;
-
-        List<Edge> prevChildren = prevEdge != null ? prevEdge.children : new ArrayList<>();
-
-        for (Edge prevChild: prevChildren) {
-            Edge child = null;
-
-            for (Edge tmpChild : children) {
-                if (prevChild.id == tmpChild.id) {
-                    child = tmpChild;
-
-                    break;
-                }
-            }
-
-            if (child == null) {
-                unmountEdge(prevChild, target);
-            }
-        }
-
-        for (Edge child : children) {
-            Edge prevChild = null;
-
-            for (Edge tmpChild : prevChildren) {
-                if (child.id == tmpChild.id) {
-                    prevChild = tmpChild;
-
-                    break;
-                }
-            }
-
-            if (child.moved) {
-                Target tmpTarget = new Target(target.view, target.index);
-
-                moveEdge(prevChild, tmpTarget);
-            }
-
-            renderEdge(child, prevChild, target);
-        }
-    }
-
-    private void renderEdge(Edge edge, Edge prevEdge, Target target) {
-        edges.put(edge.id, edge);
-
-        Element element = prevEdge != null ? prevEdge.element : null;
-
-        if (element == null) {
-            element = createElement(edge);
-
-            if (element != null) {
-                element.create();
-            }
-        }
-
-        edge.element = element;
-
-        if (element != null) {
-            element.edge = edge;
-        }
-
-        if (edge.skipped) {
-            target.index += prevEdge.targetViewsCount;
-
-            edge.parent = prevEdge.parent;
-
-            edge.contentType = prevEdge.contentType;
-
-            edge.attributes = prevEdge.attributes;
-
-            edge.children = prevEdge.children;
-
-            edge.text = prevEdge.text;
-
-            edge.targetViewsCount = prevEdge.targetViewsCount;
-
-            return;
-        }
-
-        int initialTargetIndex = target.index;
-
-        Target tmpTarget = target;
-
-        if (element != null && element.view instanceof ViewGroup) {
-            tmpTarget = new Target((ViewGroup) element.view, 0);
-        }
-
-        renderChildren(edge, prevEdge, tmpTarget);
-
-        if (element != null) {
-            /*
-              In JavaScript, patch() is executed before renderChildren.
-              However, here we need to execute it **after** because:
-
-              - Elements like `TextElement` interact with their children inside `patchView()`.
-              - Sometimes, child edges have a `null` `text` value (when they are skipped).
-              - We rely on `renderChildren` to propagate the `text` from `prevEdge`.
-
-              By running patch() after renderChildren, we ensure that all child elements
-              have the correct `text` values before patching occurs.
-            */
-
-            element.patch();
-
-            target.insert(element.view);
-        }
-
-        int targetViewsCount = target.index - initialTargetIndex;
-
-        edge.targetViewsCount = targetViewsCount;
-    }
-
-    private void unmountEdge(Edge edge, Target target) {
-        edges.remove(edge.id);
-
-        Target tmpTarget = target;
-
-        if (edge.element != null && target != null) {
-            tmpTarget = null;
-        }
-
-        for (Edge child : edge.children) {
-            unmountEdge(child, tmpTarget);
-        }
-
-        if (edge.element != null) {
-            edge.element.remove();
-
-            if (target != null) {
-                target.remove(edge.element.view);
-            }
-        }
-    }
-
-    private Element createElement(Edge edge) {
-        if (edge.contentType == null) {
-            return null;
-        }
-
-        Class<? extends Element> elementClass = this.elementClasses.get(edge.contentType);
-
-        if (elementClass == null) {
-            return null;
-        }
-
-        try {
-            Constructor<? extends Element> constructor;
-
-            constructor = elementClass.getDeclaredConstructor(Detonator.class);
-
-            return constructor.newInstance(this);
-        } catch (Exception e) {
-            return null;
-        }
-    }
-
-    private Target createTarget(Edge edge, Tree tree) {
-        return createTarget(edge, tree, 0);
-    }
-
-    private Target createTarget(Edge edge, Tree tree, int targetIndex) {
-        if (edge.parent == null) {
-            return new Target(tree.view, targetIndex);
-        }
-
-        Edge parent = edges.get(edge.parent);
-
-        int index = parent.children.indexOf(edge);
-
-        for (int i = index - 1; i >= 0; i--) {
-            Edge child = parent.children.get(i);
-
-            targetIndex += child.targetViewsCount;
-        }
-
-        if (parent.element != null) {
-            return new Target((ViewLayout) parent.element.view, targetIndex);
-        }
-
-        return createTarget(parent, tree, targetIndex);
-    }
-
-    private void propagateTargetViewsCountDifference(Edge edge, int difference) {
-        if (edge.parent == null) {
-            return;
-        }
-
-        Edge parent = edges.get(edge.parent);
-
-        Element element = parent.element;
-
-        if (element != null) {
-            return;
-        }
-
-        parent.targetViewsCount += difference;
-
-        propagateTargetViewsCountDifference(parent, difference);
-    }
-
-    private void moveEdge(Edge edge, Target target) {
-        if (edge.element != null) {
-            target.insert(edge.element.view);
-
-            return;
-        }
-
-        for (Edge child: edge.children) {
-            moveEdge(child, target);
-        }
-    }
-
-    private static class Message {
-        String action;
-        String data;
-    }
-
-    private static class TreeInitData {
-        int treeId;
-        Integer elementId;
-    }
-
-    private static class TreeDeinitData {
-        int treeId;
-    }
-
-    private static class MountData {
-        int treeId;
-        Edge edge;
-    }
-
-    private static class UnmountData {
-        int treeId;
-    }
-
-    private static class RerenderData {
-        int treeId;
-        Edge[] edges;
-    }
-
-    private static class StyleItem {
-        int elementId;
-        Style style;
-        List<String> keys;
+    @FunctionalInterface
+    public interface MessageHandler {
+        void handle(String dataString);
     }
 }

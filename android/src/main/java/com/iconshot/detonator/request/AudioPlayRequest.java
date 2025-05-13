@@ -4,7 +4,7 @@ import androidx.media3.common.Player;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.AudioElement;
-import com.iconshot.detonator.tree.Edge;
+import com.iconshot.detonator.renderer.Edge;
 
 public class AudioPlayRequest extends Request {
     public AudioPlayRequest(Detonator detonator, IncomingRequest incomingRequest) {

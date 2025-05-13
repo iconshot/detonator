@@ -1,4 +1,4 @@
-import $ from "untrue";
+import $, { PropsNoChildren } from "untrue";
 
 import { Detonator } from "../Detonator";
 
@@ -67,7 +67,10 @@ export class Video extends BaseView<VideoProps> {
   public render(): any {
     const { children, ...attributes } = this.props;
 
-    const tmpAttributes = { ...attributes, onProgress: this.onProgress };
+    const tmpAttributes: PropsNoChildren<VideoProps> = {
+      ...attributes,
+      onProgress: this.onProgress,
+    };
 
     return $("com.iconshot.detonator.video", tmpAttributes, children);
   }

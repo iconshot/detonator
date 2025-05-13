@@ -1,4 +1,4 @@
-import $ from "untrue";
+import $, { PropsNoChildren } from "untrue";
 
 import { Detonator } from "../Detonator";
 
@@ -67,9 +67,8 @@ export class Audio extends BaseView<AudioProps> {
   public render(): any {
     const { children, ...attributes } = this.props;
 
-    const tmpAttributes: Omit<AudioProps, "children"> = {
+    const tmpAttributes: PropsNoChildren<AudioProps> = {
       ...attributes,
-      style: { display: "none" },
       onProgress: this.onProgress,
     };
 

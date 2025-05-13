@@ -14,7 +14,7 @@ public class ImageGetSizeRequest extends Request<String> {
     }
 
     public void run() {
-        String url = decode(String.class);
+        String url = decodeData(String.class);
 
         class DownloadImageTask extends AsyncTask<String, Void, File> {
             @Override

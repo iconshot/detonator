@@ -1,16 +1,24 @@
-import $ from "untrue";
+import $, { PropsNoChildren } from "untrue";
+
+import { StyleSheet } from "../StyleSheet/StyleSheet";
 
 import { BaseView } from "./BaseView";
 
-import { Style, View, ViewProps } from "./View";
+import { StyleAttribute, View, ViewProps } from "./View";
+
+const styles = StyleSheet.create({
+  contentContainerHorizontal: { flexDirection: "row" },
+  contentContainerHorizontalInverted: { flexDirection: "row-reverse" },
+  contentContainerVertical: { flexDirection: "column" },
+  contentContainerVerticalInverted: { flexDirection: "column-reverse" },
+});
 
 export interface ScrollViewPageChangeEvent extends Event {
   page: number;
 }
 
 interface ScrollViewProps extends ViewProps {
-  style: Style;
-  contentContainerStyle?: Style | null;
+  contentContainerStyle?: StyleAttribute | null;
   horizontal?: boolean | null;
   paginated?: boolean | null;
   inverted?: boolean | null;
@@ -21,48 +29,43 @@ interface ScrollViewProps extends ViewProps {
 export class ScrollView extends BaseView<ScrollViewProps> {
   public render(): any {
     const {
-      style,
       contentContainerStyle = null,
       children,
       ...attributes
     } = this.props;
 
-    const tmpStyle: Style = { ...style };
-
-    tmpStyle.padding = null;
-    tmpStyle.paddingHorizontal = null;
-    tmpStyle.paddingVertical = null;
-    tmpStyle.paddingTop = null;
-    tmpStyle.paddingLeft = null;
-    tmpStyle.paddingBottom = null;
-    tmpStyle.paddingRight = null;
-
     const horizontal = attributes.horizontal ?? false;
     const inverted = attributes.inverted ?? false;
 
-    const tmpAttributes = {
-      ...attributes,
-      style: tmpStyle,
-      horizontal,
-      inverted,
-    };
+    const contentContainerStyles: StyleAttribute = [];
 
-    const tmpContentContainerStyle = { ...(contentContainerStyle ?? {}) };
+    contentContainerStyles.push(contentContainerStyle);
 
-    tmpContentContainerStyle.flexDirection = horizontal
-      ? inverted
-        ? "row-reverse"
-        : "row"
-      : inverted
-      ? "column-reverse"
-      : "column";
+    if (horizontal) {
+      contentContainerStyles.push(
+        inverted
+          ? styles.contentContainerHorizontalInverted
+          : styles.contentContainerHorizontal
+      );
+    } else {
+      contentContainerStyles.push(
+        inverted
+          ? styles.contentContainerVerticalInverted
+          : styles.contentContainerVertical
+      );
+    }
+
+    const tmpAttributes: Omit<
+      PropsNoChildren<ScrollViewProps>,
+      "contentContainerStyle"
+    > = { ...attributes, horizontal, inverted };
 
     return $(
       horizontal
         ? "com.iconshot.detonator.horizontalscrollview"
         : "com.iconshot.detonator.verticalscrollview",
       tmpAttributes,
-      $(View, { style: tmpContentContainerStyle }, children)
+      $(View, { style: contentContainerStyles }, children)
     );
   }
 }

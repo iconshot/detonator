@@ -3,8 +3,8 @@ import UIKit
 class HorizontalScrollViewElement: Element {
     private var isAtRight: Bool = false
     
-    override public func decodeAttributes(edge: Edge) -> HorizontalScrollViewAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> HorizontalScrollViewAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> HorizontalScrollView {
@@ -84,6 +84,16 @@ class HorizontalScrollViewElement: Element {
             layoutParams.onLayoutClosures["scroll"] = nil
         }
     }
+    
+    override func patchPadding(
+        padding: Float?,
+        paddingHorizontal: Float?,
+        paddingVertical: Float?,
+        paddingTop: Float?,
+        paddingLeft: Float?,
+        paddingBottom: Float?,
+        paddingRight: Float?
+    ) {}
     
     override func patchBorderRadius(
         borderRadius: StyleSize?,

@@ -10,8 +10,6 @@ import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 import com.iconshot.detonator.request.Request;
-import com.iconshot.detonator.tree.Edge;
-import com.iconshot.detonator.tree.Target;
 
 public class FullScreenCloseRequest extends Request {
     public FullScreenCloseRequest(Detonator detonator, Request.IncomingRequest incomingRequest) {

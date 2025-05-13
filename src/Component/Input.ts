@@ -1,10 +1,12 @@
-import $ from "untrue";
+import $, { PropsNoChildren } from "untrue";
 
 import { Detonator } from "../Detonator";
 
+import { StyleColor } from "../StyleSheet/StyleSheet";
+
 import { BaseView } from "./BaseView";
 
-import { StyleColor, ViewProps } from "./View";
+import { ViewProps } from "./View";
 
 export interface InputChangeEvent extends Event {
   value: string;
@@ -65,7 +67,10 @@ export class Input extends BaseView<InputProps> {
   public render(): any {
     const { children, ...attributes } = this.props;
 
-    const tmpAttributes = { ...attributes, onChange: this.onChange };
+    const tmpAttributes: PropsNoChildren<InputProps> = {
+      ...attributes,
+      onChange: this.onChange,
+    };
 
     return $("com.iconshot.detonator.input", tmpAttributes, children);
   }

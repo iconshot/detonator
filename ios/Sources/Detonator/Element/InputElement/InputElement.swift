@@ -3,8 +3,8 @@ import UIKit
 class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
     private let defaultPlaceholderColor: UIColor = UIColor(white: 1, alpha: 0.75)
     
-    override public func decodeAttributes(edge: Edge) -> InputAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> InputAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> InputView {

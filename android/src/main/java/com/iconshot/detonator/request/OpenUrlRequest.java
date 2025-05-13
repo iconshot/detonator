@@ -14,7 +14,7 @@ public class OpenUrlRequest extends Request<String> {
 
     @Override
     public void run() {
-        String url = decode(String.class);
+        String url = decodeData(String.class);
 
         try {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));

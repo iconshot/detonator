@@ -10,7 +10,7 @@ import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 import com.iconshot.detonator.request.Request;
-import com.iconshot.detonator.tree.Edge;
+import com.iconshot.detonator.renderer.Edge;
 
 public class FullScreenOpenRequest extends Request {
     public FullScreenOpenRequest(Detonator detonator, Request.IncomingRequest incomingRequest) {

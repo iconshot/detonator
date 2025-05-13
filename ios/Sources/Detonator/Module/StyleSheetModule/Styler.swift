@@ -1,5 +1,5 @@
 class Styler {
-    let style: Style?
+    private let style: Style?
     
     init(style: Style?) {
         self.style = style

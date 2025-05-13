@@ -1,8 +1,8 @@
 import UIKit
 
 class ViewElement: Element {
-    override public func decodeAttributes(edge: Edge) -> ViewAttributes? {
-        return super.decodeAttributes(edge: edge)
+    override public func decodeAttributes() -> ViewAttributes? {
+        return super.decodeAttributes()
     }
     
     override public func createView() -> ViewLayout {
