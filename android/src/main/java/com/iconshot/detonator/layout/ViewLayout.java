@@ -420,7 +420,7 @@ public class ViewLayout extends ViewGroup {
             availableSize -= isHorizontal() ? childWidth : childHeight;
         }
 
-        int totalGap = gap * (relativeChildCount - 1);
+        int totalGap = gap * Math.max(0, relativeChildCount - 1);
 
         availableSize -= totalGap;
 
@@ -1203,7 +1203,7 @@ public class ViewLayout extends ViewGroup {
             }
         }
 
-        int totalGap = gap * (relativeChildCount - 1);
+        int totalGap = gap * Math.max(0, relativeChildCount - 1);
 
         if (isHorizontal()) {
             contentWidth += totalGap;

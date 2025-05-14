@@ -1,7 +1,7 @@
 import UIKit
 
 class ViewLayout: UIView {
-    static var staticId = 0
+    public static var staticId = 0
     
     public var id: Int
     
@@ -312,7 +312,7 @@ class ViewLayout: UIView {
             availableSize -= isHorizontal() ? childWidth : childHeight
         }
         
-        let totalGap = gap * Float(relativeChildCount - 1)
+        let totalGap = gap * max(0, Float(relativeChildCount - 1))
         
         availableSize -= totalGap
         
@@ -1030,7 +1030,7 @@ class ViewLayout: UIView {
             }
         }
         
-        let totalGap = gap * Float(relativeChildCount - 1)
+        let totalGap = gap * max(0, Float(relativeChildCount - 1))
         
         if isHorizontal() {
             contentWidth += totalGap
