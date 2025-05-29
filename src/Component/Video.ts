@@ -21,7 +21,7 @@ export interface VideoProgressEvent extends Event {
 export interface VideoEndEvent extends Event {}
 
 interface VideoProps extends ViewProps {
-  url?: string | null;
+  source?: string | null;
   muted?: boolean | null;
   onPlay?: ((event: VideoPlayEvent) => void) | null;
   onPause?: ((event: VideoPauseEvent) => void) | null;
@@ -35,21 +35,21 @@ export class Video extends BaseView<VideoProps> {
 
   public async play(): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.video/play" },
+      { name: "com.iconshot.detonator.video::play" },
       this
     );
   }
 
   public async pause(): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.video/pause" },
+      { name: "com.iconshot.detonator.video::pause" },
       this
     );
   }
 
   public async seek(position: number): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.video/seek", data: position },
+      { name: "com.iconshot.detonator.video::seek", data: position },
       this
     );
   }

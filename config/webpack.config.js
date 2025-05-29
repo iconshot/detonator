@@ -39,9 +39,11 @@ const packagePath = path.resolve(process.cwd(), "package.json");
 
 const package = require(packagePath);
 
+const appName = package.name;
+
 const copyDirs = [
-  "android/app/src/main/assets/dist",
-  `ios/${package.name}/Resources/dist`,
+  `android/${appName}/app/src/main/assets/dist`,
+  `ios/${appName}/${appName}/Resources/dist`,
 ].map((dir) => path.resolve(process.cwd(), dir));
 
 module.exports = {

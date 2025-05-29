@@ -21,7 +21,7 @@ export interface AudioProgressEvent extends Event {
 export interface AudioEndEvent extends Event {}
 
 interface AudioProps extends ViewProps {
-  url?: string | null;
+  source?: string | null;
   muted?: boolean | null;
   onPlay?: ((event: AudioPlayEvent) => void) | null;
   onPause?: ((event: AudioPauseEvent) => void) | null;
@@ -35,21 +35,21 @@ export class Audio extends BaseView<AudioProps> {
 
   public async play(): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.audio/play" },
+      { name: "com.iconshot.detonator.audio::play" },
       this
     );
   }
 
   public async pause(): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.audio/pause" },
+      { name: "com.iconshot.detonator.audio::pause" },
       this
     );
   }
 
   public async seek(position: number): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.audio/seek", data: position },
+      { name: "com.iconshot.detonator.audio::seek", data: position },
       this
     );
   }

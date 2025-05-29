@@ -6,7 +6,7 @@ export class Toast {
     isShort: boolean = true
   ): Promise<void> {
     await Detonator.request({
-      name: "com.iconshot.detonator.toast/show",
+      name: "com.iconshot.detonator.toast::show",
       data: { text, isShort },
     });
   }

@@ -27,6 +27,6 @@ export class StyleSheetCreateHelper {
 
     this.styleEntries.clear();
 
-    Detonator.send("com.iconshot.detonator.stylesheet/create", idStyleEntries);
+    Detonator.send("com.iconshot.detonator.stylesheet::create", idStyleEntries);
   }
 }

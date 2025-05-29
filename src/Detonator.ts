@@ -9,14 +9,10 @@ import { HandlerManager } from "./Manager/HandlerManager";
 
 import { StyleSheetCreateHelper } from "./StyleSheet/StyleSheetCreateHelper";
 
-type DetonatorEmitterSignatures = {
-  handler: (json: string) => any;
-  event: (json: string) => any;
-  response: (json: string) => any;
-};
+type EmitterSignatures = Record<string, (value: string) => any>;
 
 export class Detonator {
-  public static emitter: Emitter<DetonatorEmitterSignatures> = new Emitter();
+  public static emitter: Emitter<EmitterSignatures> = new Emitter();
 
   private static requestId: number = 0;
 
@@ -41,7 +37,12 @@ export class Detonator {
 
     message += name;
     message += "\n";
-    message += JSON.stringify(data ?? null);
+
+    if (typeof data === "string") {
+      message += data;
+    } else {
+      message += JSON.stringify(data ?? null);
+    }
 
     const windowAny = window as any;
 
@@ -55,7 +56,7 @@ export class Detonator {
   }
 
   public static log(...data: any[]): void {
-    this.send("com.iconshot.detonator/log", data);
+    this.send("com.iconshot.detonator::log", data);
   }
 
   public static async request(
@@ -86,15 +87,15 @@ export class Detonator {
         componentId,
       };
 
-      const listener = (json: string): void => {
+      const listener = (value: string): boolean => {
         const response: {
           id: number;
           data: any;
           error: { message: string } | null;
-        } = JSON.parse(json);
+        } = JSON.parse(value);
 
         if (response.id !== request.id) {
-          return;
+          return true;
         }
 
         if (response.error !== null) {
@@ -103,17 +104,19 @@ export class Detonator {
           resolve(response.data);
         }
 
-        this.emitter.off("response", listener);
+        this.emitter.off("com.iconshot.detonator.request.response", listener);
+
+        return false;
       };
 
-      this.emitter.on("response", listener);
+      this.emitter.on("com.iconshot.detonator.request.response", listener);
 
-      this.send("com.iconshot.detonator/request", request);
+      this.send("com.iconshot.detonator.request::init", request);
     });
   }
 
   public static async openUrl(url: string): Promise<void> {
-    await this.request({ name: "com.iconshot.detonator/openUrl", data: url });
+    await this.request({ name: "com.iconshot.detonator::openUrl", data: url });
   }
 }
 

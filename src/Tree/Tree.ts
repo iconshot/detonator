@@ -50,7 +50,7 @@ export class Tree {
 
     const elementId = elementEdge?.id ?? null;
 
-    Detonator.send("com.iconshot.detonator.renderer/treeInit", {
+    Detonator.send("com.iconshot.detonator.renderer::treeInit", {
       treeId,
       elementId,
     });
@@ -65,7 +65,7 @@ export class Tree {
 
     this.deinitialized = true;
 
-    Detonator.send("com.iconshot.detonator.renderer/treeDeinit", {
+    Detonator.send("com.iconshot.detonator.renderer::treeDeinit", {
       treeId: this.treeId,
     });
   }
@@ -87,7 +87,7 @@ export class Tree {
 
     const sanitizedEdge = this.sanitizeEdge(this.edge);
 
-    Detonator.send("com.iconshot.detonator.renderer/mount", {
+    Detonator.send("com.iconshot.detonator.renderer::mount", {
       treeId: this.treeId,
       edge: sanitizedEdge,
     });
@@ -112,7 +112,7 @@ export class Tree {
 
     clearTimeout(this.timeout);
 
-    Detonator.send("com.iconshot.detonator.renderer/unmount", {
+    Detonator.send("com.iconshot.detonator.renderer::unmount", {
       treeId: this.treeId,
     });
   }
@@ -624,7 +624,7 @@ export class Tree {
       sanitizedEdges.push(sanitizedEdge);
     }
 
-    Detonator.send("com.iconshot.detonator.renderer/rerender", {
+    Detonator.send("com.iconshot.detonator.renderer::rerender", {
       treeId: this.treeId,
       edges: sanitizedEdges,
     });

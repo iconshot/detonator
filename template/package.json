@@ -6,7 +6,7 @@
     "start": "detonator start"
   },
   "dependencies": {
-    "detonator": "1.5.5",
+    "detonator": "1.6.0",
     "untrue": "5.15.0"
   }
 }

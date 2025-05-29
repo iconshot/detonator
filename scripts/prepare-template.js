@@ -8,7 +8,7 @@ const package = require("../package.json");
 async function replaceIosPbxproj() {
   const filePath = path.resolve(
     __dirname,
-    "../template/ios/HelloWorldApp.xcodeproj/project.pbxproj"
+    "../template/ios/HelloWorldApp/HelloWorldApp.xcodeproj/project.pbxproj"
   );
 
   const content = await fsp.readFile(filePath, "utf8");
@@ -29,11 +29,7 @@ async function replacePackageJson() {
 
   const json = await fse.readJson(filePath);
 
-  const detonatorVersion = package.version;
-  const untrueVersion = package.peerDependencies.untrue.replace("^", "");
-
-  json.dependencies.detonator = detonatorVersion;
-  json.dependencies.untrue = untrueVersion;
+  json.dependencies.detonator = package.version;
 
   await fse.writeJson(filePath, json, { spaces: 2 });
 }

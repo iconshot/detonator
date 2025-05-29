@@ -76,7 +76,7 @@ export class StyleSheetRemoveStyleHelper {
       }
 
       Detonator.send(
-        "com.iconshot.detonator.stylesheet/removeStyle",
+        "com.iconshot.detonator.stylesheet::removeStyle",
         elementRemoveStyleEntries
       );
     });

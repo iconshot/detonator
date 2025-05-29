@@ -11,7 +11,7 @@ export class Storage {
     const name = this.name;
 
     return await Detonator.request({
-      name: "com.iconshot.detonator.storage/getItem",
+      name: "com.iconshot.detonator.storage::getItem",
       data: { name, key },
     });
   }
@@ -20,7 +20,7 @@ export class Storage {
     const name = this.name;
 
     await Detonator.request({
-      name: "com.iconshot.detonator.storage/setItem",
+      name: "com.iconshot.detonator.storage::setItem",
       data: { name, key, value },
     });
   }

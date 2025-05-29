@@ -11,7 +11,7 @@ export interface ImageLoadEvent extends Event {}
 export interface ImageErrorEvent extends Event {}
 
 interface ImageProps extends ViewProps {
-  url?: string | null;
+  source?: string | null;
   onLoad?: ((event: ImageLoadEvent) => void) | null;
   onError?: ((event: ImageErrorEvent) => void) | null;
 }
@@ -24,11 +24,11 @@ export class Image extends BaseView<ImageProps> {
   }
 
   public static async getSize(
-    url: string
+    source: string
   ): Promise<{ width: number; height: number }> {
     return await Detonator.request({
-      name: "com.iconshot.detonator.image/getSize",
-      data: url,
+      name: "com.iconshot.detonator.image::getSize",
+      data: source,
     });
   }
 }

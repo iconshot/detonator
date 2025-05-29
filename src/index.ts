@@ -26,3 +26,5 @@ export * from "./Utility/Platform";
 export * from "./Module/AppState";
 export * from "./Module/Storage";
 export * from "./Module/FullScreen";
+
+export * from "./FileStream/FileReadStream";

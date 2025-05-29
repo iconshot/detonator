@@ -31,21 +31,21 @@ export class TextArea extends BaseView<TextAreaProps> {
 
   public async setValue(value: string): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.textarea/setValue", data: value },
+      { name: "com.iconshot.detonator.textarea::setValue", data: value },
       this
     );
   }
 
   public async focus(): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.textarea/focus" },
+      { name: "com.iconshot.detonator.textarea::focus" },
       this
     );
   }
 
   public async blur(): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.textarea/blur" },
+      { name: "com.iconshot.detonator.textarea::blur" },
       this
     );
   }

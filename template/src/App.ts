@@ -42,7 +42,7 @@ function App() {
     });
   });
 
-  const onTap = () => {
+  const onTap = Hook.useCallback(() => {
     const transition = animation.animate(1, 150);
 
     transition.on("end", () => {
@@ -50,7 +50,7 @@ function App() {
         animation.animate(0, 150);
       });
     });
-  };
+  }, [counter]);
 
   return $(View, { style: styles.container }, [
     $(Text, { style: styles.heading }, "Hello, world."),

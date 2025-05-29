@@ -35,21 +35,21 @@ export class Input extends BaseView<InputProps> {
 
   public async setValue(value: string): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.input/setValue", data: value },
+      { name: "com.iconshot.detonator.input::setValue", data: value },
       this
     );
   }
 
   public async focus(): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.input/focus" },
+      { name: "com.iconshot.detonator.input::focus" },
       this
     );
   }
 
   public async blur(): Promise<void> {
     await Detonator.request(
-      { name: "com.iconshot.detonator.input/blur" },
+      { name: "com.iconshot.detonator.input::blur" },
       this
     );
   }

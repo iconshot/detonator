@@ -1,11 +1,11 @@
 import { Emitter, Hook } from "untrue";
 
-import { EventManager } from "../Manager/EventManager";
+import { Detonator } from "../Detonator";
 
 export type AppStateState = "background" | "foreground" | "active";
 
 type AppStateModuleSignatures = {
-  state: (state: AppStateState) => any;
+  state: () => any;
 };
 
 class AppStateModule extends Emitter<AppStateModuleSignatures> {
@@ -14,23 +14,26 @@ class AppStateModule extends Emitter<AppStateModuleSignatures> {
   constructor() {
     super();
 
-    EventManager.bind("com.iconshot.detonator.appstate/state", this);
+    Detonator.emitter.on(
+      "com.iconshot.detonator.appstate.state",
+      (state: AppStateState): void => {
+        this.state = state;
 
-    this.on("state", (state: AppStateState): void => {
-      this.state = state;
-    });
+        this.emit("state");
+      }
+    );
   }
 
   public useAppState(): AppStateState | null {
     const update = Hook.useUpdate();
 
-    Hook.useEffect((): (() => void) => {
+    Hook.useMountEffect((): (() => void) => {
       this.on("state", update);
 
-      return () => {
+      return (): void => {
         this.off("state", update);
       };
-    }, []);
+    });
 
     return this.state;
   }

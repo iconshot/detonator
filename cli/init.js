@@ -40,6 +40,7 @@ async function init(appName, appId) {
     await replacePath(iosPath, iosReplaceObject);
 
     const androidRenameObject = {
+      HelloWorldApp: appName,
       "com/example/helloworldapp": appId.replaceAll(".", "/"),
     };
 
@@ -51,12 +52,14 @@ async function init(appName, appId) {
     await renamePath(androidPath, androidRenameObject);
     await renamePath(iosPath, iosRenameObject);
 
-    await removeDirIfEmpty(androidPath, "app/src/main/java/com/example");
-    await removeDirIfEmpty(androidPath, "app/src/main/java/com");
-    await removeDirIfEmpty(androidPath, "app/src/test/java/com/example");
-    await removeDirIfEmpty(androidPath, "app/src/test/java/com");
-    await removeDirIfEmpty(androidPath, "app/src/androidTest/java/com/example");
-    await removeDirIfEmpty(androidPath, "app/src/androidTest/java/com");
+    const androidAppPath = path.join(androidPath, appName, "app");
+
+    await removeDirIfEmpty(androidAppPath, "src/main/java/com/example");
+    await removeDirIfEmpty(androidAppPath, "src/main/java/com");
+    await removeDirIfEmpty(androidAppPath, "src/test/java/com/example");
+    await removeDirIfEmpty(androidAppPath, "src/test/java/com");
+    await removeDirIfEmpty(androidAppPath, "src/androidTest/java/com/example");
+    await removeDirIfEmpty(androidAppPath, "src/androidTest/java/com");
   }
 
   {

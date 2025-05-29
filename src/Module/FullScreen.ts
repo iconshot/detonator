@@ -21,7 +21,7 @@ export class FullScreen {
     windowAny.cancelAnimationFrame = undefined;
 
     await Detonator.request(
-      { name: "com.iconshot.detonator.fullscreen/open" },
+      { name: "com.iconshot.detonator.fullscreen::open" },
       view
     );
   }
@@ -34,7 +34,7 @@ export class FullScreen {
     this.cancelAnimationFrame = undefined;
 
     await Detonator.request({
-      name: "com.iconshot.detonator.fullscreen/close",
+      name: "com.iconshot.detonator.fullscreen::close",
     });
   }
 }

@@ -67,7 +67,7 @@ export class StyleSheetApplyStyleHelper {
       }
 
       Detonator.send(
-        "com.iconshot.detonator.stylesheet/applyStyle",
+        "com.iconshot.detonator.stylesheet::applyStyle",
         elementStyleEntries
       );
     });
