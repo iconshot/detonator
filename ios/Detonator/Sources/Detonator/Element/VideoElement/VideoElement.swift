@@ -29,8 +29,8 @@ class VideoElement: Element {
         let attributes = attributes as! VideoAttributes
         let prevAttributes = prevAttributes as! VideoAttributes?
         
-        let source = attributes.url
-        let prevSource = prevAttributes?.url
+        let source = attributes.source
+        let prevSource = prevAttributes?.source
         
         let patchSourceBool = forcePatch || source != prevSource
         
@@ -192,20 +192,20 @@ class VideoElement: Element {
     }
     
     class VideoAttributes: Attributes {
-        var url: String?
+        var source: String?
         var muted: Bool?
         
         required init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             
-            url = try container.decodeIfPresent(String.self, forKey: .url)
+            source = try container.decodeIfPresent(String.self, forKey: .source)
             muted = try container.decodeIfPresent(Bool.self, forKey: .muted)
             
             try super.init(from: decoder)
         }
         
         private enum CodingKeys: String, CodingKey {
-            case url
+            case source
             case muted
         }
     }
