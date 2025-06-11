@@ -67,13 +67,8 @@ class VideoElement: Element {
         
         let audioSession = AVAudioSession.sharedInstance()
         
-        do {
-            try audioSession.setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
-            
-            try audioSession.setActive(true)
-        } catch {
-            return
-        }
+        try? audioSession.setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
+        try? audioSession.setActive(true)
         
         player = AVPlayer(url: playerURL)
         
