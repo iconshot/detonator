@@ -35,6 +35,8 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         encoder = JSONEncoder()
         decoder = JSONDecoder()
         
+        encoder.outputFormatting = [.sortedKeys]
+        
         self.rootView = rootView
         
         setMessageListener("com.iconshot.detonator.request::init") { value in

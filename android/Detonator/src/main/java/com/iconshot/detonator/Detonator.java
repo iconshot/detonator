@@ -3,6 +3,7 @@ package com.iconshot.detonator;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import android.content.Context;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebView;
@@ -74,6 +75,7 @@ public class Detonator {
     private final Map<String, Module> modules;
 
     public final Handler uiHandler;
+    public final Context context;
     private final Gson gson;
 
     private WebView webView;
@@ -91,8 +93,10 @@ public class Detonator {
 
         renderer = new Renderer(this, rootView);
 
+        context = rootView.getContext();
+
         if (ContextHelper.context == null) {
-            ContextHelper.context = rootView.getContext();
+            ContextHelper.context = context;
         }
 
         uiHandler = new Handler(Looper.getMainLooper());

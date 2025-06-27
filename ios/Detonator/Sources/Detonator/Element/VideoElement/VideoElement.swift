@@ -1,6 +1,7 @@
 import UIKit
 import AVKit
 import AVFoundation
+import Photos
 
 class VideoElement: Element {
     private var player: AVPlayer?
@@ -61,16 +62,54 @@ class VideoElement: Element {
             return
         }
         
+        if source.starts(with: "content://") {
+            let localIdentifier = source.replacingOccurrences(of: "content://", with: "")
+            
+            let result = PHAsset.fetchAssets(withLocalIdentifiers: [localIdentifier], options: nil)
+            
+            guard let asset = result.firstObject else {
+                return
+            }
+            
+            if asset.mediaType != .video {
+                return
+            }
+            
+            let manager = PHImageManager.default()
+
+            let options = PHVideoRequestOptions()
+            
+            options.isNetworkAccessAllowed = true
+
+            manager.requestAVAsset(forVideo: asset, options: options) { avAsset, audioMix, info in
+                guard let avAsset = avAsset else {
+                    return
+                }
+                
+                let playerItem = AVPlayerItem(asset: avAsset)
+                
+                self.player = AVPlayer(playerItem: playerItem)
+                
+                self.initPlayer()
+            }
+            
+            return
+        }
+        
         guard let playerURL = URL(string: source) else {
             return
         }
         
+        self.player = AVPlayer(url: playerURL)
+        
+        self.initPlayer()
+    }
+    
+    private func initPlayer() -> Void {
         let audioSession = AVAudioSession.sharedInstance()
         
         try? audioSession.setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
         try? audioSession.setActive(true)
-        
-        player = AVPlayer(url: playerURL)
         
         playerLayer.player = player
         
@@ -82,7 +121,7 @@ class VideoElement: Element {
         )
     }
     
-    private func deinitPlayer() {
+    private func deinitPlayer() -> Void {
         NotificationCenter.default.removeObserver(
             self,
             name: .AVPlayerItemDidPlayToEndTime,

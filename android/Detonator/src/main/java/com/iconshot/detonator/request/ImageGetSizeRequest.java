@@ -1,12 +1,17 @@
 package com.iconshot.detonator.request;
 
+import android.content.ContentResolver;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.iconshot.detonator.Detonator;
+import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.ImageHelper;
 
 import java.io.File;
+import java.io.InputStream;
 
 public class ImageGetSizeRequest extends Request<String> {
     public ImageGetSizeRequest(Detonator detonator, IncomingRequest incomingRequest) {
@@ -30,6 +35,34 @@ public class ImageGetSizeRequest extends Request<String> {
             ImageHelper.Size size = ImageHelper.getSize(file);
 
             end(size);
+
+            return;
+        }
+
+        if (source.startsWith("content://")) {
+            Uri uri = Uri.parse(source);
+
+            ContentResolver contentResolver = ContextHelper.context.getContentResolver();
+
+            BitmapFactory.Options options = new BitmapFactory.Options();
+
+            options.inJustDecodeBounds = true;
+
+            try (InputStream input = contentResolver.openInputStream(uri)) {
+                BitmapFactory.decodeStream(input, null, options);
+
+                int width = options.outWidth;
+                int height = options.outHeight;
+
+                ImageHelper.Size size = new ImageHelper.Size();
+
+                size.width = width;
+                size.height = height;
+
+                end(size);
+            } catch (Exception e) {
+                error(new Exception("Unable to get size."));
+            }
 
             return;
         }

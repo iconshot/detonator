@@ -1,11 +1,11 @@
-struct NullEncodable<T: Encodable>: Encodable {
-    var value: T?
+public struct NullEncodable<T: Encodable>: Encodable {
+    private var value: T?
 
-    init(_ value: T?) {
+    public init(_ value: T?) {
         self.value = value
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         
         if let value = value {

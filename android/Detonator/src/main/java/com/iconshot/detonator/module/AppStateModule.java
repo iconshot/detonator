@@ -2,11 +2,9 @@ package com.iconshot.detonator.module;
 
 import android.app.Activity;
 import android.app.Application;
-import android.content.Context;
 import android.os.Bundle;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.helpers.ContextHelper;
 
 public class AppStateModule extends Module {
     private boolean foreground = false;
@@ -29,9 +27,7 @@ public class AppStateModule extends Module {
 
     @Override
     public void register() {
-        Context context = ContextHelper.context;
-
-        Application application = (Application) context.getApplicationContext();
+        Application application = (Application) detonator.context.getApplicationContext();
 
         application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {
             @Override

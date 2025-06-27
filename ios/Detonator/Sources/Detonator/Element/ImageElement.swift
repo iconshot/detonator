@@ -1,3 +1,4 @@
+import Photos
 import UIKit
 
 class ImageElement: Element {
@@ -56,6 +57,50 @@ class ImageElement: Element {
             }
 
             view.image = image
+            
+            return
+        }
+        
+        if source.starts(with: "content://") {
+            let localIdentifier = source.replacingOccurrences(of: "content://", with: "")
+            
+            let assets = PHAsset.fetchAssets(withLocalIdentifiers: [localIdentifier], options: nil)
+            
+            guard let asset = assets.firstObject else {
+                view.image = nil
+                
+                return
+            }
+            
+            if asset.mediaType != .image {
+                view.image = nil
+                
+                return
+            }
+            
+            let options = PHImageRequestOptions()
+            
+            options.deliveryMode = .highQualityFormat
+            options.isSynchronous = false
+            options.isNetworkAccessAllowed = true
+            
+            let manager = PHImageManager.default()
+            
+            manager.requestImageDataAndOrientation(for: asset, options: options) { data, _, _, _ in
+                guard let data = data else {
+                    view.image = nil
+                    
+                    return
+                }
+                
+                guard let image = UIImage(data: data) else {
+                    view.image = nil
+                    
+                    return
+                }
+                
+                view.image = image
+            }
             
             return
         }

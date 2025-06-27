@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 import com.iconshot.detonator.request.Request;
 import com.iconshot.detonator.renderer.Edge;
@@ -29,7 +28,7 @@ public class FullScreenOpenRequest extends Request {
 
         ViewGroup parent = (ViewGroup) view.getParent();
 
-        Activity activity = (Activity) ContextHelper.context;
+        Activity activity = (Activity) detonator.context;
 
         Window window = activity.getWindow();
 

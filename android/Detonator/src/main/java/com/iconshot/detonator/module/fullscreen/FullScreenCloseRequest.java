@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.view.Window;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 import com.iconshot.detonator.request.Request;
 
@@ -23,7 +22,7 @@ public class FullScreenCloseRequest extends Request {
         ViewLayout.LayoutParams layoutParams = (ViewLayout.LayoutParams) view.getLayoutParams();
         ViewLayout.LayoutParams tmpLayoutParams = FullScreenModule.layoutParams;
 
-        Activity activity = (Activity) ContextHelper.context;
+        Activity activity = (Activity) detonator.context;
 
         Window window = activity.getWindow();
 

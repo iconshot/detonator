@@ -138,7 +138,7 @@ public class ImageHelper {
     }
 
     static public class Size {
-        int width;
-        int height;
+        public int width;
+        public int height;
     }
 }

@@ -2,6 +2,7 @@ package com.iconshot.detonator.element.imageelement;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.widget.ImageView;
 
@@ -113,6 +114,14 @@ public class ImageElement extends Element<CustomImageView, ImageElement.Attribut
             Bitmap bitmap = BitmapFactory.decodeFile(file.getAbsolutePath());
 
             view.setImageBitmap(bitmap);
+
+            return;
+        }
+
+        if (source.startsWith("content://")) {
+            Uri uri = Uri.parse(source);
+
+            view.setImageURI(uri);
 
             return;
         }
