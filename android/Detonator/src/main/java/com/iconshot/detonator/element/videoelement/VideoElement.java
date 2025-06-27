@@ -127,6 +127,8 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
         player.setMediaItem(mediaItem);
 
         player.prepare();
+
+        emitHandler("onReady");
     }
 
     protected void patchBackgroundColor(

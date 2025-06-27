@@ -25,8 +25,8 @@ class AudioElement: Element {
         let attributes = attributes as! AudioAttributes
         let prevAttributes = prevAttributes as! AudioAttributes?
         
-        let source = attributes.url
-        let prevSource = prevAttributes?.url
+        let source = attributes.source
+        let prevSource = prevAttributes?.source
         
         let patchSourceBool = forcePatch || source != prevSource
         
@@ -61,16 +61,20 @@ class AudioElement: Element {
             return
         }
         
-        guard let playerUrl = URL(string: source) else {
+        guard let playerURL = URL(string: source) else {
             return
         }
         
+        self.player = AVPlayer(url: playerURL)
+        
+        self.initPlayer()
+    }
+    
+    private func initPlayer() -> Void {
         let audioSession = AVAudioSession.sharedInstance()
         
         try? audioSession.setCategory(.playback, mode: .moviePlayback, options: [.mixWithOthers])
         try? audioSession.setActive(true)
-        
-        player = AVPlayer(url: playerUrl)
         
         NotificationCenter.default.addObserver(
             self,
@@ -78,6 +82,8 @@ class AudioElement: Element {
             name: .AVPlayerItemDidPlayToEndTime,
             object: player?.currentItem
         )
+        
+        emitHandler(name: "onReady")
     }
     
     private func deinitPlayer() {
@@ -159,20 +165,20 @@ class AudioElement: Element {
     }
     
     class AudioAttributes: Attributes {
-        var url: String?
+        var source: String?
         var muted: Bool?
         
         required init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             
-            url = try container.decodeIfPresent(String.self, forKey: .url)
+            source = try container.decodeIfPresent(String.self, forKey: .source)
             muted = try container.decodeIfPresent(Bool.self, forKey: .muted)
             
             try super.init(from: decoder)
         }
         
         private enum CodingKeys: String, CodingKey {
-            case url
+            case source
             case muted
         }
     }

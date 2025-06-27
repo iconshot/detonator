@@ -6,6 +6,8 @@ import { BaseView } from "./BaseView";
 
 import { ViewProps } from "./View";
 
+export interface VideoReadyEvent extends Event {}
+
 export interface VideoPlayEvent extends Event {}
 
 export interface VideoPauseEvent extends Event {}
@@ -23,6 +25,7 @@ export interface VideoEndEvent extends Event {}
 interface VideoProps extends ViewProps {
   source?: string | null;
   muted?: boolean | null;
+  onReady?: ((event: VideoReadyEvent) => void) | null;
   onPlay?: ((event: VideoPlayEvent) => void) | null;
   onPause?: ((event: VideoPauseEvent) => void) | null;
   onSeek?: ((event: VideoSeekEvent) => void) | null;

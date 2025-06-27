@@ -105,6 +105,8 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
         player.setMediaItem(mediaItem);
 
         player.prepare();
+
+        emitHandler("onReady");
     }
 
     @Override

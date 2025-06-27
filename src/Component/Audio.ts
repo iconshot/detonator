@@ -6,6 +6,8 @@ import { BaseView } from "./BaseView";
 
 import { ViewProps } from "./View";
 
+export interface AudioReadyEvent extends Event {}
+
 export interface AudioPlayEvent extends Event {}
 
 export interface AudioPauseEvent extends Event {}
@@ -23,6 +25,7 @@ export interface AudioEndEvent extends Event {}
 interface AudioProps extends ViewProps {
   source?: string | null;
   muted?: boolean | null;
+  onReady?: ((event: AudioReadyEvent) => void) | null;
   onPlay?: ((event: AudioPlayEvent) => void) | null;
   onPause?: ((event: AudioPauseEvent) => void) | null;
   onSeek?: ((event: AudioSeekEvent) => void) | null;

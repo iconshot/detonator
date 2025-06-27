@@ -119,6 +119,8 @@ class VideoElement: Element {
             name: .AVPlayerItemDidPlayToEndTime,
             object: player?.currentItem
         )
+        
+        emitHandler(name: "onReady")
     }
     
     private func deinitPlayer() -> Void {
