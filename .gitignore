@@ -6,6 +6,7 @@ package-lock.json
 /dist
 
 /android/Detonator/build/
+/ios/Detonator/.swiftpm
 
 /template/dist
 /template/android/HelloWorldApp/app/src/main/assets/dist
