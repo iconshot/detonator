@@ -20,11 +20,11 @@ public class DetonatorActivity extends AppCompatActivity {
 
         detonator = new Detonator(rootView, "dist/index.js");
 
-        setModuleClasses();
+        setUp();
 
         detonator.initialize();
     }
 
-    protected void setModuleClasses() {
+    protected void setUp() {
     }
 }

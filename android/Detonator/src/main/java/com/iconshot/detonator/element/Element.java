@@ -14,8 +14,6 @@ import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ColorHelper;
 import com.iconshot.detonator.helpers.CompareHelper;
 import com.iconshot.detonator.helpers.AttributeHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
-import com.iconshot.detonator.helpers.PixelHelper;
 
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
 
@@ -674,7 +672,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         float value = 0;
 
         if (size instanceof Double) {
-            value = PixelHelper.dpToPx((double) size);
+            value = dpToPx((double) size);
         } else if (size instanceof String) {
             value = minSize * AttributeHelper.convertPercentStringToFloat((String) size);
         }
@@ -687,7 +685,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (width != null) {
             if (width instanceof Double) {
-                layoutParams.width = PixelHelper.dpToPx((double) width);
+                layoutParams.width = dpToPx((double) width);
 
                 layoutParams.widthPercent = null;
             } else {
@@ -707,7 +705,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (height != null) {
             if (height instanceof Double) {
-                layoutParams.height = PixelHelper.dpToPx((double) height);
+                layoutParams.height = dpToPx((double) height);
 
                 layoutParams.heightPercent = null;
             } else {
@@ -727,7 +725,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (minWidth != null) {
             if (minWidth instanceof Double) {
-                layoutParams.minWidth = PixelHelper.dpToPx((double) minWidth);
+                layoutParams.minWidth = dpToPx((double) minWidth);
 
                 layoutParams.minWidthPercent = null;
             } else {
@@ -747,7 +745,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (minHeight != null) {
             if (minHeight instanceof Double) {
-                layoutParams.minHeight = PixelHelper.dpToPx((double) minHeight);
+                layoutParams.minHeight = dpToPx((double) minHeight);
 
                 layoutParams.minHeightPercent = null;
             } else {
@@ -767,7 +765,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (maxWidth != null) {
             if (maxWidth instanceof Double) {
-                layoutParams.maxWidth = PixelHelper.dpToPx((double) maxWidth);
+                layoutParams.maxWidth = dpToPx((double) maxWidth);
 
                 layoutParams.maxWidthPercent = null;
             } else {
@@ -787,7 +785,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (maxHeight != null) {
             if (maxHeight instanceof Double) {
-                layoutParams.maxHeight = PixelHelper.dpToPx((double) maxHeight);
+                layoutParams.maxHeight = dpToPx((double) maxHeight);
 
                 layoutParams.maxHeightPercent = null;
             } else {
@@ -811,7 +809,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
             Float paddingBottom,
             Float paddingRight
     ) {
-        int tmpPadding = padding != null ? PixelHelper.dpToPx(padding) : 0;
+        int tmpPadding = padding != null ? dpToPx(padding) : 0;
 
         int tmpPaddingTop = tmpPadding;
         int tmpPaddingLeft = tmpPadding;
@@ -819,33 +817,33 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         int tmpPaddingRight = tmpPadding;
 
         if (paddingHorizontal != null) {
-            int tmpPaddingHorizontal = PixelHelper.dpToPx(paddingHorizontal);
+            int tmpPaddingHorizontal = dpToPx(paddingHorizontal);
 
             tmpPaddingLeft = tmpPaddingHorizontal;
             tmpPaddingRight = tmpPaddingHorizontal;
         }
 
         if (paddingVertical != null) {
-            int tmpPaddingVertical = PixelHelper.dpToPx(paddingVertical);
+            int tmpPaddingVertical = dpToPx(paddingVertical);
 
             tmpPaddingTop = tmpPaddingVertical;
             tmpPaddingBottom = tmpPaddingVertical;
         }
 
         if (paddingTop != null) {
-            tmpPaddingTop = PixelHelper.dpToPx(paddingTop);
+            tmpPaddingTop = dpToPx(paddingTop);
         }
 
         if (paddingLeft != null) {
-            tmpPaddingLeft = PixelHelper.dpToPx(paddingLeft);
+            tmpPaddingLeft = dpToPx(paddingLeft);
         }
 
         if (paddingBottom != null) {
-            tmpPaddingBottom = PixelHelper.dpToPx(paddingBottom);
+            tmpPaddingBottom = dpToPx(paddingBottom);
         }
 
         if (paddingRight != null) {
-            tmpPaddingRight = PixelHelper.dpToPx(paddingRight);
+            tmpPaddingRight = dpToPx(paddingRight);
         }
 
         view.setPadding(tmpPaddingLeft, tmpPaddingTop, tmpPaddingRight, tmpPaddingBottom);
@@ -862,7 +860,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     ) {
         LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
 
-        int tmpMargin = margin != null ? PixelHelper.dpToPx(margin) : 0;
+        int tmpMargin = margin != null ? dpToPx(margin) : 0;
 
         int tmpMarginTop = tmpMargin;
         int tmpMarginLeft = tmpMargin;
@@ -870,33 +868,33 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         int tmpMarginRight = tmpMargin;
 
         if (marginHorizontal != null) {
-            int tmpMarginHorizontal = PixelHelper.dpToPx(marginHorizontal);
+            int tmpMarginHorizontal = dpToPx(marginHorizontal);
 
             tmpMarginLeft = tmpMarginHorizontal;
             tmpMarginRight = tmpMarginHorizontal;
         }
 
         if (marginVertical != null) {
-            int tmpMarginVertical = PixelHelper.dpToPx(marginVertical);
+            int tmpMarginVertical = dpToPx(marginVertical);
 
             tmpMarginTop = tmpMarginVertical;
             tmpMarginBottom = tmpMarginVertical;
         }
 
         if (marginTop != null) {
-            tmpMarginTop = PixelHelper.dpToPx(marginTop);
+            tmpMarginTop = dpToPx(marginTop);
         }
 
         if (marginLeft != null) {
-            tmpMarginLeft = PixelHelper.dpToPx(marginLeft);
+            tmpMarginLeft = dpToPx(marginLeft);
         }
 
         if (marginBottom != null) {
-            tmpMarginBottom = PixelHelper.dpToPx(marginBottom);
+            tmpMarginBottom = dpToPx(marginBottom);
         }
 
         if (marginRight != null) {
-            tmpMarginRight = PixelHelper.dpToPx(marginRight);
+            tmpMarginRight = dpToPx(marginRight);
         }
 
         layoutParams.setMargins(tmpMarginLeft, tmpMarginTop, tmpMarginRight, tmpMarginBottom);
@@ -955,7 +953,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (top != null) {
             if (top instanceof Double) {
-                layoutParams.positionTop = PixelHelper.dpToPx((double) top);
+                layoutParams.positionTop = dpToPx((double) top);
                 layoutParams.positionTopPercent = null;
             } else {
                 layoutParams.positionTop = null;
@@ -972,7 +970,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (left != null) {
             if (left instanceof Double) {
-                layoutParams.positionLeft = PixelHelper.dpToPx((double) left);
+                layoutParams.positionLeft = dpToPx((double) left);
                 layoutParams.positionLeftPercent = null;
             } else {
                 layoutParams.positionLeft = null;
@@ -989,7 +987,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (bottom != null) {
             if (bottom instanceof Double) {
-                layoutParams.positionBottom = PixelHelper.dpToPx((double) bottom);
+                layoutParams.positionBottom = dpToPx((double) bottom);
                 layoutParams.positionBottomPercent = null;
             } else {
                 layoutParams.positionBottom = null;
@@ -1006,7 +1004,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
         if (right != null) {
             if (right instanceof Double) {
-                layoutParams.positionRight = PixelHelper.dpToPx((double) right);
+                layoutParams.positionRight = dpToPx((double) right);
                 layoutParams.positionRightPercent = null;
             } else {
                 layoutParams.positionRight = null;
@@ -1141,7 +1139,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
     protected float getTranslate(int size, Object translateValue) {
         if (translateValue instanceof Double) {
-            return PixelHelper.dpToPx((Double) translateValue);
+            return dpToPx((Double) translateValue);
         } else if (translateValue instanceof String) {
             float percent = AttributeHelper.convertPercentStringToFloat((String) translateValue);
 
@@ -1159,6 +1157,16 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         }
 
         return 0;
+    }
+
+    protected int dpToPx(float size) {
+        float scale = detonator.context.getResources().getDisplayMetrics().density;
+
+        return (int) (size * scale + 0.5f);
+    }
+
+    protected int dpToPx(double size) {
+        return dpToPx((float) size);
     }
 
     public void applyStyle(StyleEntry[] styleEntries) {
@@ -1244,7 +1252,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
             if (view instanceof EditText) {
                 view.post(() -> {
-                    InputMethodManager imm = (InputMethodManager) ContextHelper.context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager) detonator.context.getSystemService(Context.INPUT_METHOD_SERVICE);
 
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
                 });

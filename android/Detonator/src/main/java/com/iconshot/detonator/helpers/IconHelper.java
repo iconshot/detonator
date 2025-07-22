@@ -3,6 +3,7 @@ package com.iconshot.detonator.helpers;
 import java.util.HashMap;
 import java.util.Map;
 
+import android.content.Context;
 import android.graphics.Typeface;
 
 public class IconHelper {
@@ -2089,11 +2090,11 @@ public class IconHelper {
         return icons.get(key);
     }
 
-    public static Typeface getTypeface(String font) {
+    public static Typeface getTypeface(Context context, String font) {
         Typeface typeface = typefaces.get(font);
 
         if (typeface == null) {
-            typeface = Typeface.createFromAsset(ContextHelper.context.getAssets(), "fonts/" + font);
+            typeface = Typeface.createFromAsset(context.getAssets(), "fonts/" + font);
 
             typefaces.put(font, typeface);
         }

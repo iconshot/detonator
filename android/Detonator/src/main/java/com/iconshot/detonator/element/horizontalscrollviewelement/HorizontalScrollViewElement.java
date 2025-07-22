@@ -5,7 +5,6 @@ import android.view.View;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.helpers.CompareHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 
 public class HorizontalScrollViewElement extends Element<CustomHorizontalScrollView, HorizontalScrollViewElement.Attributes> {
@@ -22,7 +21,7 @@ public class HorizontalScrollViewElement extends Element<CustomHorizontalScrollV
 
     @Override
     public CustomHorizontalScrollView createView() {
-        CustomHorizontalScrollView view = new CustomHorizontalScrollView(ContextHelper.context);
+        CustomHorizontalScrollView view = new CustomHorizontalScrollView(detonator.context);
 
         view.setOnPageChangeListener(page -> {
             OnPageChangeData data = new OnPageChangeData();

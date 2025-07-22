@@ -93,14 +93,14 @@ public class Detonator: NSObject, WKScriptMessageHandler {
     }
     
     public func initialize() -> Void {
-        initWebView()
+        initializeWebView()
         
-        registerModules()
+        initializeModules()
         
         IconHelper.initialize()
     }
     
-    private func initWebView() -> Void {
+    private func initializeWebView() -> Void {
         let contentController = WKUserContentController()
         
         contentController.add(self, name: "DetonatorBridge")
@@ -158,6 +158,10 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         moduleClasses[key] = moduleClass
     }
     
+    public func getModules(_ key: String) -> Module? {
+        return modules[key]
+    }
+    
     public func encode(_ data: Encodable) -> String? {
         do {
             let tmpData = try encoder.encode(data)
@@ -210,11 +214,11 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         emit(name, value)
     }
     
-    private func registerModules() -> Void {
+    private func initializeModules() -> Void {
         for (key, moduleClass) in moduleClasses {
             let module = moduleClass.init(self)
             
-            module.register()
+            module.setUp()
             
             modules[key] = module
         }

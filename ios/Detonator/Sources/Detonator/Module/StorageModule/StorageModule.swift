@@ -1,5 +1,5 @@
 class StorageModule: Module {
-    override func register() -> Void {
+    override func setUp() -> Void {
         detonator.setRequestClass("com.iconshot.detonator.storage::getItem", StorageGetItemRequest.self)
         detonator.setRequestClass("com.iconshot.detonator.storage::setItem", StorageSetItemRequest.self)
     }

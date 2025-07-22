@@ -1,5 +1,5 @@
 class StyleSheetModule: Module {
-    public override func register() -> Void {
+    public override func setUp() -> Void {
         detonator.setMessageListener("com.iconshot.detonator.stylesheet::create") { value in
             let idStyleEntries: [IdStyleEntry] = self.detonator.decode(value)!
             

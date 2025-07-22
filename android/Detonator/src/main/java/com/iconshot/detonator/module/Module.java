@@ -9,5 +9,5 @@ public abstract class Module {
         this.detonator = detonator;
     }
 
-    public abstract void register();
+    public abstract void setUp();
 }

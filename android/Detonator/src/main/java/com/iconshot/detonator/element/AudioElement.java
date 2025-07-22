@@ -9,8 +9,6 @@ import androidx.media3.exoplayer.ExoPlayer;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.CompareHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
-import com.iconshot.detonator.module.stylesheet.Styler;
 
 public class AudioElement extends Element<View, AudioElement.Attributes> {
     private ExoPlayer player;
@@ -31,7 +29,7 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
 
     @Override
     public View createView() {
-        View view = new View(ContextHelper.context);
+        View view = new View(detonator.context);
 
         startTrackingProgress();
 
@@ -83,7 +81,7 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
             return;
         }
 
-        player = new ExoPlayer.Builder(ContextHelper.context).build();
+        player = new ExoPlayer.Builder(detonator.context).build();
 
         player.addListener(new ExoPlayer.Listener() {
             @Override

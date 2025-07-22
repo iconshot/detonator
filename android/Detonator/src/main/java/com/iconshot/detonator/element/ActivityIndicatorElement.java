@@ -6,8 +6,6 @@ import android.widget.ProgressBar;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ColorHelper;
 import com.iconshot.detonator.helpers.CompareHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
-import com.iconshot.detonator.helpers.PixelHelper;
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
 
 public class ActivityIndicatorElement extends Element<ProgressBar, ActivityIndicatorElement.Attributes> {
@@ -21,7 +19,7 @@ public class ActivityIndicatorElement extends Element<ProgressBar, ActivityIndic
     }
 
     protected ProgressBar createView() {
-        return new ProgressBar(ContextHelper.context);
+        return new ProgressBar(detonator.context);
     }
 
     @Override
@@ -54,7 +52,7 @@ public class ActivityIndicatorElement extends Element<ProgressBar, ActivityIndic
                 }
             }
 
-            int px = PixelHelper.dpToPx(dp);
+            int px = dpToPx(dp);
 
             layoutParams.width = px;
             layoutParams.height = px;

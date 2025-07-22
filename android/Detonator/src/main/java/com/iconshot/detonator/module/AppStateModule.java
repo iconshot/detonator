@@ -26,7 +26,7 @@ public class AppStateModule extends Module {
     }
 
     @Override
-    public void register() {
+    public void setUp() {
         Application application = (Application) detonator.context.getApplicationContext();
 
         application.registerActivityLifecycleCallbacks(new Application.ActivityLifecycleCallbacks() {

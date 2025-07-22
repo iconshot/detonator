@@ -12,7 +12,7 @@ public class FullScreenModule extends Module {
     }
 
     @Override
-    public void register() {
+    public void setUp() {
         detonator.setRequestClass("com.iconshot.detonator.fullscreen::open", FullScreenOpenRequest.class);
         detonator.setRequestClass("com.iconshot.detonator.fullscreen::close", FullScreenCloseRequest.class);
     }

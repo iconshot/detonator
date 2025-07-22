@@ -2,8 +2,6 @@ package com.iconshot.detonator.element.viewelement;
 
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
-import com.iconshot.detonator.helpers.ContextHelper;
-import com.iconshot.detonator.helpers.PixelHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
 
@@ -14,14 +12,14 @@ public abstract class BaseViewElement<T extends BaseViewElement.Attributes> exte
 
     @Override
     public ViewLayout createView() {
-        return new ViewLayout(ContextHelper.context);
+        return new ViewLayout(detonator.context);
     }
 
     @Override
     protected void patchView() {}
 
     protected void patchGap(Float gap) {
-        int tmpGap = gap != null ? PixelHelper.dpToPx(gap) : 0;
+        int tmpGap = gap != null ? dpToPx(gap) : 0;
 
         view.setGap(tmpGap);
     }

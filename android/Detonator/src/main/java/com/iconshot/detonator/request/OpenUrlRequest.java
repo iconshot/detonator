@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.helpers.ContextHelper;
 
 public class OpenUrlRequest extends Request<String> {
     public OpenUrlRequest(Detonator detonator, IncomingRequest incomingRequest) {
@@ -19,7 +18,7 @@ public class OpenUrlRequest extends Request<String> {
         try {
             Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
 
-            ContextHelper.context.startActivity(browserIntent);
+            detonator.context.startActivity(browserIntent);
 
             end();
         } catch (ActivityNotFoundException e) {

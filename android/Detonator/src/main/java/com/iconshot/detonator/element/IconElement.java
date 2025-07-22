@@ -7,9 +7,7 @@ import android.widget.TextView;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ColorHelper;
 import com.iconshot.detonator.helpers.CompareHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.IconHelper;
-import com.iconshot.detonator.helpers.PixelHelper;
 
 public class IconElement extends Element<TextView, IconElement.Attributes> {
     private int defaultColor;
@@ -25,7 +23,7 @@ public class IconElement extends Element<TextView, IconElement.Attributes> {
 
     @Override
     protected TextView createView() {
-        TextView view = new TextView(ContextHelper.context);
+        TextView view = new TextView(detonator.context);
 
         defaultColor = view.getCurrentTextColor();
 
@@ -44,7 +42,7 @@ public class IconElement extends Element<TextView, IconElement.Attributes> {
             String font = IconHelper.getFont(name);
 
             if (font != null) {
-                Typeface typeface = IconHelper.getTypeface(font);
+                Typeface typeface = IconHelper.getTypeface(detonator.context, font);
 
                 view.setTypeface(typeface);
 
@@ -59,7 +57,7 @@ public class IconElement extends Element<TextView, IconElement.Attributes> {
     }
 
     protected void patchFontSize(Float fontSize) {
-        float value = ((Integer) PixelHelper.dpToPx(fontSize != null ? fontSize : 16)).floatValue();
+        float value = ((Integer) dpToPx(fontSize != null ? fontSize : 16)).floatValue();
 
         view.setTextSize(TypedValue.COMPLEX_UNIT_PX, value);
     }

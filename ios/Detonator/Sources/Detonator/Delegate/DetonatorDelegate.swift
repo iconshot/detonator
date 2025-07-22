@@ -16,13 +16,12 @@ open class DetonatorDelegate: UIResponder, UIApplicationDelegate {
         
         detonator = Detonator(rootView: rootView, filename: "index")
         
-        setModuleClasses()
+        setUp()
         
         detonator.initialize()
         
         return true
     }
     
-    open func setModuleClasses() -> Void {
-    }
+    open func setUp() -> Void {}
 }

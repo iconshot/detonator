@@ -19,7 +19,7 @@ class AppStateModule: Module {
         detonator.emit("com.iconshot.detonator.appstate.state", state.rawValue)
     }
     
-    override func register() -> Void {
+    override func setUp() -> Void {
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(appDidEnterBackground),

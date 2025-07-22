@@ -56,7 +56,6 @@ import com.iconshot.detonator.module.fullscreen.FullScreenModule;
 import com.iconshot.detonator.module.StorageModule;
 import com.iconshot.detonator.module.stylesheet.StyleSheetModule;
 
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.FileHelper;
 
 import com.iconshot.detonator.layout.ViewLayout;
@@ -94,10 +93,6 @@ public class Detonator {
         renderer = new Renderer(this, rootView);
 
         context = rootView.getContext();
-
-        if (ContextHelper.context == null) {
-            ContextHelper.context = context;
-        }
 
         uiHandler = new Handler(Looper.getMainLooper());
 
@@ -177,13 +172,13 @@ public class Detonator {
     }
 
     public void initialize() {
-        initWebView();
+        initializeWebView();
 
-        registerModules();
+        initializeModules();
     }
 
-    private void initWebView() {
-        webView = new WebView(ContextHelper.context);
+    private void initializeWebView() {
+        webView = new WebView(context);
 
         webView.getSettings().setJavaScriptEnabled(true);
 
@@ -191,7 +186,7 @@ public class Detonator {
 
         evaluate("window.__detonator_platform = \"android\"");
 
-        String code = FileHelper.readFileFromAssets(path);
+        String code = FileHelper.readFileFromAssets(context, path);
 
         evaluate(code);
     }
@@ -233,6 +228,10 @@ public class Detonator {
         moduleClasses.put(key, moduleClass);
     }
 
+    public Module getModule(String key) {
+        return modules.get(key);
+    }
+
     public String encode(Object data) {
         return gson.toJson(data);
     }
@@ -264,7 +263,7 @@ public class Detonator {
         emit(name, value);
     }
 
-    private void registerModules() {
+    private void initializeModules() {
         for (Map.Entry<String, Class<? extends Module>> entry : moduleClasses.entrySet()) {
             String key = entry.getKey();
 
@@ -282,7 +281,7 @@ public class Detonator {
                 continue;
             }
 
-            module.register();
+            module.setUp();
 
             modules.put(key, module);
         }

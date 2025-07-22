@@ -9,7 +9,6 @@ import android.widget.ImageView;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.helpers.CompareHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.ImageHelper;
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
 
@@ -27,7 +26,7 @@ public class ImageElement extends Element<CustomImageView, ImageElement.Attribut
 
     @Override
     public CustomImageView createView() {
-        return new CustomImageView(ContextHelper.context);
+        return new CustomImageView(detonator.context);
     }
 
     @Override
@@ -126,7 +125,7 @@ public class ImageElement extends Element<CustomImageView, ImageElement.Attribut
             return;
         }
 
-        Bitmap cachedBitmap = ImageHelper.getCachedBitmap(source);
+        Bitmap cachedBitmap = ImageHelper.getCachedBitmap(detonator.context, source);
 
         // image found in cache, load it
 
@@ -143,7 +142,7 @@ public class ImageElement extends Element<CustomImageView, ImageElement.Attribut
             protected Bitmap doInBackground(String... urls) {
                 String imageUrl = urls[0];
 
-                Bitmap bitmap = ImageHelper.loadImageBitmap(imageUrl);
+                Bitmap bitmap = ImageHelper.loadImageBitmap(detonator.context, imageUrl);
 
                 return bitmap;
             }

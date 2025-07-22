@@ -21,7 +21,7 @@ public class FileStreamModule extends Module {
     }
 
     @Override
-    public void register() {
+    public void setUp() {
         detonator.setMessageListener("com.iconshot.detonator.filestream.read::run", value -> {
             ReadData data = detonator.decode(value, ReadData.class);
 

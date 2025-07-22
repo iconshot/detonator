@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.helpers.ImageHelper;
 
 import java.io.File;
@@ -42,7 +41,7 @@ public class ImageGetSizeRequest extends Request<String> {
         if (source.startsWith("content://")) {
             Uri uri = Uri.parse(source);
 
-            ContentResolver contentResolver = ContextHelper.context.getContentResolver();
+            ContentResolver contentResolver = detonator.context.getContentResolver();
 
             BitmapFactory.Options options = new BitmapFactory.Options();
 
@@ -67,10 +66,10 @@ public class ImageGetSizeRequest extends Request<String> {
             return;
         }
 
-        Bitmap cachedBitmap = ImageHelper.getCachedBitmap(source);
+        Bitmap cachedBitmap = ImageHelper.getCachedBitmap(detonator.context, source);
 
         if (cachedBitmap != null) {
-            File file = ImageHelper.getFile(source);
+            File file = ImageHelper.getFile(detonator.context, source);
 
             ImageHelper.Size size = ImageHelper.getSize(file);
 
@@ -84,13 +83,13 @@ public class ImageGetSizeRequest extends Request<String> {
             protected File doInBackground(String... urls) {
                 String imageUrl = urls[0];
 
-                Bitmap bitmap = ImageHelper.loadImageBitmap(imageUrl);
+                Bitmap bitmap = ImageHelper.loadImageBitmap(detonator.context, imageUrl);
 
                 if (bitmap == null) {
                     return null;
                 }
 
-                File file = ImageHelper.getFile(imageUrl);
+                File file = ImageHelper.getFile(detonator.context, imageUrl);
 
                 return file;
             }

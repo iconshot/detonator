@@ -5,7 +5,6 @@ import android.view.View;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.helpers.CompareHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout;
 
 public class VerticalScrollViewElement extends Element<CustomVerticalScrollView, VerticalScrollViewElement.Attributes> {
@@ -22,7 +21,7 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
 
     @Override
     public CustomVerticalScrollView createView() {
-        CustomVerticalScrollView view = new CustomVerticalScrollView(ContextHelper.context);
+        CustomVerticalScrollView view = new CustomVerticalScrollView(detonator.context);
 
         view.setOnPageChangeListener(page -> {
             OnPageChangeData data = new OnPageChangeData();

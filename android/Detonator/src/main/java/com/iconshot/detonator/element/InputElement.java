@@ -13,8 +13,6 @@ import android.widget.EditText;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ColorHelper;
 import com.iconshot.detonator.helpers.CompareHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
-import com.iconshot.detonator.helpers.PixelHelper;
 
 public class InputElement extends Element<EditText, InputElement.Attributes> {
     private int defaultColor;
@@ -31,7 +29,7 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
     @Override
     protected EditText createView() {
-        EditText view = new EditText(ContextHelper.context);
+        EditText view = new EditText(detonator.context);
 
         view.setMaxLines(1);
 
@@ -61,7 +59,7 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
                 view.clearFocus();
 
                 view.post(() -> {
-                    InputMethodManager imm = (InputMethodManager) ContextHelper.context.getSystemService(Context.INPUT_METHOD_SERVICE);
+                    InputMethodManager imm = (InputMethodManager) detonator.context.getSystemService(Context.INPUT_METHOD_SERVICE);
 
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
@@ -177,7 +175,7 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
     }
 
     protected void patchFontSize(Float fontSize) {
-        float value = ((Integer) PixelHelper.dpToPx(fontSize != null ? fontSize : 16)).floatValue();
+        float value = ((Integer) dpToPx(fontSize != null ? fontSize : 16)).floatValue();
 
         view.setTextSize(TypedValue.COMPLEX_UNIT_PX, value);
     }
@@ -196,7 +194,7 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         view.setSelection(position);
 
         view.post(() -> {
-            InputMethodManager imm = (InputMethodManager) ContextHelper.context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) detonator.context.getSystemService(Context.INPUT_METHOD_SERVICE);
 
             imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
 
@@ -208,7 +206,7 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         view.clearFocus();
 
         view.post(() -> {
-            InputMethodManager imm = (InputMethodManager) ContextHelper.context.getSystemService(Context.INPUT_METHOD_SERVICE);
+            InputMethodManager imm = (InputMethodManager) detonator.context.getSystemService(Context.INPUT_METHOD_SERVICE);
 
             imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 

@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.request.Request;
 
 public class StorageModule extends Module {
@@ -13,13 +12,13 @@ public class StorageModule extends Module {
     }
 
     @Override
-    public void register() {
+    public void setUp() {
         detonator.setRequestClass("com.iconshot.detonator.storage::getItem", StorageGetItemRequest.class);
         detonator.setRequestClass("com.iconshot.detonator.storage::setItem", StorageSetItemRequest.class);
     }
 
-    private static SharedPreferences getSharedPreferences(String name) {
-        return ContextHelper.context.getSharedPreferences(name, Context.MODE_PRIVATE);
+    private static SharedPreferences getSharedPreferences(Context context, String name) {
+        return context.getSharedPreferences(name, Context.MODE_PRIVATE);
     }
 
     public static class StorageGetItemRequest extends Request<StorageGetItemRequest.Data> {
@@ -31,7 +30,7 @@ public class StorageModule extends Module {
         public void run() {
             Data data = decodeData(Data.class);
 
-            SharedPreferences sharedPreferences = StorageModule.getSharedPreferences(data.name);
+            SharedPreferences sharedPreferences = StorageModule.getSharedPreferences(detonator.context, data.name);
 
             String value = sharedPreferences.getString(data.key, null);
 
@@ -53,7 +52,7 @@ public class StorageModule extends Module {
         public void run() {
             Data data = decodeData(Data.class);
 
-            SharedPreferences sharedPreferences = StorageModule.getSharedPreferences(data.name);
+            SharedPreferences sharedPreferences = StorageModule.getSharedPreferences(detonator.context, data.name);
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
 

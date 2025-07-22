@@ -12,7 +12,6 @@ import androidx.media3.ui.PlayerView;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.helpers.CompareHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
 import com.iconshot.detonator.layout.ViewLayout.LayoutParams;
 
 public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> {
@@ -36,9 +35,9 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
     @Override
     public VideoLayout createView() {
-        VideoLayout view = new VideoLayout(ContextHelper.context);
+        VideoLayout view = new VideoLayout(detonator.context);
 
-        playerView = new PlayerView(ContextHelper.context);
+        playerView = new PlayerView(detonator.context);
 
         playerView.setUseController(false);
 
@@ -97,7 +96,7 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
             return;
         }
 
-        player = new ExoPlayer.Builder(ContextHelper.context).build();
+        player = new ExoPlayer.Builder(detonator.context).build();
 
         player.addListener(new ExoPlayer.Listener() {
             @Override

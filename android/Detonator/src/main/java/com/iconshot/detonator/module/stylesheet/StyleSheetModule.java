@@ -14,7 +14,7 @@ public class StyleSheetModule extends Module {
     }
 
     @Override
-    public void register() {
+    public void setUp() {
         detonator.setMessageListener("com.iconshot.detonator.stylesheet::create", value -> {
             IdStyleEntry[] idStyleEntries = detonator.decode(value, IdStyleEntry[].class);
 

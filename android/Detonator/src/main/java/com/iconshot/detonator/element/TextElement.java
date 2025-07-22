@@ -6,8 +6,6 @@ import android.widget.TextView;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.helpers.ColorHelper;
 import com.iconshot.detonator.helpers.CompareHelper;
-import com.iconshot.detonator.helpers.ContextHelper;
-import com.iconshot.detonator.helpers.PixelHelper;
 import com.iconshot.detonator.renderer.Edge;
 
 public class TextElement extends Element<TextView, TextElement.Attributes> {
@@ -24,7 +22,7 @@ public class TextElement extends Element<TextView, TextElement.Attributes> {
 
     @Override
     protected TextView createView() {
-        TextView view = new TextView(ContextHelper.context);
+        TextView view = new TextView(detonator.context);
 
         defaultColor = view.getCurrentTextColor();
 
@@ -65,7 +63,7 @@ public class TextElement extends Element<TextView, TextElement.Attributes> {
     }
 
     protected void patchFontSize(Float fontSize) {
-        float value = ((Integer) PixelHelper.dpToPx(fontSize != null ? fontSize : 16)).floatValue();
+        float value = ((Integer) dpToPx(fontSize != null ? fontSize : 16)).floatValue();
 
         view.setTextSize(TypedValue.COMPLEX_UNIT_PX, value);
     }

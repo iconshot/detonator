@@ -4,7 +4,7 @@ import Photos
 class FileStreamModule: Module {
     private var dataMap: [Int: Data] = [:]
     
-    override func register() {
+    override func setUp() {
         detonator.setMessageListener("com.iconshot.detonator.filestream.read::run") { value in
             let data: ReadData! = self.detonator.decode(value)
             

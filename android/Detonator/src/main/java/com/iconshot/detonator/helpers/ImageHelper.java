@@ -1,5 +1,6 @@
 package com.iconshot.detonator.helpers;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 
@@ -15,7 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class ImageHelper {
-    static public Bitmap loadImageBitmap(String imageUrl) {
+    static public Bitmap loadImageBitmap(Context context, String imageUrl) {
         Bitmap bitmap = null;
 
         try {
@@ -43,7 +44,7 @@ public class ImageHelper {
 
             bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
 
-            File file = getFile(imageUrl);
+            File file = getFile(context, imageUrl);
 
             File parent = file.getParentFile();
 
@@ -66,8 +67,8 @@ public class ImageHelper {
         return bitmap;
     }
 
-    static public Bitmap getCachedBitmap(String imageUrl) {
-        File file = getFile(imageUrl);
+    static public Bitmap getCachedBitmap(Context context, String imageUrl) {
+        File file = getFile(context, imageUrl);
 
         if (file.exists()) {
             try {
@@ -84,10 +85,10 @@ public class ImageHelper {
         return null;
     }
 
-    static public File getFile(String imageUrl) {
+    static public File getFile(Context context, String imageUrl) {
         String fileName = getFileName(imageUrl);
 
-        File directory = new File(ContextHelper.context.getCacheDir(), "com.iconshot.detonator.image");
+        File directory = new File(context.getCacheDir(), "com.iconshot.detonator.image");
 
         File file = new File(directory, fileName);
 
