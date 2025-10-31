@@ -19,7 +19,7 @@ class VerticalScrollViewElement: Element {
         view.onPageChangeListener = { page in
             let data = OnPageChangeData(page: page)
             
-            self.emitHandler(name: "onPageChange", data: data)
+            self.sendHandler(name: "onPageChange", data: data)
         }
         
         view.onScrollListener = {

@@ -28,7 +28,7 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
 
             data.page = page;
 
-            emitHandler("onPageChange", data);
+            sendHandler("onPageChange", data);
         });
 
         view.getViewTreeObserver().addOnScrollChangedListener(() -> {

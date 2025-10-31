@@ -1,6 +1,6 @@
 {
   "name": "detonator",
-  "version": "1.7.3",
+  "version": "1.8.0",
   "description": "Build native mobile apps with Untrue.",
   "homepage": "https://detonator.dev",
   "repository": {
@@ -34,6 +34,6 @@
     "webpack-cli": "^5.1.4"
   },
   "peerDependencies": {
-    "untrue": "^5.15.0"
+    "untrue": "^5.16.2"
   }
 }

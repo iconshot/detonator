@@ -28,7 +28,7 @@ public class HorizontalScrollViewElement extends Element<CustomHorizontalScrollV
 
             data.page = page;
 
-            emitHandler("onPageChange", data);
+            sendHandler("onPageChange", data);
         });
 
         view.getViewTreeObserver().addOnScrollChangedListener(() -> {

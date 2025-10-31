@@ -12,80 +12,22 @@ export class FileReadStream {
     private readonly size: number = 1024 * 1024 // default size is 1 MB
   ) {}
 
-  public read(): Promise<Uint8Array> {
-    return new Promise<Uint8Array>((resolve, reject): void => {
-      const dataListener = (value: string): boolean => {
-        const [idString, data] = value.split("\n", 2);
+  public async read(): Promise<Uint8Array> {
+    const base64 = await Detonator.request(
+      "com.iconshot.detonator.filestream::read",
+      { id: this.id, path: this.path, offset: this.offset, size: this.size }
+    ).fetch();
 
-        const id = parseInt(idString);
+    const binary = atob(base64);
 
-        if (id !== this.id) {
-          return true;
-        }
+    const bytes = new Uint8Array(binary.length);
 
-        const binary = atob(data);
+    for (let i = 0; i < binary.length; i++) {
+      bytes[i] = binary.charCodeAt(i);
+    }
 
-        const bytes = new Uint8Array(binary.length);
+    this.offset += bytes.length;
 
-        for (let i = 0; i < binary.length; i++) {
-          bytes[i] = binary.charCodeAt(i);
-        }
-
-        this.offset += bytes.length;
-
-        resolve(bytes);
-
-        cleanUp();
-
-        return false;
-      };
-
-      const errorListener = (value: string): boolean => {
-        const [idString, errorMessage] = value.split("\n", 2);
-
-        const id = parseInt(idString);
-
-        if (id !== this.id) {
-          return true;
-        }
-
-        const error = new Error(errorMessage);
-
-        reject(error);
-
-        cleanUp();
-
-        return false;
-      };
-
-      const cleanUp = (): void => {
-        Detonator.emitter.off(
-          "com.iconshot.detonator.filestream.read.data",
-          dataListener
-        );
-
-        Detonator.emitter.off(
-          "com.iconshot.detonator.filestream.read.error",
-          errorListener
-        );
-      };
-
-      Detonator.emitter.on(
-        "com.iconshot.detonator.filestream.read.data",
-        dataListener
-      );
-
-      Detonator.emitter.on(
-        "com.iconshot.detonator.filestream.read.error",
-        errorListener
-      );
-
-      Detonator.send("com.iconshot.detonator.filestream.read::run", {
-        id: this.id,
-        path: this.path,
-        offset: this.offset,
-        size: this.size,
-      });
-    });
+    return bytes;
   }
 }

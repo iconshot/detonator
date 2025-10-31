@@ -7,21 +7,27 @@ export class Storage {
     this.name = name ?? "com.iconshot.detonator.storage";
   }
 
-  async getItem(key: string): Promise<string | null> {
-    const name = this.name;
+  public async getItem(key: string): Promise<string | null> {
+    const value = await Detonator.request(
+      "com.iconshot.detonator.storage::getItem",
+      {
+        name: this.name,
+        key,
+      }
+    ).fetch();
 
-    return await Detonator.request({
-      name: "com.iconshot.detonator.storage::getItem",
-      data: { name, key },
-    });
+    if (value === ":n") {
+      return null;
+    }
+
+    return value.slice(1);
   }
 
-  async setItem(key: string, value: string): Promise<void> {
-    const name = this.name;
-
-    await Detonator.request({
-      name: "com.iconshot.detonator.storage::setItem",
-      data: { name, key, value },
-    });
+  public async setItem(key: string, value: string): Promise<void> {
+    await Detonator.request("com.iconshot.detonator.storage::setItem", {
+      name: this.name,
+      key,
+      value,
+    }).fetch();
   }
 }

@@ -1,48 +1,21 @@
-import { Slot, Component, Emitter } from "untrue";
-
-import { TreeHub } from "./Tree/TreeHub";
-import { Tree } from "./Tree/Tree";
-
-import { View } from "./Component/View";
+import { Component, Emitter } from "untrue";
 
 import { HandlerManager } from "./Manager/HandlerManager";
 
-import { StyleSheetCreateHelper } from "./StyleSheet/StyleSheetCreateHelper";
+import { Edge } from "./Tree/Edge";
+import { TreeRegistry } from "./Tree/TreeRegistry";
+
+import { Request } from "./Request";
+
+import { MessageFormatter } from "./MessageFormatter";
 
 type EmitterSignatures = Record<string, (value: string) => any>;
 
 export class Detonator {
   public static emitter: Emitter<EmitterSignatures> = new Emitter();
 
-  private static requestId: number = 0;
-
-  private static tree: Tree = TreeHub.createTree();
-
-  public static mount(slot: Slot): void {
-    StyleSheetCreateHelper.send();
-
-    this.tree.mount(slot);
-  }
-
-  public static unmount(): void {
-    this.tree.unmount();
-  }
-
-  public static createTree(view: View): Tree {
-    return TreeHub.createTree(view);
-  }
-
-  public static send(name: string, data: any): void {
-    let message = "";
-
-    message += name;
-    message += "\n";
-
-    if (typeof data === "string") {
-      message += data;
-    } else {
-      message += JSON.stringify(data ?? null);
-    }
+  public static send(name: string, data?: any): void {
+    const message = MessageFormatter.join([name, data]);
 
     const windowAny = window as any;
 
@@ -59,64 +32,28 @@ export class Detonator {
     this.send("com.iconshot.detonator::log", data);
   }
 
-  public static async request(
-    {
-      name,
-      data = null,
-    }: {
-      name: string;
-      data?: any;
-    },
-    component: Component | null = null
-  ): Promise<any> {
-    let componentId: number | null = null;
-
-    if (component !== null) {
-      componentId = TreeHub.getComponentId(component);
-
-      if (componentId === null) {
-        throw new Error("Component is not mounted.");
-      }
-    }
-
-    return new Promise<any>((resolve, reject): void => {
-      const request = {
-        id: this.requestId++,
-        name,
-        data: data !== null ? JSON.stringify(data) : null,
-        componentId,
-      };
-
-      const listener = (value: string): boolean => {
-        const response: {
-          id: number;
-          data: any;
-          error: { message: string } | null;
-        } = JSON.parse(value);
-
-        if (response.id !== request.id) {
-          return true;
-        }
-
-        if (response.error !== null) {
-          reject(new Error(response.error.message));
-        } else {
-          resolve(response.data);
-        }
-
-        this.emitter.off("com.iconshot.detonator.request.response", listener);
-
-        return false;
-      };
-
-      this.emitter.on("com.iconshot.detonator.request.response", listener);
-
-      this.send("com.iconshot.detonator.request::init", request);
-    });
+  public static request(name: string, data?: any): Request {
+    return new Request(name, data);
   }
 
   public static async openUrl(url: string): Promise<void> {
-    await this.request({ name: "com.iconshot.detonator::openUrl", data: url });
+    await this.request("com.iconshot.detonator::openUrl", url).fetch();
+  }
+
+  public static hasEdge(edgeId: number): boolean {
+    return TreeRegistry.edges.has(edgeId);
+  }
+
+  public static getEdge(edgeId: number): Edge | null {
+    return TreeRegistry.edges.get(edgeId) ?? null;
+  }
+
+  public static getComponentId(component: Component): number | null {
+    return TreeRegistry.components.get(component)?.id ?? null;
+  }
+
+  public static getElementId(element: Element): number | null {
+    return TreeRegistry.elements.get(element)?.id ?? null;
   }
 }
 

@@ -14,7 +14,7 @@ class Renderer {
         self.detonator = detonator
         self.rootView = rootView
         
-        detonator.setMessageListener("com.iconshot.detonator.renderer::treeInit") { value in
+        detonator.setEventListener("com.iconshot.detonator.renderer::treeInit") { value in
             let data: TreeInitData = detonator.decode(value)!
             
             var view: ViewLayout
@@ -32,13 +32,13 @@ class Renderer {
             self.trees[data.treeId] = tree
         }
             
-        detonator.setMessageListener("com.iconshot.detonator.renderer::treeDeinit") { value in
+        detonator.setEventListener("com.iconshot.detonator.renderer::treeDeinit") { value in
             let data: TreeDeinitData = detonator.decode(value)!
             
             self.trees[data.treeId] = nil
         }
         
-        detonator.setMessageListener("com.iconshot.detonator.renderer::mount") { value in
+        detonator.setEventListener("com.iconshot.detonator.renderer::mount") { value in
             let data: MountData = detonator.decode(value)!
             
             let tree = self.trees[data.treeId]!
@@ -52,7 +52,7 @@ class Renderer {
             self.performLayout()
         }
         
-        detonator.setMessageListener("com.iconshot.detonator.renderer::unmount") { value in
+        detonator.setEventListener("com.iconshot.detonator.renderer::unmount") { value in
             let data: UnmountData = detonator.decode(value)!
             
             let tree = self.trees[data.treeId]!
@@ -66,7 +66,7 @@ class Renderer {
             self.performLayout()
         }
         
-        detonator.setMessageListener("com.iconshot.detonator.renderer::rerender") { value in
+        detonator.setEventListener("com.iconshot.detonator.renderer::rerender") { value in
             let data: RerenderData = detonator.decode(value)!
             
             let tree = self.trees[data.treeId]!

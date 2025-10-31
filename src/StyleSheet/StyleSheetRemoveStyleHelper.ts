@@ -1,8 +1,6 @@
 import { Detonator } from "../Detonator";
 
-import { BaseView } from "../Component/BaseView";
-
-import { TreeHub } from "../Tree/TreeHub";
+import { BaseView } from "../UI/BaseView";
 
 import { Style } from "./StyleSheet";
 
@@ -23,13 +21,13 @@ export class StyleSheetRemoveStyleHelper {
     view: BaseView,
     key: K | K[] | null
   ): void {
-    const componentId = TreeHub.getComponentId(view);
+    const componentId = Detonator.getComponentId(view);
 
     if (componentId === null) {
       throw new Error("Component is not mounted.");
     }
 
-    const componentEdge = TreeHub.edges.get(componentId)!;
+    const componentEdge = Detonator.getEdge(componentId)!;
 
     const elementEdge = componentEdge.children[0]!;
 
@@ -60,8 +58,8 @@ export class StyleSheetRemoveStyleHelper {
       const elementRemoveStyleEntries: ElementRemoveStyleEntry[] = [];
 
       this.elementRemoveStyleEntries.forEach(
-        (elementRemoveStyleEntry, elementId) => {
-          if (!TreeHub.edges.has(elementId)) {
+        (elementRemoveStyleEntry, elementId): void => {
+          if (!Detonator.hasEdge(elementId)) {
             return;
           }
 

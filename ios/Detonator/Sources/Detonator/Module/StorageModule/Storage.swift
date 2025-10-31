@@ -1,7 +1,7 @@
 import Foundation
 
 class Storage {
-    let name: String
+    private let name: String
     
     public var content: [String: String] {
         didSet {

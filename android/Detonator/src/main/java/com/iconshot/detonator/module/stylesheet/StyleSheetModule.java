@@ -9,13 +9,15 @@ import java.util.List;
 import java.util.Map;
 
 public class StyleSheetModule extends Module {
+    public static Map<Integer, StyleEntry> styleEntries = new HashMap<>();
+
     public StyleSheetModule(Detonator detonator) {
         super(detonator);
     }
 
     @Override
     public void setUp() {
-        detonator.setMessageListener("com.iconshot.detonator.stylesheet::create", value -> {
+        detonator.setEventListener("com.iconshot.detonator.stylesheet::create", value -> {
             IdStyleEntry[] idStyleEntries = detonator.decode(value, IdStyleEntry[].class);
 
             for (IdStyleEntry idStyleEntry : idStyleEntries) {
@@ -23,7 +25,7 @@ public class StyleSheetModule extends Module {
             }
         });
 
-        detonator.setMessageListener("com.iconshot.detonator.stylesheet::applyStyle", value -> {
+        detonator.setEventListener("com.iconshot.detonator.stylesheet::applyStyle", value -> {
             ElementStyleEntry[] elementStyleEntries = detonator.decode(value, ElementStyleEntry[].class);
 
             for (ElementStyleEntry elementStyleEntry : elementStyleEntries) {
@@ -35,7 +37,7 @@ public class StyleSheetModule extends Module {
             detonator.performLayout();
         });
 
-        detonator.setMessageListener("com.iconshot.detonator.stylesheet::removeStyle", value -> {
+        detonator.setEventListener("com.iconshot.detonator.stylesheet::removeStyle", value -> {
             ElementRemoveStyleEntry[] elementRemoveStyleEntries = detonator.decode(value, ElementRemoveStyleEntry[].class);
 
             for (ElementRemoveStyleEntry elementRemoveStyleEntry : elementRemoveStyleEntries) {
@@ -48,19 +50,17 @@ public class StyleSheetModule extends Module {
         });
     }
 
-    public static Map<Integer, StyleEntry> styleEntries = new HashMap<>();
-
-    class IdStyleEntry {
+    private static class IdStyleEntry {
         int id;
         StyleEntry styleEntry;
     }
 
-    class ElementStyleEntry {
+    private static class ElementStyleEntry {
         int elementId;
         StyleEntry[] styleEntries;
     }
 
-    class ElementRemoveStyleEntry {
+    private static class ElementRemoveStyleEntry {
         int elementId;
         List<String>[] toRemoveKeys;
     }

@@ -7,13 +7,16 @@ public class Detonator: NSObject, WKScriptMessageHandler {
     
     private var renderer: Renderer!
     
-    private var messageListeners: [String: ((String) -> Void)]
+    public var messageFormatter: MessageFormatter!
     
-    private var elementClasses: [String: Element.Type] = [:]
-    private var requestClasses: [String: Request.Type] = [:]
+    private var eventListeners: [String: ((String) -> Void)] = [:]
+    
+    private var requestListeners: [String: ((RequestPromise, String, Edge?) -> Void)] = [:]
+    
     private var moduleClasses: [String: Module.Type] = [:]
+    private var elementClasses: [String: Element.Type] = [:]
     
-    private var modules: [String: Module]
+    private var modules: [String: Module] = [:]
     
     private var encoder: JSONEncoder!
     private var decoder: JSONDecoder!
@@ -22,15 +25,13 @@ public class Detonator: NSObject, WKScriptMessageHandler {
     private var rootView: ViewLayout!
         
     init(rootView: ViewLayout, filename: String) {
-        messageListeners = [:]
-        
-        modules = [:]
-        
         self.filename = filename
         
         super.init()
         
         renderer = Renderer(self, rootView)
+        
+        messageFormatter = MessageFormatter(self)
         
         encoder = JSONEncoder()
         decoder = JSONDecoder()
@@ -39,52 +40,46 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         
         self.rootView = rootView
         
-        setMessageListener("com.iconshot.detonator.request::init") { value in
-            let incomingRequest: Request.IncomingRequest = self.decode(value)!
+        setEventListener("com.iconshot.detonator.request::fetch") { value in
+            let parts = self.messageFormatter.split(value, 4)
             
-            guard let requestClass = self.requestClasses[incomingRequest.name] else {
-                return;
+            let fetchId = Int(parts[0])!
+            let edgeId = parts[1] != "-" ? Int(parts[1]) : nil
+            let name = parts[2]
+            let dataValue = parts[3]
+            
+            let promise = RequestPromise(self, fetchId)
+            
+            var edge: Edge? = nil
+            
+            if let edgeId = edgeId {
+                edge = self.getEdge(edgeId)
+                
+                if let element = edge!.element {
+                    let elementRequestListener = element.getRequestListener(name)
+                    
+                    if let elementRequestListener = elementRequestListener {
+                        
+                        elementRequestListener(promise, dataValue)
+                        
+                        return
+                    }
+                }
             }
             
-            let request = requestClass.init(self, incomingRequest: incomingRequest)
+            let requestListener = self.requestListeners[name]
             
-            request.run()
+            guard let requestListener = requestListener else {
+                promise.reject("No request listener found for \"\(name)\".")
+                
+                return
+            }
+            
+            requestListener(promise, dataValue, edge)
         }
         
-        setMessageListener("com.iconshot.detonator::log") { value in
-            let str = String(value.dropFirst().dropLast())
-            
-            print(str)
-        }
-        
-        setElementClass("com.iconshot.detonator.view", ViewElement.self)
-        setElementClass("com.iconshot.detonator.text", TextElement.self)
-        setElementClass("com.iconshot.detonator.input", InputElement.self)
-        setElementClass("com.iconshot.detonator.textarea", TextAreaElement.self)
-        setElementClass("com.iconshot.detonator.image", ImageElement.self)
-        setElementClass("com.iconshot.detonator.video", VideoElement.self)
-        setElementClass("com.iconshot.detonator.audio", AudioElement.self)
-        setElementClass("com.iconshot.detonator.verticalscrollview", VerticalScrollViewElement.self)
-        setElementClass("com.iconshot.detonator.horizontalscrollview", HorizontalScrollViewElement.self)
-        setElementClass("com.iconshot.detonator.safeareaview", SafeAreaViewElement.self)
-        setElementClass("com.iconshot.detonator.icon", IconElement.self)
-        setElementClass("com.iconshot.detonator.activityindicator", ActivityIndicatorElement.self)
-        
-        setRequestClass("com.iconshot.detonator::openUrl", OpenUrlRequest.self)
-        setRequestClass("com.iconshot.detonator.input::focus", InputFocusRequest.self)
-        setRequestClass("com.iconshot.detonator.input::blur", InputBlurRequest.self)
-        setRequestClass("com.iconshot.detonator.input::setValue", InputSetValueRequest.self)
-        setRequestClass("com.iconshot.detonator.textarea::focus", TextAreaFocusRequest.self)
-        setRequestClass("com.iconshot.detonator.textarea::blur", TextAreaBlurRequest.self)
-        setRequestClass("com.iconshot.detonator.textarea::setValue", TextAreaSetValueRequest.self)
-        setRequestClass("com.iconshot.detonator.image::getSize", ImageGetSizeRequest.self)
-        setRequestClass("com.iconshot.detonator.video::play", VideoPlayRequest.self)
-        setRequestClass("com.iconshot.detonator.video::pause", VideoPauseRequest.self)
-        setRequestClass("com.iconshot.detonator.video::seek", VideoSeekRequest.self)
-        setRequestClass("com.iconshot.detonator.audio::play", AudioPlayRequest.self)
-        setRequestClass("com.iconshot.detonator.audio::pause", AudioPauseRequest.self)
-        setRequestClass("com.iconshot.detonator.audio::seek", AudioSeekRequest.self)
-        
+        setModuleClass("com.iconshot.detonator.ui", UIModule.self)
+        setModuleClass("com.iconshot.detonator.utility", UtilityModule.self)
         setModuleClass("com.iconshot.detonator.appstate", AppStateModule.self)
         setModuleClass("com.iconshot.detonator.storage", StorageModule.self)
         setModuleClass("com.iconshot.detonator.fullscreen", FullScreenModule.self)
@@ -122,16 +117,20 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         evaluate(code: code)
     }
     
-    public func getEdge(edgeId: Int) -> Edge? {
+    public func getEdge(_ edgeId: Int) -> Edge? {
         return renderer.edges[edgeId]
     }
     
-    public func getMessageListener(_ key: String) -> ((String) -> Void)? {
-        return messageListeners[key]
+    public func setEventListener(_ key: String, eventListener: @escaping (String) -> Void) -> Void {
+        eventListeners[key] = eventListener
     }
     
-    public func setMessageListener(_ key: String, messageListener: @escaping (String) -> Void) -> Void {
-        messageListeners[key] = messageListener
+    public func setRequestListener(_ key: String, requestListener: @escaping (RequestPromise, String, Edge?) -> Void) -> Void {
+        requestListeners[key] = requestListener
+    }
+    
+    public func setModuleClass(_ key: String, _ moduleClass: Module.Type) -> Void {
+        moduleClasses[key] = moduleClass
     }
     
     public func getElementClass(_ key: String) -> Element.Type? {
@@ -142,29 +141,13 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         elementClasses[key] = elementClass
     }
     
-    public func getRequestClass(_ key: String) -> Request.Type? {
-        return requestClasses[key]
-    }
-    
-    public func setRequestClass(_ key: String, _ requestClass: Request.Type) -> Void {
-        requestClasses[key] = requestClass
-    }
-    
-    public func getModuleClass(_ key: String) -> Module.Type? {
-        return moduleClasses[key]
-    }
-    
-    public func setModuleClass(_ key: String, _ moduleClass: Module.Type) -> Void {
-        moduleClasses[key] = moduleClass
-    }
-    
-    public func getModules(_ key: String) -> Module? {
-        return modules[key]
-    }
-    
-    public func encode(_ data: Encodable) -> String? {
+    public func encode(_ data: Encodable?) -> String? {
+        if data == nil {
+            return "null"
+        }
+
         do {
-            let tmpData = try encoder.encode(data)
+            let tmpData = try encoder.encode(data!)
             
             let value = String(data: tmpData, encoding: .utf8)
             
@@ -198,20 +181,20 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         webView.evaluateJavaScript(code, completionHandler: completion)
     }
     
-    public func emit(_ name: String, _ value: String) -> Void {
-        let escapedValue = value
+    public func send(_ name: String, _ data: Encodable? = "") -> Void {
+        let lines: [Encodable?] = [data]
+        
+        send(name, lines)
+    }
+    
+    private func send(_ name: String, _ lines: [Encodable?]) {
+        let value = messageFormatter.join(lines)
             .replacingOccurrences(of: "\\", with: "\\\\")
             .replacingOccurrences(of: "`", with: "\\`")
         
-        let code = "window.Detonator.emitter.emit(`\(name)`, `\(escapedValue)`);"
+        let code = "window.Detonator.emitter.emit(`\(name)`, `\(value)`);"
         
         evaluate(code: code)
-    }
-    
-    public func emit(_ name: String, _ data: Encodable) -> Void {
-        let value = encode(data)!
-        
-        emit(name, value)
     }
     
     private func initializeModules() -> Void {
@@ -246,16 +229,16 @@ public class Detonator: NSObject, WKScriptMessageHandler {
         
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             if message.name == "DetonatorBridge", let messageString = message.body as? String {
-                let pieces = messageString.split(separator: "\n", maxSplits: 1, omittingEmptySubsequences: false)
+                let pieces = self.messageFormatter.split(messageString, 2)
                 
-                let name = String(pieces[0])
-                let value = String(pieces[1])
+                let name = pieces[0]
+                let value = pieces[1]
                 
-                guard let messageListener = self.messageListeners[name] else {
+                guard let eventListener = self.eventListeners[name] else {
                     return
                 }
 
-                messageListener(value)
+                eventListener(value)
             }
         }
     }

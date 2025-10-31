@@ -16,6 +16,26 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         
         view.addTarget(self, action: #selector(onChangeListener(_:)), for: .editingChanged)
         
+        setRequestListener("com.iconshot.detonator.ui.input::focus") { promise, value in
+            view.becomeFirstResponder()
+            
+            promise.resolve()
+        }
+        
+        setRequestListener("com.iconshot.detonator.ui.input::blur") { promise, value in
+            view.resignFirstResponder()
+            
+            promise.resolve()
+        }
+        
+        setRequestListener("com.iconshot.detonator.ui.input::setValue") { promise, value in
+            view.text = value
+            
+            view.sendActions(for: .editingChanged)
+            
+            promise.resolve()
+        }
+        
         return view
     }
     
@@ -149,30 +169,10 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         view.textColor = color != nil ? ColorHelper.parseColor(color: color!) : nil
     }
     
-    public func focus() -> Void {
-        let view = view as! InputView
-        
-        view.becomeFirstResponder()
-    }
-    
-    public func blur() -> Void {
-        let view = view as! InputView
-        
-        view.resignFirstResponder()
-    }
-    
-    public func setValue(value: String) -> Void {
-        let view = view as! InputView
-        
-        view.text = value
-        
-        view.sendActions(for: .editingChanged)
-    }
-    
     func textFieldShouldReturn(_ view: UITextField) -> Bool {
         view.resignFirstResponder()
 
-        emitHandler(name: "onDone")
+        sendHandler(name: "onDone")
         
         return true
     }
@@ -180,7 +180,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
     @objc private func onChangeListener(_ view: UITextField) {
         let data = OnChangeData(value: view.text ?? "")
         
-        emitHandler(name: "onChange", data: data)
+        sendHandler(name: "onChange", data: data)
         
         detonator.performLayout()
     }

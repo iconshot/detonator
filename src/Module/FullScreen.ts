@@ -1,6 +1,6 @@
 import { Detonator } from "../Detonator";
 
-import { View } from "../Component/View";
+import { View } from "../UI/View";
 
 export class FullScreen {
   private static requestAnimationFrame:
@@ -11,7 +11,11 @@ export class FullScreen {
     | typeof window.cancelAnimationFrame
     | undefined;
 
-  static async open(view: View): Promise<void> {
+  public static async open(view: View): Promise<void> {
+    if (!(view instanceof View)) {
+      throw new Error("Not a View component.");
+    }
+
     this.requestAnimationFrame = window.requestAnimationFrame;
     this.cancelAnimationFrame = window.cancelAnimationFrame;
 
@@ -20,21 +24,18 @@ export class FullScreen {
     windowAny.requestAnimationFrame = undefined;
     windowAny.cancelAnimationFrame = undefined;
 
-    await Detonator.request(
-      { name: "com.iconshot.detonator.fullscreen::open" },
-      view
-    );
+    await Detonator.request("com.iconshot.detonator.fullscreen::open")
+      .withEdge(view)
+      .fetch();
   }
 
-  static async close(): Promise<void> {
+  public static async close(): Promise<void> {
     window.requestAnimationFrame = this.requestAnimationFrame!;
     window.cancelAnimationFrame = this.cancelAnimationFrame!;
 
     this.requestAnimationFrame = undefined;
     this.cancelAnimationFrame = undefined;
 
-    await Detonator.request({
-      name: "com.iconshot.detonator.fullscreen::close",
-    });
+    await Detonator.request("com.iconshot.detonator.fullscreen::close").fetch();
   }
 }

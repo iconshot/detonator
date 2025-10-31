@@ -41,6 +41,8 @@ open class Element: NSObject {
     
     public var forcePatch: Bool = true
     
+    private var requestListeners: [String: ((RequestPromise, String) -> Void)] = [:]
+    
     public var tapGestureRecognizer: UITapGestureRecognizer!
     public var longTapGestureRecognizer: UILongPressGestureRecognizer!
     
@@ -61,10 +63,18 @@ open class Element: NSObject {
         preconditionFailure("This method must be overridden.")
     }
     
-    public func emitHandler(name: String, data: Encodable? = nil) {
+    public func setRequestListener(_ name: String, _ listener: @escaping (RequestPromise, String) -> Void) {
+        requestListeners[name] = listener
+    }
+    
+    public func getRequestListener(_ name: String) -> ((RequestPromise, String) -> Void)? {
+        return requestListeners[name]
+    }
+    
+    public func sendHandler(name: String, data: Encodable? = nil) {
         let handler = Handler(name: name, edgeId: edge.id, data: data)
         
-        detonator.emit("com.iconshot.detonator.handler", handler)
+        detonator.send("com.iconshot.detonator.handler", handler)
     }
     
     public func create() -> Void {
@@ -1356,12 +1366,12 @@ open class Element: NSObject {
     }
     
     @objc func onTapListener(_ gestureRecognizer: UITapGestureRecognizer) {
-        emitHandler(name: "onTap")
+        sendHandler(name: "onTap")
     }
     
     @objc func onLongTapListener(_ gestureRecognizer: UILongPressGestureRecognizer) {
         if gestureRecognizer.state == .began {
-            emitHandler(name: "onLongTap")
+            sendHandler(name: "onLongTap")
         }
     }
     

@@ -33,6 +33,44 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
 
         startTrackingProgress();
 
+        setRequestListener("com.iconshot.detonator.ui.audio::play", (promise, value) -> {
+            if (player == null) {
+                promise.reject("No player available.");
+
+                return;
+            }
+
+            player.play();
+
+            promise.resolve();
+        });
+
+        setRequestListener("com.iconshot.detonator.ui.audio::pause", (promise, value) -> {
+            if (player == null) {
+                promise.reject("No player available.");
+
+                return;
+            }
+
+            player.pause();
+
+            promise.resolve();
+        });
+
+        setRequestListener("com.iconshot.detonator.ui.audio::seek", (promise, value) -> {
+            Integer position = detonator.decode(value, Integer.class);
+
+            if (player == null) {
+                promise.reject("No player available.");
+
+                return;
+            }
+
+            player.seekTo(position);
+
+            promise.resolve();
+        });
+
         return view;
     }
 
@@ -88,7 +126,7 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
             public void onPlaybackStateChanged(int playbackState) {
                 switch (playbackState) {
                     case ExoPlayer.STATE_ENDED: {
-                        emitHandler("onEnd");
+                        sendHandler("onEnd");
 
                         break;
                     }
@@ -104,7 +142,7 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
 
         player.prepare();
 
-        emitHandler("onReady");
+        sendHandler("onReady");
     }
 
     @Override
@@ -116,30 +154,6 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
         if (progressRunnable != null) {
             handler.removeCallbacks(progressRunnable);
         }
-    }
-
-    public void play() throws Exception {
-        if (player == null) {
-            throw new Exception("No player available.");
-        }
-
-        player.play();
-    }
-
-    public void pause() throws Exception {
-        if (player == null) {
-            throw new Exception("No player available.");
-        }
-
-        player.pause();
-    }
-
-    public void seek(int position) throws Exception {
-        if (player == null) {
-            throw new Exception("No player available.");
-        }
-
-        player.seekTo(position);
     }
 
     private void startTrackingProgress() {
@@ -160,7 +174,7 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
 
                 data.position = position;
 
-                emitHandler("onProgress", data);
+                sendHandler("onProgress", data);
             }
         };
 

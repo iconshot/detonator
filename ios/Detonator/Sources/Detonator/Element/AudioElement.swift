@@ -18,6 +18,48 @@ class AudioElement: Element {
         
         startTrackingProgress()
         
+        setRequestListener("com.iconshot.detonator.ui.audio::play") { promise, value in
+            guard let player = self.player else {
+                promise.reject("No player available.")
+                
+                return
+            }
+            
+            player.play()
+            
+            promise.resolve()
+        }
+        
+        setRequestListener("com.iconshot.detonator.ui.audio::pause") { promise, value in
+            guard let player = self.player else {
+                promise.reject("No player available.")
+                
+                return
+            }
+            
+            player.pause()
+            
+            promise.resolve()
+        }
+        
+        setRequestListener("com.iconshot.detonator.ui.audio::seek") { promise, value in
+            let position: Int = self.detonator.decode(value)!
+            
+            guard let player = self.player else {
+                promise.reject("No player available.")
+                
+                return
+            }
+            
+            let seconds = Double(position) / 1000
+        
+            let time = CMTime(seconds: seconds, preferredTimescale: 600)
+            
+            player.seek(to: time)
+            
+            promise.resolve()
+        }
+        
         return view
     }
     
@@ -83,7 +125,7 @@ class AudioElement: Element {
             object: player?.currentItem
         )
         
-        emitHandler(name: "onReady")
+        sendHandler(name: "onReady")
     }
     
     private func deinitPlayer() {
@@ -104,40 +146,6 @@ class AudioElement: Element {
         timer?.invalidate()
     }
     
-    public func play() throws -> Void {
-        guard let player = player else {
-            let error = NSError(domain: "com.iconshot.detonator.audio", code: -1, userInfo: [NSLocalizedDescriptionKey: "No player available."])
-            
-            throw error
-        }
-        
-        player.play()
-    }
-    
-    public func pause() throws -> Void {
-        guard let player = player else {
-            let error = NSError(domain: "com.iconshot.detonator.audio", code: -1, userInfo: [NSLocalizedDescriptionKey: "No player available."])
-            
-            throw error
-        }
-        
-        player.pause()
-    }
-    
-    public func seek(position: Int) throws -> Void {
-        guard let player = player else {
-            let error = NSError(domain: "com.iconshot.detonator.audio", code: -1, userInfo: [NSLocalizedDescriptionKey: "No player available."])
-            
-            throw error
-        }
-        
-        let seconds = Double(position) / 1000
-    
-        let time = CMTime(seconds: seconds, preferredTimescale: 600)
-        
-        player.seek(to: time)
-    }
-    
     private func startTrackingProgress() {
         timer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { timer in
             let time = self.player?.currentTime() ?? CMTime.zero
@@ -152,12 +160,12 @@ class AudioElement: Element {
             
             let data = OnProgressData(position: position)
             
-            self.emitHandler(name: "onProgress", data: data)
+            self.sendHandler(name: "onProgress", data: data)
         }
     }
     
     @objc func playerDidEnd() {
-        emitHandler(name: "onEnd")
+        sendHandler(name: "onEnd")
     }
     
     struct OnProgressData: Encodable {

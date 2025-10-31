@@ -22,7 +22,7 @@ public class FileStreamModule extends Module {
 
     @Override
     public void setUp() {
-        detonator.setMessageListener("com.iconshot.detonator.filestream.read::run", value -> {
+        detonator.setRequestListener("com.iconshot.detonator.filestream::read", (promise, value, edge) -> {
             ReadData data = detonator.decode(value, ReadData.class);
 
             new Thread(() -> {
@@ -37,17 +37,9 @@ public class FileStreamModule extends Module {
                         throw new Exception("Unsupported path.");
                     }
 
-                    String dataValue = data.id + "\n" + base64;
-
-                    detonator.uiHandler.post(() -> {
-                        detonator.emit("com.iconshot.detonator.filestream.read.data", dataValue);
-                    });
+                    promise.resolve(base64);
                 } catch (Exception exception) {
-                    String errorValue = data.id + "\n" + exception.getMessage();
-
-                    detonator.uiHandler.post(() -> {
-                        detonator.emit("com.iconshot.detonator.filestream.read.error", errorValue);
-                    });
+                    promise.reject(exception);
                 }
             }).start();
         });
@@ -71,9 +63,7 @@ public class FileStreamModule extends Module {
                     ? buffer
                     : java.util.Arrays.copyOf(buffer, bytesRead);
 
-            String base64 = Base64.encodeToString(chunk, Base64.NO_WRAP);
-
-            return base64;
+            return Base64.encodeToString(chunk, Base64.NO_WRAP);
         }
     }
 
@@ -115,7 +105,7 @@ public class FileStreamModule extends Module {
         return Base64.encodeToString(chunk, Base64.NO_WRAP);
     }
 
-    protected static class ReadData {
+    private static class ReadData {
         int id;
         String path;
         int offset;

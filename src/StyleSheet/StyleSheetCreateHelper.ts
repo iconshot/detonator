@@ -19,7 +19,7 @@ export class StyleSheetCreateHelper {
 
     const idStyleEntries: IdStyleEntry[] = [];
 
-    this.styleEntries.forEach((styleEntry, styleEntryId) => {
+    this.styleEntries.forEach((styleEntry, styleEntryId): void => {
       const idStyleEntry: IdStyleEntry = { id: styleEntryId, styleEntry };
 
       idStyleEntries.push(idStyleEntry);

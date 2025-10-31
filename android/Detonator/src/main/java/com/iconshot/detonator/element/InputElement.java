@@ -45,7 +45,7 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
                 data.value = s.toString();
 
-                emitHandler("onChange", data);
+                sendHandler("onChange", data);
             }
 
             @Override
@@ -63,13 +63,47 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
                     imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
 
-                    emitHandler("onDone");
+                    sendHandler("onDone");
                 });
 
                 return true;
             }
 
             return false;
+        });
+
+        setRequestListener("com.iconshot.detonator.ui.input::focus", (promise, value) -> {
+            view.requestFocus();
+
+            int position = view.getText().length();
+
+            view.setSelection(position);
+
+            view.post(() -> {
+                InputMethodManager imm = (InputMethodManager) detonator.context.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+
+                promise.resolve();
+            });
+        });
+
+        setRequestListener("com.iconshot.detonator.ui.input::blur", (promise, value) -> {
+            view.clearFocus();
+
+            view.post(() -> {
+                InputMethodManager imm = (InputMethodManager) detonator.context.getSystemService(Context.INPUT_METHOD_SERVICE);
+
+                imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+
+                promise.resolve();
+            });
+        });
+
+        setRequestListener("com.iconshot.detonator.ui.input::setValue", (promise, value) -> {
+            view.setText(value);
+
+            promise.resolve();
         });
 
         return view;
@@ -184,38 +218,6 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
         Integer tmpColor = ColorHelper.parseColor(color);
 
         view.setTextColor(tmpColor != null ? tmpColor : defaultColor);
-    }
-
-    public void focus(Runnable callback) {
-        view.requestFocus();
-
-        int position = view.getText().length();
-
-        view.setSelection(position);
-
-        view.post(() -> {
-            InputMethodManager imm = (InputMethodManager) detonator.context.getSystemService(Context.INPUT_METHOD_SERVICE);
-
-            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
-
-            callback.run();
-        });
-    }
-
-    public void blur(Runnable callback) {
-        view.clearFocus();
-
-        view.post(() -> {
-            InputMethodManager imm = (InputMethodManager) detonator.context.getSystemService(Context.INPUT_METHOD_SERVICE);
-
-            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
-
-            callback.run();
-        });
-    }
-
-    public void setValue(String value) {
-        view.setText(value);
     }
 
     private static class OnChangeData {

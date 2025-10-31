@@ -16,7 +16,7 @@ class AppStateModule: Module {
         
         self.state = state
         
-        detonator.emit("com.iconshot.detonator.appstate.state", state.rawValue)
+        detonator.send("com.iconshot.detonator.appstate.state", state.rawValue)
     }
     
     override func setUp() -> Void {

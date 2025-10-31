@@ -5,7 +5,7 @@ import android.view.ViewGroup;
 import com.iconshot.detonator.Detonator;
 import com.iconshot.detonator.element.Element;
 import com.iconshot.detonator.layout.ViewLayout;
-import com.iconshot.detonator.module.fullscreen.FullScreenModule;
+import com.iconshot.detonator.module.FullScreenModule;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -25,7 +25,7 @@ public class Renderer {
         this.detonator = detonator;
         this.rootView = rootView;
 
-        detonator.setMessageListener("com.iconshot.detonator.renderer::treeInit", value -> {
+        detonator.setEventListener("com.iconshot.detonator.renderer::treeInit", value -> {
             TreeInitData data = detonator.decode(value, TreeInitData.class);
 
             ViewLayout view;
@@ -43,13 +43,13 @@ public class Renderer {
             trees.put(data.treeId, tree);
         });
 
-        detonator.setMessageListener("com.iconshot.detonator.renderer::treeDeinit", value -> {
+        detonator.setEventListener("com.iconshot.detonator.renderer::treeDeinit", value -> {
             TreeDeinitData data = detonator.decode(value, TreeDeinitData.class);
 
             trees.remove(data.treeId);
         });
 
-        detonator.setMessageListener("com.iconshot.detonator.renderer::mount", value -> {
+        detonator.setEventListener("com.iconshot.detonator.renderer::mount", value -> {
             MountData data = detonator.decode(value, MountData.class);
 
             Tree tree = trees.get(data.treeId);
@@ -63,7 +63,7 @@ public class Renderer {
             performLayout();
         });
 
-        detonator.setMessageListener("com.iconshot.detonator.renderer::unmount", value -> {
+        detonator.setEventListener("com.iconshot.detonator.renderer::unmount", value -> {
             UnmountData data = detonator.decode(value, UnmountData.class);
 
             Tree tree = trees.get(data.treeId);
@@ -77,7 +77,7 @@ public class Renderer {
             performLayout();
         });
 
-        detonator.setMessageListener("com.iconshot.detonator.renderer::rerender", value -> {
+        detonator.setEventListener("com.iconshot.detonator.renderer::rerender", value -> {
             RerenderData data = detonator.decode(value, RerenderData.class);
 
             Tree tree = trees.get(data.treeId);

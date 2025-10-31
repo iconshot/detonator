@@ -1,6 +1,5 @@
 import {
   Slot,
-  Ref,
   Hookster,
   ClassComponent,
   FunctionComponent,
@@ -12,13 +11,16 @@ import { Detonator } from "../Detonator";
 import { ErrorHandler } from "../ErrorHandler";
 
 import { StyleSheetHelper } from "../StyleSheet/StyleSheetHelper";
+import { StyleSheetCreateHelper } from "../StyleSheet/StyleSheetCreateHelper";
 
 import { HandlerManager } from "../Manager/HandlerManager";
+
+import { View } from "../UI/View";
 
 import { Edge } from "./Edge";
 import { Target } from "./Target";
 
-import { TreeHub } from "./TreeHub";
+import { TreeRegistry } from "./TreeRegistry";
 
 interface SanitizedEdge {
   id: number;
@@ -32,6 +34,8 @@ interface SanitizedEdge {
 }
 
 export class Tree {
+  private treeId: number;
+
   private element: Element;
 
   private edge: Edge | null = null;
@@ -45,13 +49,38 @@ export class Tree {
   private skippedIds: Set<number> = new Set();
   private movedIds: Set<number> = new Set();
 
-  constructor(private treeId: number, elementEdge: Edge | null) {
-    this.element = elementEdge?.element! ?? document.createElement("root");
+  constructor(view: View | null = null) {
+    StyleSheetCreateHelper.send();
 
-    const elementId = elementEdge?.id ?? null;
+    let element: Element | null = null;
+    let elementId: number | null = null;
+
+    if (view !== null) {
+      if (!(view instanceof View)) {
+        throw new Error("Not a View component.");
+      }
+
+      const componentId = Detonator.getComponentId(view);
+
+      if (componentId === null) {
+        throw new Error("View component is not mounted.");
+      }
+
+      const componentEdge = Detonator.getEdge(componentId)!;
+
+      const elementEdge = componentEdge.children[0]!;
+
+      element = elementEdge.element!;
+
+      elementId = elementEdge.id;
+    }
+
+    this.treeId = TreeRegistry.treeId++;
+
+    this.element = element ?? TreeRegistry.rootElement;
 
     Detonator.send("com.iconshot.detonator.renderer::treeInit", {
-      treeId,
+      treeId: this.treeId,
       elementId,
     });
   }
@@ -81,7 +110,7 @@ export class Tree {
 
     const target = new Target(this.element);
 
-    this.edge = new Edge(TreeHub.edgeId++, slot);
+    this.edge = new Edge(TreeRegistry.edgeId++, slot);
 
     this.renderEdge(this.edge, null, target);
 
@@ -172,7 +201,7 @@ export class Tree {
       // prepare child
 
       if (child === null) {
-        child = new Edge(TreeHub.edgeId++, slot, edge.depth + 1, edge);
+        child = new Edge(TreeRegistry.edgeId++, slot, edge.depth + 1, edge);
       } else {
         prevChild = child.clone();
 
@@ -238,7 +267,7 @@ export class Tree {
     const component = edge.component;
     const hookster = edge.hookster;
 
-    TreeHub.edges.set(id, edge);
+    TreeRegistry.edges.set(id, edge);
 
     if (component !== null) {
       this.unqueue(edge);
@@ -300,29 +329,31 @@ export class Tree {
     if (component === null) {
       const ComponentClass = contentType as ClassComponent;
 
-      component = new ComponentClass(props);
+      component = new ComponentClass(props as any);
 
       component.initialize((): void => {
         this.queue(edge);
       });
     } else {
-      component.updateProps(props);
+      component.updateProps(props as any);
     }
 
     edge.component = component;
 
-    TreeHub.components.set(component, edge);
+    TreeRegistry.components.set(component, edge);
 
     const ref = slot.getRef();
 
     const prevRef = prevSlot?.getRef() ?? null;
 
-    if (prevRef instanceof Ref && prevRef !== ref) {
-      prevRef.value = null;
-    }
+    if (ref !== prevRef) {
+      if (prevRef !== null) {
+        prevRef.value = null;
+      }
 
-    if (ref instanceof Ref && ref !== prevRef) {
-      ref.value = component;
+      if (ref !== null) {
+        ref.value = component;
+      }
     }
 
     const children = component.render() ?? [];
@@ -366,7 +397,7 @@ export class Tree {
 
     const ComponentFunction = contentType as FunctionComponent;
 
-    const children = ComponentFunction(props, prevProps) ?? [];
+    const children = ComponentFunction(props as any, prevProps as any) ?? [];
 
     hookster.deactivate();
 
@@ -382,6 +413,10 @@ export class Tree {
     prevEdge: Edge | null,
     target: Target
   ): void {
+    const slot: Slot = edge.slot;
+
+    const prevSlot: Slot | null = prevEdge?.slot ?? null;
+
     let element = edge.element;
 
     if (element === null) {
@@ -391,6 +426,24 @@ export class Tree {
     edge.element = element;
 
     this.patchElement(edge, prevEdge);
+
+    console.log("elements.set");
+
+    TreeRegistry.elements.set(element, edge);
+
+    const ref = slot.getRef();
+
+    const prevRef = prevSlot?.getRef() ?? null;
+
+    if (ref !== prevRef) {
+      if (prevRef !== null) {
+        prevRef.value = null;
+      }
+
+      if (ref !== null) {
+        ref.value = element;
+      }
+    }
 
     const tmpTarget = new Target(element);
 
@@ -413,11 +466,15 @@ export class Tree {
     const hookster = edge.hookster;
     const children = edge.children;
 
-    TreeHub.edges.delete(id);
+    TreeRegistry.edges.delete(id);
 
     let tmpTarget = target;
 
     if (element !== null) {
+      console.log("elements.delete");
+
+      TreeRegistry.elements.delete(element);
+
       target.remove(element);
 
       if (slot instanceof Slot && slot.isElement()) {
@@ -427,7 +484,7 @@ export class Tree {
 
     const ref = slot instanceof Slot ? slot.getRef() : null;
 
-    if (ref instanceof Ref) {
+    if (ref !== null) {
       ref.value = null;
     }
 
@@ -436,7 +493,7 @@ export class Tree {
     }
 
     if (component !== null) {
-      TreeHub.components.delete(component);
+      TreeRegistry.components.delete(component);
 
       this.unqueue(edge);
 
@@ -522,9 +579,12 @@ export class Tree {
 
   private patchElement(edge: Edge, prevEdge: Edge | null): void {
     const slot: Slot = edge.slot;
-    const element = edge.element!;
 
     const prevSlot: Slot | null = prevEdge?.slot ?? null;
+
+    const element = edge.element!;
+
+    // handle attributes
 
     const attributes = slot.getAttributes() ?? {};
 
@@ -750,7 +810,7 @@ export class Tree {
     const skipped = this.skippedIds.has(id);
 
     if (!skipped) {
-      const tmpAttributes = {};
+      const tmpAttributes: Record<string, any> = {};
 
       for (const key in attributes) {
         const value = attributes[key] ?? null;

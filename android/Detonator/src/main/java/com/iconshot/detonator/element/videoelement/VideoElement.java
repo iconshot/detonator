@@ -49,6 +49,44 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
         startTrackingProgress();
 
+        setRequestListener("com.iconshot.detonator.ui.video::play", (promise, value) -> {
+            if (player == null) {
+                promise.reject("No player available.");
+
+                return;
+            }
+
+            player.play();
+
+            promise.resolve();
+        });
+
+        setRequestListener("com.iconshot.detonator.ui.video::pause", (promise, value) -> {
+            if (player == null) {
+                promise.reject("No player available.");
+
+                return;
+            }
+
+            player.pause();
+
+            promise.resolve();
+        });
+
+        setRequestListener("com.iconshot.detonator.ui.video::seek", (promise, value) -> {
+            Integer position = detonator.decode(value, Integer.class);
+
+            if (player == null) {
+                promise.reject("No player available.");
+
+                return;
+            }
+
+            player.seekTo(position);
+
+            promise.resolve();
+        });
+
         return view;
     }
 
@@ -109,7 +147,7 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
                     }
 
                     case ExoPlayer.STATE_ENDED: {
-                        emitHandler("onEnd");
+                        sendHandler("onEnd");
 
                         break;
                     }
@@ -127,7 +165,7 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
         player.prepare();
 
-        emitHandler("onReady");
+        sendHandler("onReady");
     }
 
     protected void patchBackgroundColor(
@@ -200,30 +238,6 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
         }
     }
 
-    public void play() throws Exception {
-        if (player == null) {
-            throw new Exception("No player available.");
-        }
-
-        player.play();
-    }
-
-    public void pause() throws Exception {
-        if (player == null) {
-            throw new Exception("No player available.");
-        }
-
-        player.pause();
-    }
-
-    public void seek(int position) throws Exception {
-        if (player == null) {
-            throw new Exception("No player available.");
-        }
-
-        player.seekTo(position);
-    }
-
     private void startTrackingProgress() {
         progressRunnable = new Runnable() {
             @Override
@@ -242,7 +256,7 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
                 data.position = position;
 
-                emitHandler("onProgress", data);
+                sendHandler("onProgress", data);
             }
         };
 

@@ -1,4 +1,4 @@
-import { StyleAttribute } from "../Component/View";
+import { StyleAttribute } from "../UI/View";
 
 import { Style } from "./StyleSheet";
 

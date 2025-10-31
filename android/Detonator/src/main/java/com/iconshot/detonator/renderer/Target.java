@@ -4,7 +4,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
-import com.iconshot.detonator.module.fullscreen.FullScreenModule;
+import com.iconshot.detonator.module.FullScreenModule;
 
 public class Target {
     public final ViewGroup view;

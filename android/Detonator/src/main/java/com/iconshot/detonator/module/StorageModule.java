@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.iconshot.detonator.Detonator;
-import com.iconshot.detonator.request.Request;
 
 public class StorageModule extends Module {
     public StorageModule(Detonator detonator) {
@@ -13,46 +12,20 @@ public class StorageModule extends Module {
 
     @Override
     public void setUp() {
-        detonator.setRequestClass("com.iconshot.detonator.storage::getItem", StorageGetItemRequest.class);
-        detonator.setRequestClass("com.iconshot.detonator.storage::setItem", StorageSetItemRequest.class);
-    }
+        detonator.setRequestListener("com.iconshot.detonator.storage::getItem", (promise, value, edge) -> {
+            GetItemData data = detonator.decode(value, GetItemData.class);
 
-    private static SharedPreferences getSharedPreferences(Context context, String name) {
-        return context.getSharedPreferences(name, Context.MODE_PRIVATE);
-    }
+            SharedPreferences sharedPreferences = getSharedPreferences(data.name);
 
-    public static class StorageGetItemRequest extends Request<StorageGetItemRequest.Data> {
-        public StorageGetItemRequest(Detonator detonator, IncomingRequest incomingRequest) {
-            super(detonator, incomingRequest);
-        }
+            String itemValue = sharedPreferences.getString(data.key, null);
 
-        @Override
-        public void run() {
-            Data data = decodeData(Data.class);
+            promise.resolve(itemValue != null ? "&" + itemValue : ":n");
+        });
 
-            SharedPreferences sharedPreferences = StorageModule.getSharedPreferences(detonator.context, data.name);
+        detonator.setRequestListener("com.iconshot.detonator.storage::setItem", (promise, value, edge) -> {
+            SetItemData data = detonator.decode(value, SetItemData.class);
 
-            String value = sharedPreferences.getString(data.key, null);
-
-            end(value);
-        }
-
-        public class Data {
-            String name;
-            String key;
-        }
-    }
-
-    public static class StorageSetItemRequest extends Request<StorageSetItemRequest.Data> {
-        public StorageSetItemRequest(Detonator detonator, IncomingRequest incomingRequest) {
-            super(detonator, incomingRequest);
-        }
-
-        @Override
-        public void run() {
-            Data data = decodeData(Data.class);
-
-            SharedPreferences sharedPreferences = StorageModule.getSharedPreferences(detonator.context, data.name);
+            SharedPreferences sharedPreferences = getSharedPreferences(data.name);
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
 
@@ -60,13 +33,22 @@ public class StorageModule extends Module {
 
             editor.apply();
 
-            end();
-        }
+            promise.resolve();
+        });
+    }
 
-        public class Data {
-            String name;
-            String key;
-            String value;
-        }
+    private SharedPreferences getSharedPreferences(String name) {
+        return detonator.context.getSharedPreferences(name, Context.MODE_PRIVATE);
+    }
+
+    private static class GetItemData {
+        String name;
+        String key;
+    }
+
+    private static class SetItemData {
+        String name;
+        String key;
+        String value;
     }
 }

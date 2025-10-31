@@ -10,7 +10,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
 import com.iconshot.detonator.Detonator;
-
 import com.iconshot.detonator.helpers.ColorHelper;
 import com.iconshot.detonator.helpers.CompareHelper;
 import com.iconshot.detonator.helpers.AttributeHelper;
@@ -27,7 +26,9 @@ import com.iconshot.detonator.module.stylesheet.StyleSheetModule;
 import com.iconshot.detonator.module.stylesheet.Styler;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public abstract class Element<K extends View, T extends Element.Attributes> {
     protected Detonator detonator;
@@ -46,6 +47,8 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
     protected boolean forcePatch = true;
 
+    private Map<String, Detonator.ElementRequestListener> requestListeners = new HashMap<>();
+
     private boolean longTapped = false;
 
     public Element(Detonator detonator) {
@@ -60,18 +63,26 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
         return detonator.decode(edge.attributes, AttributesClass);
     }
 
-    protected void emitHandler(String name, Object data) {
+    public void setRequestListener(String key, Detonator.ElementRequestListener requestListener) {
+        requestListeners.put(key, requestListener);
+    }
+
+    public Detonator.ElementRequestListener getRequestListener(String key) {
+        return requestListeners.get(key);
+    }
+
+    protected void sendHandler(String name, Object data) {
         Handler handler = new Handler();
 
         handler.name = name;
         handler.edgeId = edge.id;
         handler.data = data;
 
-        detonator.emit("com.iconshot.detonator.handler", handler);
+        detonator.send("com.iconshot.detonator.handler", handler);
     }
 
-    protected void emitHandler(String name) {
-        emitHandler(name, null);
+    protected void sendHandler(String name) {
+        sendHandler(name, null);
     }
 
     public void create() {
@@ -93,11 +104,11 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
                 return;
             }
 
-            emitHandler("onTap");
+            sendHandler("onTap");
         });
 
         view.setOnLongClickListener((View v) -> {
-            emitHandler("onLongTap");
+            sendHandler("onLongTap");
 
             longTapped = true;
 

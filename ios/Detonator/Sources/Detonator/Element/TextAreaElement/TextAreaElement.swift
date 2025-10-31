@@ -21,6 +21,26 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         view.textContainer.lineBreakMode = .byWordWrapping
         view.textContainer.maximumNumberOfLines = 0
         
+        setRequestListener("com.iconshot.detonator.ui.textarea::focus") { promise, value in
+            view.becomeFirstResponder()
+            
+            promise.resolve()
+        }
+        
+        setRequestListener("com.iconshot.detonator.ui.textarea::blur") { promise, value in
+            view.resignFirstResponder()
+            
+            promise.resolve()
+        }
+        
+        setRequestListener("com.iconshot.detonator.ui.textarea::setValue") { promise, value in
+            view.text = value
+            
+            self.textViewDidChange(view)
+            
+            promise.resolve()
+        }
+        
         return view
     }
     
@@ -178,30 +198,10 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
         view.textColor = color != nil ? ColorHelper.parseColor(color: color!) : nil
     }
     
-    public func focus() -> Void {
-        let view = view as! TextAreaView
-        
-        view.becomeFirstResponder()
-    }
-    
-    public func blur() -> Void {
-        let view = view as! TextAreaView
-        
-        view.resignFirstResponder()
-    }
-    
-    public func setValue(value: String) {
-        let view = view as! TextAreaView
-        
-        view.text = value
-        
-        textViewDidChange(view)
-    }
-    
     func textViewDidChange(_ textView: UITextView) {
         let data = OnChangeData(value: textView.text ?? "")
         
-        emitHandler(name: "onChange", data: data)
+        sendHandler(name: "onChange", data: data)
         
         detonator.performLayout()
     }

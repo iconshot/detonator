@@ -22,7 +22,7 @@ public class AppStateModule extends Module {
 
         String currentState = foreground ? "active": "background";
 
-        detonator.emit("com.iconshot.detonator.appstate.state", currentState);
+        detonator.send("com.iconshot.detonator.appstate.state", currentState);
     }
 
     @Override

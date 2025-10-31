@@ -5,8 +5,8 @@ class FileStreamModule: Module {
     private var dataMap: [Int: Data] = [:]
     
     override func setUp() {
-        detonator.setMessageListener("com.iconshot.detonator.filestream.read::run") { value in
-            let data: ReadData! = self.detonator.decode(value)
+        detonator.setRequestListener("com.iconshot.detonator.filestream::read") { promise, value, edge in
+            let data: ReadData = self.detonator.decode(value)!
             
             DispatchQueue.global(qos: .userInitiated).async {
                 do {
@@ -27,20 +27,12 @@ class FileStreamModule: Module {
                             size: data.size
                         )
                     } else {
-                        throw NSError(domain: "com.iconshot.detonator.filestream.read", code: 1, userInfo: [NSLocalizedDescriptionKey: "Path not supported."])
+                        throw NSError(domain: "com.iconshot.detonator.filestream::read", code: 1, userInfo: [NSLocalizedDescriptionKey: "Path not supported."])
                     }
                     
-                    let dataValue = "\(data.id)\n\(base64)"
-                    
-                    DispatchQueue.main.async {
-                        self.detonator.emit("com.iconshot.detonator.filestream.read.data", dataValue)
-                    }
+                    promise.resolve(base64)
                 } catch {
-                    let errorValue = "\(data.id)\n\(error.localizedDescription)"
-                    
-                    DispatchQueue.main.async {
-                        self.detonator.emit("com.iconshot.detonator.filestream.read.error", errorValue)
-                    }
+                    promise.reject(error)
                 }
             }
         }
@@ -48,7 +40,7 @@ class FileStreamModule: Module {
     
     private func readFileBase64ChunkFromFile(id: Int, path: String, offset: Int, size: Int) throws -> String {
         guard let fileURL = URL(string: path) else {
-            throw NSError(domain: "com.iconshot.detonator.filestream.read", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid path."])
+            throw NSError(domain: "com.iconshot.detonator.filestream::read", code: 1, userInfo: [NSLocalizedDescriptionKey: "Invalid path."])
         }
         
         let fileHandle = try FileHandle(forReadingFrom: fileURL)
@@ -83,7 +75,7 @@ class FileStreamModule: Module {
             let assets = PHAsset.fetchAssets(withLocalIdentifiers: [localIdentifier], options: nil)
 
             guard let asset = assets.firstObject else {
-                throw NSError(domain: "com.iconshot.detonator.filestream.read", code: 2, userInfo: [NSLocalizedDescriptionKey: "Asset not found."])
+                throw NSError(domain: "com.iconshot.detonator.filestream::read", code: 2, userInfo: [NSLocalizedDescriptionKey: "Asset not found."])
             }
             
             let semaphore = DispatchSemaphore(value: 0)
@@ -112,14 +104,14 @@ class FileStreamModule: Module {
                             resultError = error
                         }
                     } else {
-                        resultError = NSError(domain: "com.iconshot.detonator.filestream.read", code: 3, userInfo: [NSLocalizedDescriptionKey: "Could not load AVAsset."])
+                        resultError = NSError(domain: "com.iconshot.detonator.filestream::read", code: 3, userInfo: [NSLocalizedDescriptionKey: "Could not load AVAsset."])
                     }
                     
                     semaphore.signal()
                 }
                 
             default:
-                throw NSError(domain: "com.iconshot.detonator.filestream.read", code: 4, userInfo: [NSLocalizedDescriptionKey: "Unsupported media type."])
+                throw NSError(domain: "com.iconshot.detonator.filestream::read", code: 4, userInfo: [NSLocalizedDescriptionKey: "Unsupported media type."])
             }
             
             _ = semaphore.wait(timeout: .now() + 10)
@@ -132,7 +124,7 @@ class FileStreamModule: Module {
         }
 
         guard let data = resultData else {
-            throw NSError(domain: "com.iconshot.detonator.filestream.read", code: 5, userInfo: [NSLocalizedDescriptionKey: "No data returned."])
+            throw NSError(domain: "com.iconshot.detonator.filestream::read", code: 5, userInfo: [NSLocalizedDescriptionKey: "No data returned."])
         }
 
         if offset >= data.count {
@@ -150,7 +142,7 @@ class FileStreamModule: Module {
         return base64
     }
     
-    struct ReadData: Decodable {
+    private struct ReadData: Decodable {
         let id: Int
         let path: String
         let offset: Int

@@ -16,8 +16,10 @@ class AppStateModule extends Emitter<AppStateModuleSignatures> {
 
     Detonator.emitter.on(
       "com.iconshot.detonator.appstate.state",
-      (state: AppStateState): void => {
-        this.state = state;
+      (value): void => {
+        console.log("state!", value);
+
+        this.state = value as AppStateState;
 
         this.emit("state");
       }
