@@ -1,7 +1,7 @@
 class StorageModule: Module {
-    private static var storages: [String: Storage] = [:]
+    private var storages: [String: Storage] = [:]
     
-    public static func getStorage(name: String) -> Storage {
+    private func getStorage(name: String) -> Storage {
         if let storage = storages[name] {
             return storage
         }
@@ -15,9 +15,9 @@ class StorageModule: Module {
     
     override func setUp() -> Void {
         detonator.setRequestListener("com.iconshot.detonator.storage::getItem") { promise, value, edge in
-            let data: GetItemData! = self.detonator.decode(value)
+            let data: GetItemData = self.detonator.decode(value)!
             
-            let storage = StorageModule.getStorage(name: data.name)
+            let storage = self.getStorage(name: data.name)
             
             let itemValue = storage.content[data.key]
             
@@ -25,9 +25,9 @@ class StorageModule: Module {
         }
         
         detonator.setRequestListener("com.iconshot.detonator.storage::setItem") { promise, value, edge in
-            let data: SetItemData! = self.detonator.decode(value)
+            let data: SetItemData = self.detonator.decode(value)!
             
-            let storage = StorageModule.getStorage(name: data.name)
+            let storage = self.getStorage(name: data.name)
             
             storage.content[data.key] = data.value
             

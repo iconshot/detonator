@@ -1,6 +1,12 @@
 import UIKit
 
 class FullScreenModule: Module {
+    public static var parent: UIView? = nil
+    public static var view: ViewLayout? = nil
+    public static var index: Int? = nil
+    public static var layoutParams: LayoutParams? = nil
+    public static var fullScreenViewController: FullScreenViewController? = nil
+    
     override func setUp() -> Void {
         detonator.setRequestListener("com.iconshot.detonator.fullscreen::open") { promise, value, edge in
             let view = edge!.children.first!.element!.view as! ViewLayout
@@ -146,10 +152,4 @@ class FullScreenModule: Module {
             promise.resolve()
         }
     }
-    
-    public static var parent: UIView? = nil
-    public static var view: ViewLayout? = nil
-    public static var index: Int? = nil
-    public static var layoutParams: LayoutParams? = nil
-    public static var fullScreenViewController: FullScreenViewController? = nil
 }
