@@ -1,15 +1,15 @@
 import UIKit
 
 class ViewElement: Element {
-    override public func decodeAttributes() -> ViewAttributes? {
+    override func decodeAttributes() -> ViewAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func createView() -> ViewLayout {
+    override func createView() -> ViewLayout {
         return ViewLayout()
     }
     
-    override func patchOverflow(overflow: String?) {
+    override func patchOverflow(overflow: String?) -> Void {
         let tmpOverflow = overflow ?? "visible"
         
         switch tmpOverflow {
@@ -30,7 +30,7 @@ class ViewElement: Element {
         }
     }
     
-    override func patchFlexDirection(flexDirection: String?) {
+    override func patchFlexDirection(flexDirection: String?) -> Void {
         let view = view as! ViewLayout
         
         switch flexDirection {
@@ -61,7 +61,7 @@ class ViewElement: Element {
         }
     }
     
-    override func patchJustifyContent(justifyContent: String?) {
+    override func patchJustifyContent(justifyContent: String?) -> Void {
         let view = view as! ViewLayout
         
         switch justifyContent {
@@ -112,7 +112,7 @@ class ViewElement: Element {
         }
     }
     
-    override func patchAlignItems(alignItems: String?) {
+    override func patchAlignItems(alignItems: String?) -> Void {
         let view = view as! ViewLayout
         
         switch alignItems {
@@ -148,7 +148,7 @@ class ViewElement: Element {
         }
     }
     
-    override func patchGap(gap: Float?) {
+    override func patchGap(gap: Float?) -> Void {
         let view = view as! ViewLayout
         
         view.gap = gap ?? 0

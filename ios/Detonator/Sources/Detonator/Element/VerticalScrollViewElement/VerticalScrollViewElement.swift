@@ -3,12 +3,16 @@ import UIKit
 class VerticalScrollViewElement: Element {
     private var isAtBottom: Bool = false
     
-    override public func decodeAttributes() -> VerticalScrollViewAttributes? {
+    override func decodeAttributes() -> VerticalScrollViewAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func createView() -> VerticalScrollView {
-        let view = VerticalScrollView()
+    override func createView() -> VerticalScrollView {
+        return VerticalScrollView()
+    }
+    
+    override func setUpView() -> Void {
+        let view = view as! VerticalScrollView
         
         view.delegate = view
         
@@ -29,11 +33,9 @@ class VerticalScrollViewElement: Element {
             
             self.isAtBottom = diff == 0
         }
-        
-        return view
     }
     
-    override public func patchView() {
+    override func patchView() -> Void {
         let view = view as! VerticalScrollView
         
         let layoutParams = view.layoutParams
@@ -93,7 +95,7 @@ class VerticalScrollViewElement: Element {
         paddingLeft: Float?,
         paddingBottom: Float?,
         paddingRight: Float?
-    ) {}
+    ) -> Void {}
     
     override func patchBorderRadius(
         borderRadius: StyleSize?,
@@ -101,7 +103,7 @@ class VerticalScrollViewElement: Element {
         borderRadiusTopRight: StyleSize?,
         borderRadiusBottomLeft: StyleSize?,
         borderRadiusBottomRight: StyleSize?
-    ) {}
+    ) -> Void {}
     
     struct OnPageChangeData: Encodable {
         let page: Int

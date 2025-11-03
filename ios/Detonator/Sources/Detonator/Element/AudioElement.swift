@@ -9,13 +9,15 @@ class AudioElement: Element {
     
     private var currentPosition: Int = 0
     
-    override public func decodeAttributes() -> AudioAttributes? {
+    override func decodeAttributes() -> AudioAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func createView() -> UIView {
-        let view = UIView()
-        
+    override func createView() -> UIView {
+        return UIView()
+    }
+    
+    override func setUpView() -> Void {
         startTrackingProgress()
         
         setRequestListener("com.iconshot.detonator.ui.audio::play") { promise, value in
@@ -59,11 +61,9 @@ class AudioElement: Element {
             
             promise.resolve()
         }
-        
-        return view
     }
     
-    override public func patchView() {
+    override func patchView() -> Void {
         let attributes = attributes as! AudioAttributes
         let prevAttributes = prevAttributes as! AudioAttributes?
         
@@ -92,11 +92,11 @@ class AudioElement: Element {
         }
     }
     
-    override func patchDisplay(display: String?) {
+    override func patchDisplay(display: String?) -> Void {
         super.patchDisplay(display: "none")
     }
     
-    private func patchSource(source: String?) {
+    private func patchSource(source: String?) -> Void {
         deinitPlayer()
         
         guard let source = source else {
@@ -128,7 +128,7 @@ class AudioElement: Element {
         sendHandler(name: "onReady")
     }
     
-    private func deinitPlayer() {
+    private func deinitPlayer() -> Void {
         NotificationCenter.default.removeObserver(
             self,
             name: .AVPlayerItemDidPlayToEndTime,
@@ -140,13 +140,13 @@ class AudioElement: Element {
         player = nil
     }
     
-    override public func removeView() {
+    override func removeView() -> Void {
         deinitPlayer()
         
         timer?.invalidate()
     }
     
-    private func startTrackingProgress() {
+    private func startTrackingProgress() -> Void {
         timer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { timer in
             let time = self.player?.currentTime() ?? CMTime.zero
             
@@ -164,7 +164,7 @@ class AudioElement: Element {
         }
     }
     
-    @objc func playerDidEnd() {
+    @objc func playerDidEnd() -> Void {
         sendHandler(name: "onEnd")
     }
     

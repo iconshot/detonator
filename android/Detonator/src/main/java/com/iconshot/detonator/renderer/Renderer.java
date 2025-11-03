@@ -156,6 +156,7 @@ public class Renderer {
 
             if (element != null) {
                 element.create();
+                element.setUp();
             }
         }
 

@@ -3,12 +3,16 @@ import UIKit
 class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
     private let defaultPlaceholderColor: UIColor = UIColor(white: 1, alpha: 0.75)
     
-    override public func decodeAttributes() -> InputAttributes? {
+    override func decodeAttributes() -> InputAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func createView() -> InputView {
-        let view = InputView()
+    override func createView() -> InputView {
+        return InputView()
+    }
+    
+    override func setUpView() -> Void {
+        let view = view as! InputView
         
         view.delegate = self
         
@@ -35,11 +39,9 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
             
             promise.resolve()
         }
-        
-        return view
     }
     
-    override public func patchView() {
+    override func patchView() -> Void {
         let view = view as! InputView
         
         let attributes = attributes as! InputAttributes
@@ -94,7 +96,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         }
     }
     
-    private func patchInputType(inputType: String?, autoCapitalize: String?) {
+    private func patchInputType(inputType: String?, autoCapitalize: String?) -> Void {
         let view = view as! InputView
         
         switch inputType {
@@ -155,7 +157,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         }
     }
     
-    override func patchFontSize(fontSize: Float?) {
+    override func patchFontSize(fontSize: Float?) -> Void {
         let view = view as! InputView
         
         let value = CGFloat(fontSize ?? 16)
@@ -163,7 +165,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         view.font = UIFont.systemFont(ofSize: value)
     }
     
-    override func patchColor(color: StyleColor?) {
+    override func patchColor(color: StyleColor?) -> Void {
         let view = view as! InputView
         
         view.textColor = color != nil ? ColorHelper.parseColor(color: color!) : nil
@@ -177,7 +179,7 @@ class InputElement: Element, UIGestureRecognizerDelegate, UITextFieldDelegate {
         return true
     }
     
-    @objc private func onChangeListener(_ view: UITextField) {
+    @objc private func onChangeListener(_ view: UITextField) -> Void {
         let data = OnChangeData(value: view.text ?? "")
         
         sendHandler(name: "onChange", data: data)

@@ -63,7 +63,7 @@ open class Element: NSObject {
         preconditionFailure("This method must be overridden.")
     }
     
-    public func setRequestListener(_ name: String, _ listener: @escaping (RequestPromise, String) -> Void) {
+    public func setRequestListener(_ name: String, _ listener: @escaping (RequestPromise, String) -> Void) -> Void {
         requestListeners[name] = listener
     }
     
@@ -71,19 +71,21 @@ open class Element: NSObject {
         return requestListeners[name]
     }
     
-    public func sendHandler(name: String, data: Encodable? = nil) {
+    public func sendHandler(name: String, data: Encodable? = nil) -> Void {
         let handler = Handler(name: name, edgeId: edge.id, data: data)
         
         detonator.send("com.iconshot.detonator.handler", handler)
     }
     
     public func create() -> Void {
-        let view = createView()
-        
+        view = createView()
+    }
+    
+    public func setUp() -> Void {
         view.addGestureRecognizer(tapGestureRecognizer)
         view.addGestureRecognizer(longTapGestureRecognizer)
         
-        self.view = view
+        setUpView()
     }
     
     public func patch() -> Void {
@@ -1344,7 +1346,7 @@ open class Element: NSObject {
         return StyleSheetHelper.createStyle(styleEntries: tmpStyleEntries)
     }
     
-    public func remove() {
+    public func remove() -> Void {
         removeView()
     }
     
@@ -1352,10 +1354,11 @@ open class Element: NSObject {
         preconditionFailure("This method must be overridden.")
     }
     
-    open func patchView() {}
-    open func removeView() {}
+    open func setUpView() -> Void {}
+    open func patchView() -> Void {}
+    open func removeView() -> Void {}
     
-    func resignFirstResponder(_ view: UIView) {
+    func resignFirstResponder(_ view: UIView) -> Void {
         if view.isFirstResponder {
             view.resignFirstResponder()
         }
@@ -1365,11 +1368,11 @@ open class Element: NSObject {
         }
     }
     
-    @objc func onTapListener(_ gestureRecognizer: UITapGestureRecognizer) {
+    @objc func onTapListener(_ gestureRecognizer: UITapGestureRecognizer) -> Void {
         sendHandler(name: "onTap")
     }
     
-    @objc func onLongTapListener(_ gestureRecognizer: UILongPressGestureRecognizer) {
+    @objc func onLongTapListener(_ gestureRecognizer: UILongPressGestureRecognizer) -> Void {
         if gestureRecognizer.state == .began {
             sendHandler(name: "onLongTap")
         }

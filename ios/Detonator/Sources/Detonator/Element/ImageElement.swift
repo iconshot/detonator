@@ -2,19 +2,21 @@ import Photos
 import UIKit
 
 class ImageElement: Element {
-    override public func decodeAttributes() -> ImageAttributes? {
+    override func decodeAttributes() -> ImageAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func createView() -> UIImageView {
-        let view = UIImageView()
-        
-        view.isUserInteractionEnabled = true
-        
-        return view
+    override func createView() -> UIImageView {
+        return UIImageView()
     }
     
-    override public func patchView() {
+    override func setUpView() -> Void {
+        let view = view as! UIImageView
+        
+        view.isUserInteractionEnabled = true
+    }
+    
+    override func patchView() -> Void {
         let attributes = attributes as! ImageAttributes
         let prevAttributes = prevAttributes as! ImageAttributes?
         
@@ -28,7 +30,7 @@ class ImageElement: Element {
         }
     }
     
-    private func patchSource(source: String?) {
+    private func patchSource(source: String?) -> Void {
         let view = view as! UIImageView
         
         guard let source = source else {
@@ -122,7 +124,7 @@ class ImageElement: Element {
         }
     }
     
-    override func patchObjectFit(objectFit: String?) {
+    override func patchObjectFit(objectFit: String?) -> Void {
         let view = view as! UIImageView
 
         switch objectFit {

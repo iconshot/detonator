@@ -23,11 +23,12 @@ public class IconElement extends Element<TextView, IconElement.Attributes> {
 
     @Override
     protected TextView createView() {
-        TextView view = new TextView(detonator.context);
+        return new TextView(detonator.context);
+    }
 
+    @Override
+    protected void setUpView() {
         defaultColor = view.getCurrentTextColor();
-
-        return view;
     }
 
     @Override

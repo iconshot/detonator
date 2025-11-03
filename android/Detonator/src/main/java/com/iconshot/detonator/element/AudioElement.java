@@ -29,8 +29,11 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
 
     @Override
     public View createView() {
-        View view = new View(detonator.context);
+        return new View(detonator.context);
+    }
 
+    @Override
+    protected void setUpView() {
         startTrackingProgress();
 
         setRequestListener("com.iconshot.detonator.ui.audio::play", (promise, value) -> {
@@ -70,8 +73,6 @@ public class AudioElement extends Element<View, AudioElement.Attributes> {
 
             promise.resolve();
         });
-
-        return view;
     }
 
     @Override

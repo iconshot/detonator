@@ -29,8 +29,11 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
 
     @Override
     protected EditText createView() {
-        EditText view = new EditText(detonator.context);
+        return new EditText(detonator.context);
+    }
 
+    @Override
+    protected void setUpView() {
         view.setGravity(Gravity.TOP);
 
         defaultColor = view.getCurrentTextColor();
@@ -87,8 +90,6 @@ public class TextAreaElement extends Element<EditText, TextAreaElement.Attribute
 
             promise.resolve();
         });
-
-        return view;
     }
 
     @Override

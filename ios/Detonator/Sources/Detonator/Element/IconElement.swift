@@ -1,19 +1,21 @@
 import UIKit
 
 class IconElement: Element {
-    override public func decodeAttributes() -> IconAttributes? {
+    override func decodeAttributes() -> IconAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func createView() -> TextView {
-        let view = TextView()
+    override func createView() -> TextView {
+        return TextView()
+    }
+    
+    override func setUpView() -> Void {
+        let view = view as! TextView
         
         view.isUserInteractionEnabled = true
-        
-        return view
     }
 
-    override public func patchView() {
+    override func patchView() -> Void {
         let view = view as! TextView
         
         let attributes = attributes as! IconAttributes
@@ -39,7 +41,7 @@ class IconElement: Element {
         }
     }
     
-    override func patchFontSize(fontSize: Float?) {
+    override func patchFontSize(fontSize: Float?) -> Void {
         let view = view as! TextView
         
         let value = CGFloat(fontSize ?? 16)
@@ -47,7 +49,7 @@ class IconElement: Element {
         view.font = view.font.withSize(value)
     }
     
-    override func patchColor(color: StyleColor?) {
+    override func patchColor(color: StyleColor?) -> Void {
         let view = view as! TextView
         
         view.textColor = color != nil ? ColorHelper.parseColor(color: color!) : nil

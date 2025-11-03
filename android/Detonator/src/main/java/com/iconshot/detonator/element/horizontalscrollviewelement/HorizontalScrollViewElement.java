@@ -21,8 +21,11 @@ public class HorizontalScrollViewElement extends Element<CustomHorizontalScrollV
 
     @Override
     public CustomHorizontalScrollView createView() {
-        CustomHorizontalScrollView view = new CustomHorizontalScrollView(detonator.context);
+        return new CustomHorizontalScrollView(detonator.context);
+    }
 
+    @Override
+    protected void setUpView() {
         view.setOnPageChangeListener(page -> {
             OnPageChangeData data = new OnPageChangeData();
 
@@ -38,8 +41,6 @@ public class HorizontalScrollViewElement extends Element<CustomHorizontalScrollV
 
             isAtRight = diff == 0;
         });
-
-        return view;
     }
 
     @Override

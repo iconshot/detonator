@@ -12,12 +12,16 @@ class VideoElement: Element {
     
     private var currentPosition: Int = 0
     
-    override public func decodeAttributes() -> VideoAttributes? {
+    override func decodeAttributes() -> VideoAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func createView() -> VideoView {
-        let view = VideoView()
+    override func createView() -> VideoView {
+        return VideoView()
+    }
+    
+    override func setUpView() -> Void {
+        let view = view as! VideoView
         
         view.playerLayer = playerLayer
         
@@ -64,11 +68,9 @@ class VideoElement: Element {
             
             promise.resolve()
         }
-        
-        return view
     }
     
-    override public func patchView() {
+    override func patchView() -> Void {
         let attributes = attributes as! VideoAttributes
         let prevAttributes = prevAttributes as! VideoAttributes?
         
@@ -97,7 +99,7 @@ class VideoElement: Element {
         }
     }
     
-    private func patchSource(source: String?) {
+    private func patchSource(source: String?) -> Void {
         deinitPlayer()
         
         guard let source = source else {
@@ -179,13 +181,13 @@ class VideoElement: Element {
         playerLayer.player = nil
     }
     
-    override public func removeView() {
+    override func removeView() -> Void {
         deinitPlayer()
         
         timer?.invalidate()
     }
     
-    override func patchObjectFit(objectFit: String?) {
+    override func patchObjectFit(objectFit: String?) -> Void {
         switch objectFit {
         case "cover":
             playerLayer.videoGravity = .resizeAspectFill
@@ -209,7 +211,7 @@ class VideoElement: Element {
         }
     }
     
-    private func startTrackingProgress() {
+    private func startTrackingProgress() -> Void {
         timer = Timer.scheduledTimer(withTimeInterval: 1 / 30, repeats: true) { timer in
             let time = self.player?.currentTime() ?? CMTime.zero
             
@@ -227,7 +229,7 @@ class VideoElement: Element {
         }
     }
     
-    @objc func playerDidEnd() {
+    @objc func playerDidEnd() -> Void {
         sendHandler(name: "onEnd")
     }
     

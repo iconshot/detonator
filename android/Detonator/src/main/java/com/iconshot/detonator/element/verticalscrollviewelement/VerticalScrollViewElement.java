@@ -21,8 +21,11 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
 
     @Override
     public CustomVerticalScrollView createView() {
-        CustomVerticalScrollView view = new CustomVerticalScrollView(detonator.context);
+        return new CustomVerticalScrollView(detonator.context);
+    }
 
+    @Override
+    protected void setUpView() {
         view.setOnPageChangeListener(page -> {
             OnPageChangeData data = new OnPageChangeData();
 
@@ -38,8 +41,6 @@ public class VerticalScrollViewElement extends Element<CustomVerticalScrollView,
 
             isAtBottom = diff == 0;
         });
-
-        return view;
     }
 
     @Override

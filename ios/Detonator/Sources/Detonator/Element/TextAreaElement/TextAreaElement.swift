@@ -8,7 +8,11 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
     }
     
     override public func createView() -> TextAreaView {
-        let view = TextAreaView()
+        return TextAreaView()
+    }
+    
+    override func setUpView() {
+        let view = view as! TextAreaView
         
         view.delegate = self
         
@@ -40,8 +44,6 @@ class TextAreaElement: Element, UIGestureRecognizerDelegate, UITextViewDelegate 
             
             promise.resolve()
         }
-        
-        return view
     }
     
     override public func patchView() {

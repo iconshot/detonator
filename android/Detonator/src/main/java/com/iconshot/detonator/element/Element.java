@@ -87,7 +87,9 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
     public void create() {
         view = createView();
+    }
 
+    public void setUp() {
         LayoutParams layoutParams = new LayoutParams(
                 LayoutParams.WRAP_CONTENT,
                 LayoutParams.WRAP_CONTENT
@@ -114,6 +116,8 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
 
             return false;
         });
+
+        setUpView();
     }
 
     public void patch() {
@@ -1244,6 +1248,7 @@ public abstract class Element<K extends View, T extends Element.Attributes> {
     }
 
     protected abstract K createView();
+    protected void setUpView() {}
     protected void patchView() {}
     protected void removeView() {}
 

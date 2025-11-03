@@ -145,6 +145,7 @@ class Renderer {
             
             if element != nil {
                 element!.create()
+                element!.setUp()
             }
         }
         

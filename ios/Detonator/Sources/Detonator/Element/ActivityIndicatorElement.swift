@@ -6,11 +6,13 @@ class ActivityIndicatorElement: Element {
     }
     
     override public func createView() -> UIActivityIndicatorView {
-        let view = UIActivityIndicatorView()
+        return UIActivityIndicatorView()
+    }
+    
+    override func setUpView() {
+        let view = view as! UIActivityIndicatorView
         
         view.startAnimating()
-        
-        return view
     }
     
     override public func patchView() {

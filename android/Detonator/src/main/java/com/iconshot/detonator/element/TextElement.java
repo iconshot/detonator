@@ -22,11 +22,12 @@ public class TextElement extends Element<TextView, TextElement.Attributes> {
 
     @Override
     protected TextView createView() {
-        TextView view = new TextView(detonator.context);
+        return new TextView(detonator.context);
+    }
 
+    @Override
+    protected void setUpView() {
         defaultColor = view.getCurrentTextColor();
-
-        return view;
     }
 
     @Override

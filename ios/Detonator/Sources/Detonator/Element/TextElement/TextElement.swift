@@ -1,19 +1,21 @@
 import UIKit
 
 class TextElement: Element {
-    override public func decodeAttributes() -> TextAttributes? {
+    override func decodeAttributes() -> TextAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func createView() -> TextView {
-        let view = TextView()
-        
-        view.isUserInteractionEnabled = true
-        
-        return view
+    override func createView() -> TextView {
+        return TextView()
     }
     
-    override public func patchView() {
+    override func setUpView() -> Void {
+        let view = view as! TextView
+        
+        view.isUserInteractionEnabled = true
+    }
+    
+    override func patchView() -> Void {
         let view = view as! TextView
         
         let attributes = attributes as! TextAttributes
@@ -49,7 +51,7 @@ class TextElement: Element {
         }
     }
     
-    override func patchFontSize(fontSize: Float?) {
+    override func patchFontSize(fontSize: Float?) -> Void {
         let view = view as! TextView
         
         let value = CGFloat(fontSize ?? 16)
@@ -57,7 +59,7 @@ class TextElement: Element {
         view.font = UIFont.systemFont(ofSize: value)
     }
     
-    override func patchColor(color: StyleColor?) {
+    override func patchColor(color: StyleColor?) -> Void {
         let view = view as! TextView
         
         view.textColor = color != nil ? ColorHelper.parseColor(color: color!) : nil

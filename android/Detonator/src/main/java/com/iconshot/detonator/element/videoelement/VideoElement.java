@@ -35,8 +35,11 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
     @Override
     public VideoLayout createView() {
-        VideoLayout view = new VideoLayout(detonator.context);
+        return new VideoLayout(detonator.context);
+    }
 
+    @Override
+    protected void setUpView() {
         playerView = new PlayerView(detonator.context);
 
         playerView.setUseController(false);
@@ -86,8 +89,6 @@ public class VideoElement extends Element<VideoLayout, VideoElement.Attributes> 
 
             promise.resolve();
         });
-
-        return view;
     }
 
     @Override

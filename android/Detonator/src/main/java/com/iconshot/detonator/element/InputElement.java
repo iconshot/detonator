@@ -29,8 +29,11 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
     @Override
     protected EditText createView() {
-        EditText view = new EditText(detonator.context);
+        return new EditText(detonator.context);
+    }
 
+    @Override
+    protected void setUpView() {
         view.setMaxLines(1);
 
         defaultColor = view.getCurrentTextColor();
@@ -105,8 +108,6 @@ public class InputElement extends Element<EditText, InputElement.Attributes> {
 
             promise.resolve();
         });
-
-        return view;
     }
 
     @Override

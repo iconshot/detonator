@@ -1,9 +1,9 @@
 class SafeAreaViewElement: ViewElement {
-    override public func decodeAttributes() -> SafeAreaViewAttributes? {
+    override func decodeAttributes() -> SafeAreaViewAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func patchView() {
+    override func patchView() -> Void {
         super.patchView()
         
         let attributes = attributes as! SafeAreaViewAttributes
@@ -20,7 +20,7 @@ class SafeAreaViewElement: ViewElement {
         }
     }
     
-    func patchEdges(edges: [String]) {
+    private func patchEdges(edges: [String]) -> Void {
         let view = view as! ViewLayout
         
         let layoutParams = view.layoutParams
@@ -66,8 +66,7 @@ class SafeAreaViewElement: ViewElement {
         paddingLeft: Float?,
         paddingBottom: Float?,
         paddingRight: Float?
-    ) {
-    }
+    ) -> Void {}
     
     class SafeAreaViewAttributes: ViewAttributes {
         var edges: [String]

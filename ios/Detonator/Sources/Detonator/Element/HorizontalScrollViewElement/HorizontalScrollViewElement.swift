@@ -3,12 +3,16 @@ import UIKit
 class HorizontalScrollViewElement: Element {
     private var isAtRight: Bool = false
     
-    override public func decodeAttributes() -> HorizontalScrollViewAttributes? {
+    override func decodeAttributes() -> HorizontalScrollViewAttributes? {
         return super.decodeAttributes()
     }
     
-    override public func createView() -> HorizontalScrollView {
-        let view = HorizontalScrollView()
+    override func createView() -> HorizontalScrollView {
+        return HorizontalScrollView()
+    }
+    
+    override func setUpView() -> Void {
+        let view = view as! HorizontalScrollView
         
         view.delegate = view
         
@@ -29,11 +33,9 @@ class HorizontalScrollViewElement: Element {
             
             self.isAtRight = diff == 0
         }
-        
-        return view
     }
     
-    override public func patchView() {
+    override func patchView() -> Void {
         let view = view as! HorizontalScrollView
         
         let layoutParams = view.layoutParams
@@ -93,7 +95,7 @@ class HorizontalScrollViewElement: Element {
         paddingLeft: Float?,
         paddingBottom: Float?,
         paddingRight: Float?
-    ) {}
+    ) -> Void {}
     
     override func patchBorderRadius(
         borderRadius: StyleSize?,
@@ -101,7 +103,7 @@ class HorizontalScrollViewElement: Element {
         borderRadiusTopRight: StyleSize?,
         borderRadiusBottomLeft: StyleSize?,
         borderRadiusBottomRight: StyleSize?
-    ) {}
+    ) -> Void {}
     
     struct OnPageChangeData: Encodable {
         let page: Int
