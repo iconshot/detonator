@@ -178,7 +178,9 @@ public class Detonator: NSObject, WKScriptMessageHandler {
     }
     
     private func evaluate(code: String, completion: ((Any?, Error?) -> Void)? = nil) -> Void {
-        webView.evaluateJavaScript(code, completionHandler: completion)
+        DispatchQueue.main.async {
+            self.webView.evaluateJavaScript(code, completionHandler: completion)
+        }
     }
     
     public func send(_ name: String, _ data: Encodable? = "") -> Void {

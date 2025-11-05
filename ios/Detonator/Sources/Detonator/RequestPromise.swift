@@ -14,9 +14,7 @@ public class RequestPromise {
         
         let value = detonator.messageFormatter.join(lines)
         
-        DispatchQueue.main.async {
-            self.detonator.send("com.iconshot.detonator.request.fetch::resolve", value)
-        }
+        detonator.send("com.iconshot.detonator.request.fetch::resolve", value)
     }
     
     public func reject(_ error: Error) -> Void {
@@ -28,8 +26,6 @@ public class RequestPromise {
         
         let value = detonator.messageFormatter.join(lines)
         
-        DispatchQueue.main.async {
-            self.detonator.send("com.iconshot.detonator.request.fetch::reject", value)
-        }
+        detonator.send("com.iconshot.detonator.request.fetch::reject", value)
     }
 }

@@ -180,9 +180,11 @@ public class Detonator {
     }
 
     private void evaluate(String code) {
-        webView.evaluateJavascript(code, new ValueCallback<String>() {
-            @Override
-            public void onReceiveValue(String value) { }
+        uiHandler.post(() -> {
+            webView.evaluateJavascript(code, new ValueCallback<String>() {
+                @Override
+                public void onReceiveValue(String value) { }
+            });
         });
     }
 

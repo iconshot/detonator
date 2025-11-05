@@ -24,9 +24,7 @@ public class RequestPromise {
 
         String value = detonator.messageFormatter.join(lines);
 
-        detonator.uiHandler.post(() -> {
-            detonator.send("com.iconshot.detonator.request.fetch::resolve", value);
-        });
+        detonator.send("com.iconshot.detonator.request.fetch::resolve", value);
     }
 
     public void reject(Exception exception) {
@@ -41,8 +39,6 @@ public class RequestPromise {
 
         String value = detonator.messageFormatter.join(lines);
 
-        detonator.uiHandler.post(() -> {
-            detonator.send("com.iconshot.detonator.request.fetch::reject", value);
-        });
+        detonator.send("com.iconshot.detonator.request.fetch::reject", value);
     }
 }
