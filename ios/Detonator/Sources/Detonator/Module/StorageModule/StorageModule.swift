@@ -21,7 +21,7 @@ class StorageModule: Module {
             
             let itemValue = storage.content[data.key]
             
-            promise.resolve(itemValue != nil ? "&\(itemValue)" : ":n")
+            promise.resolve(itemValue != nil ? "&\(itemValue!)" : ":n")
         }
         
         detonator.setRequestListener("com.iconshot.detonator.storage::setItem") { promise, value, edge in

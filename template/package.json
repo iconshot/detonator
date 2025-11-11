@@ -9,7 +9,7 @@
     "build": "detonator build"
   },
   "dependencies": {
-    "detonator": "1.11.0",
+    "detonator": "1.11.1",
     "untrue": "5.18.0"
   }
 }
