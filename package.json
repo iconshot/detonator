@@ -1,14 +1,16 @@
 {
   "name": "detonator",
-  "version": "1.10.0",
+  "version": "1.11.0",
   "description": "Build native mobile apps with Untrue.",
   "homepage": "https://detonator.dev",
   "repository": {
     "type": "git",
     "url": "https://github.com/iconshot/detonator.git"
   },
-  "main": "dist/index.js",
-  "bin": "cli/index.js",
+  "type": "module",
+  "main": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
+  "bin": "./cli/index.js",
   "scripts": {
     "remove-dist": "rm -rf dist",
     "bundle-dist": "npm run remove-dist && tsc",
@@ -34,6 +36,6 @@
     "webpack-cli": "^5.1.4"
   },
   "peerDependencies": {
-    "untrue": "^5.16.2"
+    "untrue": "^5.18.0"
   }
 }

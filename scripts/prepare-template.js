@@ -3,7 +3,7 @@ const path = require("node:path");
 
 const fse = require("fs-extra");
 
-const package = require("../package.json");
+const packageJson = require("../package.json");
 
 async function replaceIosPbxproj() {
   const filePath = path.resolve(
@@ -29,7 +29,8 @@ async function replacePackageJson() {
 
   const json = await fse.readJson(filePath);
 
-  json.dependencies.detonator = package.version;
+  json.dependencies.detonator = packageJson.version;
+  json.dependencies.untrue = packageJson.peerDependencies.untrue.slice(1);
 
   await fse.writeJson(filePath, json, { spaces: 2 });
 }

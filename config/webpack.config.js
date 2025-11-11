@@ -37,9 +37,9 @@ const appTsConfigPath = path.resolve(process.cwd(), "tsconfig.json");
 
 const packagePath = path.resolve(process.cwd(), "package.json");
 
-const package = require(packagePath);
+const packageJson = require(packagePath);
 
-const appName = package.name;
+const appName = packageJson.name;
 
 const copyDirs = [
   `android/${appName}/app/src/main/assets/dist`,
@@ -49,7 +49,7 @@ const copyDirs = [
 module.exports = {
   entry: path.resolve(process.cwd(), "src/index"),
   output: {
-    path: path.resolve(process.cwd(), "dist"),
+    path: path.resolve(process.cwd(), "dist/esm"),
     filename: "index.js",
   },
   module: {
@@ -57,9 +57,16 @@ module.exports = {
       {
         test: /\.ts?$/,
         use: [
-          { loader: "ts-loader", options: { configFile: appTsConfigPath } },
+          {
+            loader: "ts-loader",
+            options: { configFile: appTsConfigPath, transpileOnly: true },
+          },
         ],
         exclude: /node_modules/,
+      },
+      {
+        test: /\.js$/,
+        resolve: { fullySpecified: false },
       },
     ],
   },

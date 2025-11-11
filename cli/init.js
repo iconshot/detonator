@@ -5,6 +5,8 @@ const readline = require("node:readline");
 
 const exec = util.promisify(require("node:child_process").exec);
 
+const build = require("./build");
+
 const fse = require("fs-extra");
 
 async function init(appName, appId) {
@@ -71,14 +73,7 @@ async function init(appName, appId) {
   {
     console.log("Bundling");
 
-    const libraryConfigPath = path.resolve(
-      __dirname,
-      "../config/webpack.config.js"
-    );
-
-    const command = `npx webpack --config ${libraryConfigPath}`;
-
-    await exec(command);
+    await build(false);
   }
 
   console.log("\x1b[32m%s\x1b[0m", "\u2713 Finished. Happy coding!");
