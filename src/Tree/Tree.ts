@@ -427,8 +427,6 @@ export class Tree {
 
     this.patchElement(edge, prevEdge);
 
-    console.log("elements.set");
-
     TreeRegistry.elements.set(element, edge);
 
     const ref = slot.getRef();
@@ -471,8 +469,6 @@ export class Tree {
     let tmpTarget = target;
 
     if (element !== null) {
-      console.log("elements.delete");
-
       TreeRegistry.elements.delete(element);
 
       target.remove(element);
