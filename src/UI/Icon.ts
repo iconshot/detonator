@@ -9,7 +9,7 @@ interface IconProps extends ViewProps {
 }
 
 export class Icon extends BaseView<IconProps> {
-  render() {
+  public render(): any {
     const { children, ...attributes } = this.props;
 
     return $("com.iconshot.detonator.ui.icon", attributes);
